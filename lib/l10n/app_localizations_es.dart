@@ -3120,6 +3120,10 @@ class SEs extends S {
       'Anime y manga con metadatos completos.';
 
   @override
+  String get welcomeSourceDescBangumi =>
+      'Un catálogo de anime de la comunidad china, con títulos y etiquetas en chino.';
+
+  @override
   String get welcomeSourceDescMangaBaka =>
       'Manga, manhwa, manhua y novelas ligeras.';
 
@@ -3725,6 +3729,12 @@ class SEs extends S {
 
   @override
   String get browseFilterAnimeAdaptation => 'Adaptación al anime';
+
+  @override
+  String get browseFilterCategory => 'Categoría';
+
+  @override
+  String get browseFilterMaxRank => 'Mejor puesto';
 
   @override
   String get vndbHasAnimeAdaptation => 'Con adaptación';

@@ -2884,6 +2884,9 @@ class SZh extends S {
   String get welcomeSourceDescAniList => '带有丰富元数据的动漫和漫画。';
 
   @override
+  String get welcomeSourceDescBangumi => '中文社区动画资料库，带中文标题与标签。';
+
+  @override
   String get welcomeSourceDescMangaBaka => '漫画、韩漫、国漫和轻小说。';
 
   @override
@@ -3453,6 +3456,12 @@ class SZh extends S {
 
   @override
   String get browseFilterAnimeAdaptation => '动漫改编';
+
+  @override
+  String get browseFilterCategory => '分类';
+
+  @override
+  String get browseFilterMaxRank => '最高排名';
 
   @override
   String get vndbHasAnimeAdaptation => '有改编';

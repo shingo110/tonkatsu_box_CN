@@ -216,6 +216,7 @@ class ApiProxy {
         }
       // Keyless: the proxy is still the only way there from a browser.
       case ProxyTarget.anilist:
+      case ProxyTarget.bangumi:
       case ProxyTarget.fantlab:
       case ProxyTarget.kitsu:
       case ProxyTarget.listenbrainz:

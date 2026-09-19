@@ -2,6 +2,7 @@
 /// refusal cannot drift. One host per constant; API hosts only.
 enum ProxyTarget {
   anilist('graphql.anilist.co'),
+  bangumi('api.bgm.tv'),
   comicvine('comicvine.gamespot.com'),
   fantlab('api.fantlab.ru'),
   googlebooks('www.googleapis.com'),

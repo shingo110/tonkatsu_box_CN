@@ -17,6 +17,7 @@ extension DataSourceUi on DataSource {
         DataSource.steamGridDb => AppAssets.iconSteamGridDbColor,
         DataSource.vndb => AppAssets.iconVndbColor,
         DataSource.anilist => AppAssets.iconAnilistColor,
+        DataSource.bangumi => null,
         DataSource.mangabaka => AppAssets.iconMangaBakaColor,
         DataSource.mangadex => AppAssets.iconMangaDexColor,
         DataSource.kitsu => AppAssets.iconKitsuColor,

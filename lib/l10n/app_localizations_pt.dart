@@ -3110,6 +3110,10 @@ class SPt extends S {
       'Anime e manga com metadados completos.';
 
   @override
+  String get welcomeSourceDescBangumi =>
+      'Um catálogo de anime da comunidade chinesa, com títulos e tags em chinês.';
+
+  @override
   String get welcomeSourceDescMangaBaka =>
       'Manga, manhwa, manhua e light novels.';
 
@@ -3711,6 +3715,12 @@ class SPt extends S {
 
   @override
   String get browseFilterAnimeAdaptation => 'Adaptação para anime';
+
+  @override
+  String get browseFilterCategory => 'Categoria';
+
+  @override
+  String get browseFilterMaxRank => 'Melhor posição';
 
   @override
   String get vndbHasAnimeAdaptation => 'Tem adaptação';

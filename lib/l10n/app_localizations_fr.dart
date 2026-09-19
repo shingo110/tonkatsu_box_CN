@@ -3122,6 +3122,10 @@ class SFr extends S {
       'Animes et mangas, métadonnées enrichies.';
 
   @override
+  String get welcomeSourceDescBangumi =>
+      'Un catalogue d\'animes de la communauté chinoise, avec titres et tags en chinois.';
+
+  @override
   String get welcomeSourceDescMangaBaka =>
       'Mangas, manhwas, manhuas et light novels.';
 
@@ -3731,6 +3735,12 @@ class SFr extends S {
 
   @override
   String get browseFilterAnimeAdaptation => 'Adaptation anime';
+
+  @override
+  String get browseFilterCategory => 'Catégorie';
+
+  @override
+  String get browseFilterMaxRank => 'Meilleur classement';
 
   @override
   String get vndbHasAnimeAdaptation => 'A une adaptation';

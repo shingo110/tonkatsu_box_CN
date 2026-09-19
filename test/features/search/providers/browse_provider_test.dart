@@ -394,7 +394,7 @@ void main() {
       final BrowseState state = container.read(browseProvider);
       expect(state.mediaType, MediaType.anime);
       // Every source of the type comes on — that is the point of the migration.
-      expect(state.activeSources, hasLength(2));
+      expect(state.activeSources, hasLength(3));
     });
 
     test('setMediaType keeps the typed query but drops filters', () async {

@@ -34,6 +34,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:tonkatsu_box/core/api/anilist/anilist_graphql_client.dart';
 import 'package:tonkatsu_box/core/api/anilist_api.dart';
+import 'package:tonkatsu_box/core/api/bangumi_api.dart';
 import 'package:tonkatsu_box/core/api/fantlab_api.dart';
 import 'package:tonkatsu_box/core/api/google_books_api.dart';
 import 'package:tonkatsu_box/core/api/hardcover_api.dart';
@@ -173,6 +174,8 @@ class MockSteamApi extends Mock implements SteamApi {}
 class MockRaApi extends Mock implements RaApi {}
 
 class MockFantlabApi extends Mock implements FantlabApi {}
+
+class MockBangumiApi extends Mock implements BangumiApi {}
 
 class MockMangaBakaApi extends Mock implements MangaBakaApi {}
 

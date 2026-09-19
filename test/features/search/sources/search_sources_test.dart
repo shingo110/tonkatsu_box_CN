@@ -33,6 +33,7 @@ void main() {
         'games',
         'anilist_anime',
         'manga',
+        'bangumi_anime',
         'mangabaka',
         'mangadex',
         'kitsu_anime',

@@ -5438,6 +5438,12 @@ abstract class S {
   /// **'Anime and manga with rich metadata.'**
   String get welcomeSourceDescAniList;
 
+  /// No description provided for @welcomeSourceDescBangumi.
+  ///
+  /// In en, this message translates to:
+  /// **'A Chinese-community anime catalog with Chinese titles and tags.'**
+  String get welcomeSourceDescBangumi;
+
   /// No description provided for @welcomeSourceDescMangaBaka.
   ///
   /// In en, this message translates to:
@@ -6499,6 +6505,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Anime adaptation'**
   String get browseFilterAnimeAdaptation;
+
+  /// No description provided for @browseFilterCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get browseFilterCategory;
+
+  /// No description provided for @browseFilterMaxRank.
+  ///
+  /// In en, this message translates to:
+  /// **'Best rank'**
+  String get browseFilterMaxRank;
 
   /// No description provided for @vndbHasAnimeAdaptation.
   ///

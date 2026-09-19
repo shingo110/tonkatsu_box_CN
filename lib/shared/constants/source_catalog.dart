@@ -56,6 +56,11 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
     url: 'https://anilist.co/',
   ),
   SourceInfo(
+    source: DataSource.bangumi,
+    mediaTypes: <MediaType>[MediaType.anime],
+    url: 'https://bgm.tv/',
+  ),
+  SourceInfo(
     source: DataSource.mangabaka,
     mediaTypes: <MediaType>[MediaType.manga],
     url: 'https://mangabaka.org/',

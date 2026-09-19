@@ -5,6 +5,7 @@ import 'package:core/models/media_type.dart';
 import '../models/search_source.dart';
 import 'anilist_anime_source.dart';
 import 'anilist_manga_source.dart';
+import 'bangumi_anime_source.dart';
 import 'comicvine_source.dart';
 import 'fantlab_source.dart';
 import 'google_books_source.dart';
@@ -43,6 +44,8 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     // AniList
     AniListAnimeSource(),
     AniListMangaSource(),
+    // Bangumi
+    BangumiAnimeSource(),
     // MangaBaka
     MangaBakaSource(),
     // MangaDex

@@ -27,9 +27,13 @@ final AutoDisposeFutureProviderFamily<List<Anime>, _AnimeSeedKey>
   (Ref ref, _AnimeSeedKey seed) async {
     final AniListApi aniList = ref.watch(aniListApiProvider);
     final KitsuApi kitsu = ref.watch(kitsuApiProvider);
-    final int? aniListId = seed.source == DataSource.kitsu
-        ? await kitsu.getAniListAnimeId(seed.id)
-        : seed.id;
+    // Only AniList and Kitsu ids mean anything to the AniList similarity
+    // endpoint, so a seed from any other catalog yields no row.
+    final int? aniListId = switch (seed.source) {
+      DataSource.anilist => seed.id,
+      DataSource.kitsu => await kitsu.getAniListAnimeId(seed.id),
+      _ => null,
+    };
     if (aniListId == null) return <Anime>[];
     final List<Anime> recs = await aniList.getAnimeRecommendations(aniListId);
     if (recs.isEmpty) return recs;

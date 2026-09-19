@@ -177,6 +177,51 @@ class Anime {
     );
   }
 
+  /// Bangumi search / subject payload. `name` is the original title and
+  /// `name_cn` the Chinese one; Chinese takes the [title] slot so the default
+  /// title language reads Chinese, and [titleNative] keeps the original.
+  factory Anime.fromBangumi(Map<String, dynamic> json) {
+    final int id = (json['id'] as num).toInt();
+
+    final String? original = _nonEmpty(json['name']);
+    final String? chinese = _nonEmpty(json['name_cn']);
+    final String title =
+        _firstNonEmpty(<String?>[chinese, original]) ?? 'Unknown';
+
+    final Map<String, dynamic> images =
+        (json['images'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
+
+    final Map<String, dynamic> rating =
+        (json['rating'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
+    final num? score = rating['score'] as num?;
+
+    // Calendar rows carry `air_date`; search and subject rows carry `date`.
+    final String? date =
+        _nonEmpty(json['date']) ?? _nonEmpty(json['air_date']);
+
+    return Anime(
+      id: id,
+      source: DataSource.bangumi,
+      title: title,
+      titleNative: original,
+      description: _nonEmpty(json['summary']),
+      coverUrl: _nonEmpty(images['large']) ?? _nonEmpty(json['image']),
+      coverUrlMedium: _nonEmpty(images['common']),
+      // Bangumi rates 0–10 where Anime stores AniList's 0–100.
+      averageScore: score != null ? (score * 10).round() : null,
+      status: _bangumiStatus(date),
+      startYear: _bangumiDatePart(date, 0),
+      startMonth: _bangumiDatePart(date, 1),
+      startDay: _bangumiDatePart(date, 2),
+      episodes: (json['eps'] as num?)?.toInt(),
+      format: _bangumiFormat(_nonEmpty(json['platform'])),
+      tags: _bangumiTagNames(json['tags']),
+      studios: _bangumiStudios(_bangumiInfobox(json['infobox'])),
+      externalUrl: 'https://bgm.tv/subject/$id',
+      updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    );
+  }
+
   factory Anime.fromDb(Map<String, dynamic> row) {
     List<String>? genres;
     if (row['genres'] != null && (row['genres'] as String).isNotEmpty) {
@@ -522,6 +567,94 @@ class Anime {
         'OVA' => 'OVA',
         'ONA' => 'ONA',
         'music' => 'MUSIC',
+        _ => null,
+      };
+
+  /// Bangumi tags are community votes ordered by count, so the head of the list
+  /// carries the meaning and the tail is one-off spelling variants.
+  static const int _bangumiMaxTags = 12;
+
+  static List<String>? _bangumiTagNames(Object? raw) {
+    if (raw is! List<dynamic>) return null;
+    final List<String> out = <String>[];
+    for (final Object? entry in raw) {
+      if (entry is! Map<String, dynamic>) continue;
+      final String? name = _nonEmpty(entry['name']);
+      if (name != null) out.add(name);
+      if (out.length >= _bangumiMaxTags) break;
+    }
+    return out.isEmpty ? null : out;
+  }
+
+  /// Flattens Bangumi's `infobox` list into a `key -> raw value` map.
+  static Map<String, dynamic> _bangumiInfobox(Object? raw) {
+    if (raw is! List<dynamic>) return const <String, dynamic>{};
+    final Map<String, dynamic> out = <String, dynamic>{};
+    for (final Object? entry in raw) {
+      if (entry is! Map<String, dynamic>) continue;
+      final Object? key = entry['key'];
+      if (key is String && key.isNotEmpty) out[key] = entry['value'];
+    }
+    return out;
+  }
+
+  /// The studio, from the dedicated key first and the production committee
+  /// second. Bangumi may list several, joined by ` / `.
+  static List<String>? _bangumiStudios(Map<String, dynamic> infobox) {
+    for (final String key in const <String>['动画制作', '製作', '制作']) {
+      final List<String> names = _bangumiInfoboxValues(infobox[key]);
+      if (names.isNotEmpty) return names;
+    }
+    return null;
+  }
+
+  /// An infobox value is a bare string or a list of `{'v': ...}` maps; either
+  /// can pack several names into one ` / ` separated string.
+  static List<String> _bangumiInfoboxValues(Object? raw) {
+    final List<Object?> entries = switch (raw) {
+      final String value => <Object?>[value],
+      final List<dynamic> list => list,
+      _ => const <Object?>[],
+    };
+    final List<String> out = <String>[];
+    for (final Object? entry in entries) {
+      final String? value = switch (entry) {
+        final String s => s,
+        final Map<String, dynamic> m => _nonEmpty(m['v']),
+        _ => null,
+      };
+      if (value == null) continue;
+      for (final String part in value.split(' / ')) {
+        final String trimmed = part.trim();
+        if (trimmed.isNotEmpty && !out.contains(trimmed)) out.add(trimmed);
+      }
+    }
+    return out;
+  }
+
+  /// Bangumi dates are `YYYY-MM-DD`; partial values (`2024-04`) leave the
+  /// trailing parts null.
+  static int? _bangumiDatePart(String? date, int index) {
+    if (date == null) return null;
+    final List<String> parts = date.split('-');
+    return parts.length > index ? int.tryParse(parts[index]) : null;
+  }
+
+  /// Bangumi carries no airing flag, so only the case needing no inference is
+  /// derived: a start date still in the future.
+  static String? _bangumiStatus(String? date) {
+    final DateTime? start = date == null ? null : DateTime.tryParse(date);
+    if (start == null) return null;
+    return start.isAfter(DateTime.now()) ? 'NOT_YET_RELEASED' : null;
+  }
+
+  /// Maps Bangumi's `platform` onto the AniList format vocabulary. The Chinese
+  /// literals are the API's own values, not prose.
+  static String? _bangumiFormat(String? platform) => switch (platform) {
+        'TV' => 'TV',
+        'WEB' || '动态漫画' => 'ONA',
+        'OVA' || 'OAD' => 'OVA',
+        '剧场版' || '剧场版动画' => 'MOVIE',
         _ => null,
       };
 

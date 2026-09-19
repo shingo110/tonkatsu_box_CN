@@ -25,6 +25,10 @@ enum DataSource {
   /// AniList — anime and manga database.
   anilist('AniList', 0xFF3DB4F2),
 
+  /// Bangumi (bgm.tv) — Chinese-community anime catalog. The only anime source
+  /// with a Chinese title field and Chinese community tags.
+  bangumi('Bangumi', 0xFFF09199),
+
   /// MangaBaka — open catalog of manga / manhwa / manhua / light novels.
   mangabaka('MangaBaka', 0xFFE5484D),
 

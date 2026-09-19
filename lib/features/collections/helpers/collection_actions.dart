@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/anilist_api.dart';
+import '../../../core/api/bangumi_api.dart';
 import '../../../core/api/episode_source/tv_episode_source.dart';
 import '../../../core/api/comicvine_api.dart';
 import '../../../core/api/google_books_api.dart';
@@ -642,6 +643,10 @@ class CollectionActions {
         case MediaType.anime:
           final Anime? anime;
           switch (item.source) {
+            case DataSource.bangumi:
+              anime = await ref
+                  .read(bangumiApiProvider)
+                  .getAnimeById(item.externalId);
             case DataSource.kitsu:
               anime = await ref
                   .read(kitsuApiProvider)

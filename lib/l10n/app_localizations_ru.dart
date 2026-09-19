@@ -3135,6 +3135,10 @@ class SRu extends S {
   String get welcomeSourceDescAniList => 'Аниме и манга с подробными данными.';
 
   @override
+  String get welcomeSourceDescBangumi =>
+      'Каталог аниме китайского сообщества с китайскими названиями и тегами.';
+
+  @override
   String get welcomeSourceDescMangaBaka => 'Манга, манхва, маньхуа и ранобэ.';
 
   @override
@@ -3734,6 +3738,12 @@ class SRu extends S {
 
   @override
   String get browseFilterAnimeAdaptation => 'Аниме-адаптация';
+
+  @override
+  String get browseFilterCategory => 'Категория';
+
+  @override
+  String get browseFilterMaxRank => 'Лучший рейтинг';
 
   @override
   String get vndbHasAnimeAdaptation => 'Есть адаптация';

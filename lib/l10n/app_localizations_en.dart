@@ -3071,6 +3071,10 @@ class SEn extends S {
   String get welcomeSourceDescAniList => 'Anime and manga with rich metadata.';
 
   @override
+  String get welcomeSourceDescBangumi =>
+      'A Chinese-community anime catalog with Chinese titles and tags.';
+
+  @override
   String get welcomeSourceDescMangaBaka =>
       'Manga, manhwa, manhua and light novels.';
 
@@ -3669,6 +3673,12 @@ class SEn extends S {
 
   @override
   String get browseFilterAnimeAdaptation => 'Anime adaptation';
+
+  @override
+  String get browseFilterCategory => 'Category';
+
+  @override
+  String get browseFilterMaxRank => 'Best rank';
 
   @override
   String get vndbHasAnimeAdaptation => 'Has adaptation';
