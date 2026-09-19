@@ -5,7 +5,50 @@ All notable changes to this project are documented in this file.
 Format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/html_node/Style-of-Change-Logs.html): a short topic line, an optional body describing the change, then a list of affected files with the names of classes / methods / variables in parentheses so each symbol is greppable.
 
+> **Fork note:** this changelog tracks the upstream project verbatim. Entries
+> introduced by the `shingo110/tonkatsu_box_CN` fork are marked with a `[cn]`
+> prefix in the version line (e.g. `[cn] 0.44.1-fork`), so an upstream merge
+> cannot silently overwrite them.
+
 ## [Unreleased]
+
+## [cn] Added — Bangumi anime source
+
+A first domestic catalog: browse and search anime on the Chinese community catalog
+[bgm.tv](https://bgm.tv/) (Bangumi). Keyless, Chinese titles and tags, category /
+year / rating / rank filters, and details with studios parsed from the infobox.
+
+  * packages/core/lib/models/data_source.dart (DataSource.bangumi): New value.
+  * packages/core/lib/models/anime.dart (Anime.fromBangumi): New factory mapping
+    name_cn→title, name→titleNative, rating.score×10→averageScore, date/air_date
+    →start dates, eps→episodes, platform→format, tags (capped, votes dropped),
+    infobox 动画制作/製作→studios, externalUrl bgm.tv/subject/{id}.
+  * lib/shared/constants/data_source_ui.dart (icon switch): bangumi → null.
+  * lib/shared/constants/source_catalog.dart (kDataSourceCatalog): Bangumi entry.
+  * lib/features/welcome/widgets/welcome_step_sources.dart (_description):
+    bangumi arm, `welcomeSourceDescBangumi`.
+  * lib/features/search/sources/bangumi_anime_source.dart (BangumiAnimeSource,
+    id bangumi_anime): New — category/year/rating/rank filters, match/rank/heat
+    sorts, rank fallback when browsing without a query.
+  * lib/core/api/bangumi/… (bangumi_types.dart, bangumi_http_client.dart,
+    bangumi_search_api.dart): New API client trio, keyless, custom User-Agent.
+  * lib/core/api/bangumi_api.dart (BangumiApi, bangumiApiProvider): New facade.
+  * lib/features/search/filters/bangumi_meta_tag_filter.dart
+    (BangumiMetaTagFilter): New — category selection.
+  * lib/features/search/filters/bangumi_rank_filter.dart (BangumiRankFilter):
+    New — best-rank floor filter.
+  * lib/features/search/sources/search_sources.dart (searchSources):
+    BangumiAnimeSource registered after AniList.
+  * lib/features/collections/helpers/collection_actions.dart (refresh of anime):
+    Bangumi ids refresh via getAnimeById instead of leaking to AniList.
+  * lib/features/collections/widgets/anime_similars_section.dart (seed switch):
+    non-anilist/kitsu sources return no similarity seed.
+  * packages/core/lib/api/proxy_targets.dart (ProxyTarget.bangumi): New allowlist
+    entry for the web proxy.
+  * server/lib/src/proxy_handler.dart (ApiProxy._authorize): bangumi in the
+    keyless group.
+  * lib/l10n/app_*.arb ×6: welcomeSourceDescBangumi, browseFilterCategory,
+    browseFilterMaxRank — 1743 keys per locale.
 
 ## [0.44.0] - 2026-09-16
 

@@ -129,7 +129,7 @@ If the diff touches `packages/core/lib/database/dao/**` or
 `packages/core/lib/models/**`, regenerate and commit the result:
 
 ```bash
-powershell.exe -Command "cd '$(wslpath -w "$PWD")/packages/core'; dart run tool/generate_rpc.dart"
+cd packages/core && dart run tool/generate_rpc.dart
 ```
 
 Do not hand-edit anything under `packages/core/lib/rpc/generated/`. The Phase 5
@@ -255,10 +255,10 @@ Language per file: most are Russian. Keep each in its current language. Preserve
 ### Phase 5 — Gate (single run)
 
 ```bash
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter analyze --fatal-infos --fatal-warnings"
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter test"
-powershell.exe -Command "cd '$(wslpath -w "$PWD")/packages/core'; dart test"
-powershell.exe -Command "cd '$(wslpath -w "$PWD")/server'; dart test"
+flutter analyze --fatal-infos --fatal-warnings
+flutter test
+cd packages/core && dart test
+cd server && dart test
 ```
 
 `packages/core` and `server` resolve separately, so a change there is invisible
@@ -274,7 +274,7 @@ Follow the failure-recovery rules below. When green, STOP — report what change
 | **Test fails — a test I just wrote** | Fix the test (wrong mock stub, missing fallback, wrong assertion). Re-run tests only. |
 | **Test fails — existing test** | **Default: the test is right, the production code is wrong.** Do not edit the test yet. First, re-read the test and the code paths it covers. Ask: *"Was this specific behaviour something I deliberately changed as part of the task?"* Answer this honestly before touching anything. **→ If NO** (surprise failure, behaviour change you didn't plan): back to **Phase 1** — the code is wrong, fix the code, then Phase 3 for the affected area, then re-gate. **→ If YES** (the old assertion contradicts the intended new behaviour, and the new behaviour is in the spec/user request): update the test, rerun tests. Document the behaviour change in the final report so the user sees what shifted. **If unsure, default to NO.** |
 | **Review (Phase 1-2) needs a code change** | Fix inline. If the fix touches production code (not just comments/docstrings), add/update tests in Phase 3 before re-gating. |
-| **R3 reveals missing ARB keys** | Add the key to **every** `lib/l10n/app_*.arb` locale file (glob them, don't assume a fixed set), run `powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter gen-l10n"`, re-run analyzer. |
+| **R3 reveals missing ARB keys** | Add the key to **every** `lib/l10n/app_*.arb` locale file (glob them, don't assume a fixed set), run `flutter gen-l10n`, re-run analyzer. |
 | **`generated_up_to_date_test` fails** | The RPC layer is stale — regenerate (`dart run tool/generate_rpc.dart` in `packages/core`) and commit the output. Never edit the generated files to make it pass. |
 | **Flaky test** | Retry the affected test file once via `flutter test path/to/test.dart`. If it still fails, treat it as real. |
 

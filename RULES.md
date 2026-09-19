@@ -1,0 +1,105 @@
+# RULES.md — 规约总纲与坑点登记册
+
+> **改动代码前先读完这份。** 本文是与开发无关紧要的「不许做 / 必须做 / 会炸」清单；实现层次的细节与 WHY 以 [`.claude/CLAUDE.md`](.claude/CLAUDE.md) 为准，那是本仓库最详细的开发规约，两者冲突时以 CLAUDE.md 为准。文档缺失段落可向 [`PROJECT.md`](PROJECT.md)（全景）与 [`TASK.md`](TASK.md)（任务）查询。
+
+## 0. 权威性与优先级
+
+| 级别 | 文件 | 内容 |
+|:----:|------|------|
+| 1 | `analysis_options.yaml` | 唯一事实来源（lint 规则），改它必须同步改 `docs/CODESTYLE.md` 对应段落 |
+| 1 | `.claude/CLAUDE.md` | 最细实现规约；本文件的展开 |
+| 2 | 本文件 `RULES.md` | 人类可读硬约束 + 坑点登记 |
+| 3 | `PROJECT.md` / `TASK.md` | 定位与任务，不承担规约 |
+
+冲突时按级别裁定，同级冲突以更具体者为准。
+
+## 二、硬约束（违反即不可合并）
+
+| # | 约束 | 后果 |
+|:-:|------|------|
+| R1 | **语言边界**：代码注释与提交信息一律英文；对用户与协作者的文档（README / PROJECT / TASK / RULES）用中文；UI 文案只能进 `.arb` | 中文注释进代码、硬编码 UI 串，必然被 review 打回 |
+| R2 | **迁移链只可追加，绝不可修改既有迁移**；`schema.dart` 的 `create*Table` 与之等权不可变。加列用 `Migration.addColumnIfAbsent`，加索引用 `CREATE ... IF NOT EXISTS` | 改链 = 已装机用户的库升级错乱，等同事故 |
+| R3 | **三端同绿**：Windows / Android / Web 任一不得破。Web 端问题无构建期提示（`dart:io` 会编译成桩）—— 只能靠 `kIsWebBuild` 运行时守卫 | 破一端的提交在 CI 必挂 |
+| R4 | **HTTP 出口唯一**：一切客户端必须经 `createApiDio`（`lib/core/api/api_dio.dart`）。禁止自建 `Dio` | 绕开会漏掉 Web 端代理重写，浏览器里静默 403 |
+| R5 | **严格类型**：禁 `dynamic`；公开 API 禁 `var`；一切返回与参数标注类型 | `analysis_options` 直接判负 |
+| R6 | **UI 文案必须进 ARB**：`lib/l10n/app_*.arb` × 6 语言，键必须齐平 | 缺一语言 `gen-l10n` 失败 |
+| R7 | **改动 DAO 或模型**：必须 `cd packages/core && dart run tool/generate_rpc.dart` 并提交生成物 | `generated_up_to_date_test` 必挂 |
+| R8 | **引用路径必须已被 git 跟踪**：写进提交文件前用 `git ls-files <path>` 核验 | 幽灵链接，克隆后即死 |
+
+## 三、加数据源 SOP（七步 + 两处连带 + 三处护栏）
+
+新增一个数据源 = 增量七步，顺序可参考：
+
+1. `packages/core/lib/models/data_source.dart` —— 枚举加值（颜色合规参考既有项）
+2. `lib/shared/constants/data_source_ui.dart` —— 图标 switch 加分支（穷尽性会让编译器盯住你）
+3. `lib/shared/constants/source_catalog.dart` —— `SourceInfo` 加行
+4. `lib/features/search/sources/<源>_source.dart` —— 源实现（80–160 行，照 `bangumi_anime_source.dart` 抄壳）
+5. `lib/core/api/<源>/` —— 三件套 + facade（types / http_client / search_api / `<源>_api.dart`）
+6. `lib/features/search/sources/search_sources.dart` —— import + 实例；**列表顺序 = 主源/备源优先级**
+7. 该源的筛选器（`lib/features/search/filters/<源>_*_filter.dart`，按需）
+
+**Web 端另加**：`packages/core/lib/api/proxy_targets.dart` 一行；带密钥的还在 `server/lib/src/proxy_handler.dart` 的 `ApiProxy._authorize` 加分支。
+
+**两个「漏了必串源」连带点**：
+
+- `lib/features/collections/helpers/collection_actions.dart` —— 该媒体类型刷新 switch，新源 id 必须发对的查询目标（例子：Bangumi id 发去 AniList 查）
+- 相似推荐等按源支配的穷尽 switch —— 不是我们源可用的端点，返回空即可
+
+**五个「加了必炸」护栏**：
+
+- `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（19→20）
+- `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码（anime 2→3）
+- `test/features/search/sources/search_sources_test.dart` —— 注册表 id 顺序表
+- `test/features/search/sources/source_output_media_type_test.dart` —— 输出媒体类型断言
+- RPC 一致性（见 R7，无幸免）
+
+## 四、Windows 环境坑（全部伪装成"项目坏了"）
+
+| # | 现象 | 真凶 | 规避 |
+|:-:|------|------|------|
+| P1 | 全部测试 `+0 -413`，报 `WebSocketException: Invalid WebSocket upgrade request` | `HTTP_PROXY` 指向沙箱代理，`NO_PROXY` 未设，flutter_tester 连 loopback 被拦 —— 极易误判为编译错误 | 带清代理跑：`env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy -u ALL_PROXY -u all_proxy NO_PROXY="127.0.0.1,localhost,::1" flutter test --no-pub` |
+| P2 | `flutter analyze` 刷出 1 万+ `package:test` 错 | 子包依赖未装：根 `pub get` 不生成 `packages/core` / `server` 的 package_config | `dart pub get --directory packages/core` 与 `server` 各跑一遍 |
+| P3 | `flutter run -d windows` 链接失败 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 | 写码/分析/测试不受影响；要跑桌面需装 VS 组件 |
+| P4 | 两份 `flutter test` 并发 → 交替 `PathAccessException` / `errno=5` 崩的是工具本身 | 撞 `build/native_assets/windows/sqlite3.dll` 文件锁 | 测试串行，绝不并发 |
+| P5 | flutter_test 里没有真网络 | 测试绑定默认装「一律返回 400」的假 HttpOverrides | 在线验证需在 `ensureInitialized()` 后 `HttpOverrides.global = null;` |
+| P6 | `flutter.bat` 经 cmd 吃裸 `|` | 命令行参数含 `\|` 时（如 `--coverage-package="tonkatsu_box\|core"`）需写 `.ps1` 或加引号 | 见 `.claude/CLAUDE.md` Toolchain |
+| P7 | 覆盖率统计缺 `packages/core` | `flutter test --coverage` 默认只包当前包 | 永远传 `--coverage-package='tonkatsu_box\|core'` |
+
+## 五、测试设施坑（mocktail，都是血泪）
+
+- **`verify(...).captured` 的命名参数顺序无保证**：它遍历 role invocation 的 `namedArguments.keys`，**不是调用点书写顺序**。实测 8 个命名参数吐 `[sort, page, perPage, …]`，按书写序编号必全错位。症状：十几个断言全挂、可值明明发对。正解：`thenAnswer((Invocation invocation) {...})` 里按 `invocation.namedArguments[Symbol('x')]` 取。
+- **本 SDK 的 `Symbol` 没有 `name` getter** —— 只能 `Symbol('x')` 相等查找，不能反向取名。
+- **Dart VM 会把未传的可选命名参数默认值一并物化进 invocation**：调用点只传 8 个，得到 9 个 named 参数（多一个 `null` 的 `tags`）。查询按键断言用 `containsAll`，不要比集合相等。
+
+## 六、数据源实测结论（2026-09-18）
+
+**稳定可用**：Bangumi `api.bgm.tv/v0` · NeoDB `neodb.social/api/catalog/search` · 微信读书 `weread.qq.com/web/search/global` · 优酷 `search.youku.com/api/search` · 爱奇艺 `mesh.if.iqiyi.com/.../homePageV3` · 网易云 · QQ 音乐。
+
+**可用但限流极狠**：豆瓣 Frodo `frodo.douban.com/api/v2/*` —— HMAC-SHA1 签名（secret `bf7dddc7c9cfe6f7` + apiKey `0dad551ec0f84ed02907ff5c42e8ec70` + 配对 UA）；**连打 10 次即 403，冷却 3–5 分钟**；签名 path 必须等于最终请求 path（剧集 `/tv/{id}`，用 `/movie/{id}` 会 996）。
+
+**免签补充**：`movie.douban.com/j/subject_suggest`（需 Referer），无限流，字段少。
+
+**不可用**：猫眼（302）· B 站主站（412）· 哔哩哔哩漫画（code 99）· 快看（404）· 动漫之家（不可达）· 腾讯视频搜索（仅 HTML）· 芒果 TV（401）· RSSHub 公共实例（403 Cloudflare，自建可用）。
+
+## 七、Bangumi 接入要点（首个源样板）
+
+- 入口 `api.bgm.tv/v0`，免密钥，**必须带自定义 User-Agent**，否则 Cloudflare 403。
+- 搜索 `POST /v0/search/subjects`（body `{keyword, sort, filter:{type:[2], meta_tags, air_date, rating, rank}}`）；详情 `GET /v0/subjects/{id}`。
+- 代码位置：`lib/core/api/bangumi/` 三件套 + `bangumi_api.dart`（`bangumiApiProvider`）+ `bangumi_anime_source.dart`（id `bangumi_anime`）+ `bangumi_meta_tag_filter.dart` / `bangumi_rank_filter.dart`。
+- 领域映射：`name_cn`→`title`，`name`→`titleNative`，`rating.score ×10`→`averageScore`（0–10 → 0–100），`date`/`air_date`→起播日月年，`eps`→集数，`platform`→format（TV/WEB→ONA、剧场版→MOVIE），`tags` 截 12 个且丢票数，infobox `动画制作`/`製作`→studios，外链 `bgm.tv/subject/{id}`。
+- **空关键词浏览必须把 `sort` 从 `match` 兜底为 `rank`**：`match` 无关键词时结果无意义。
+- **搜索接口的 `keyword` 与 `filter` 两路必须都传**：只传 `filter` 会 400。
+
+## 八、提交约定（对齐上游 `docs/COMMITS.md`）
+
+Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`），以便 grep 区分上游/分支。
+
+## 九、定义完成（必须全绿再收工）
+
+1. `flutter analyze --fatal-infos --fatal-warnings` **零输出**
+2. `flutter test` · `dart test`（packages/core）· `dart test`（server）**全绿**
+3. RPC 生成物 `git diff --exit-code -- packages/core/lib/rpc/generated` 为空
+4. **在线活体验证**通过（临时插真实 API；不允许"测试都过了"当完工）
+5. 护栏、ARB 键数（6×1743 全齐）、`TASK.md` 状态同步
+
+按此清单跑完，再回头补文档与记忆。

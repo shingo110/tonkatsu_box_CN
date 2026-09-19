@@ -2,8 +2,10 @@
 
 ## Language
 
-Always reply to the user in Russian. Code, comments, commit messages and docs
-are English (see "Comments" below).
+Reply to the user in Chinese — this fork targets Chinese-language users. Code,
+comments, commit messages and docs are English (see "Comments" below). UI
+strings are a third case: they go in `.arb` and exist in all six locales. Do
+not answer in Russian; the upstream author's rule does not apply here.
 
 ## Stack
 
@@ -17,19 +19,46 @@ are English (see "Comments" below).
 
 ## Toolchain
 
-**The Flutter SDK lives on Windows, not inside WSL.** Run every Flutter command
-through PowerShell. `$(wslpath -w "$PWD")` resolves the current WSL directory to
-its Windows path — never hardcode it.
+**The Flutter SDK lives on Windows.** This fork is checked out on Windows
+itself, so the commands below run as-is from the repo root. There is no WSL
+hop, no `wslpath`, and no `powershell.exe -Command` wrapper.
 
 ```bash
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter analyze --fatal-infos --fatal-warnings"
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter test"
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter run -d windows"
+flutter analyze --fatal-infos --fatal-warnings
+flutter test
+dart test --directory packages/core
+dart test --directory server
 ```
 
 `flutter.bat` goes through cmd, which eats an unquoted `|`. For arguments
 containing one (e.g. `--coverage-package="tonkatsu_box|core"`) write a `.ps1`
 and use PowerShell's `--%` stop-parsing token.
+
+### Windows environment traps
+
+These three all present as project failures. None of them is one.
+
+1. **Proxy variables break every test.** `flutter_tester` reaches its harness
+   over a loopback WebSocket. With `HTTP_PROXY`/`HTTPS_PROXY` set and `NO_PROXY`
+   unset, that hop is proxied and the run reports `+0 -413` with
+   `WebSocketException: Invalid WebSocket upgrade request` for every file —
+   indistinguishable from a project-wide compile error at a glance.
+
+   ```bash
+   env -u HTTP_PROXY -u HTTPS_PROXY NO_PROXY="127.0.0.1,localhost,::1" flutter test
+   ```
+
+2. **A root `analyze` covers both subpackages, a root `pub get` does not.**
+   Until `dart pub get --directory packages/core` and the same for `server` have
+   run, `flutter analyze` reports ~10 000 `package:test` errors that are all in
+   those two `test/` trees. `lib/` is green throughout.
+
+3. **`flutter pub get` can fail on the Windows plugin symlinks and still leave
+   a usable `package_config.json`.** Re-running it costs minutes. Pass
+   `--no-pub` to `analyze` / `test` once the file exists.
+   `flutter run -d windows` additionally needs the Visual Studio C++ workload;
+   without it the desktop target cannot link, but analysis and tests never
+   needed it.
 
 ### Workspace layout
 
@@ -190,7 +219,9 @@ packages/core/lib/database/
     ├── migration_registry.dart    # .all (v1..N), .pending(from), .latestVersion
     ├── migration_runner.dart      # Replay + MigrationFailure reporting
     ├── migration_v1.dart          # Base schema — start of the chain
-    └── migration_vN.dart          # One file per version (currently up to v60)
+    └── migration_vN.dart          # One file per version; the chain length is
+                                   # `MigrationRegistry.latestVersion`, never a
+                                   # number written down here
 ```
 
 #### ⚠️ CARDINAL RULE: existing migrations are IMMUTABLE
@@ -501,9 +532,9 @@ turn the route into an open relay. Adding an API means adding a row there, and
 a keyed one also needs a case in `ApiProxy._authorize`.
 
 ```bash
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter build web"
+flutter build web
 # dev, page and server on different ports:
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter run -d chrome --dart-define=SERVER_BASE_URL=http://localhost:8080"
+flutter run -d chrome --dart-define=SERVER_BASE_URL=http://localhost:8080
 ```
 
 How web is kept compilable — three seams, in order of preference:

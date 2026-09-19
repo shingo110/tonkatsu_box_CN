@@ -2,398 +2,246 @@
   <img src="assets/images/logo.png" width="120" alt="Tonkatsu Box">
 </p>
 
-<h1 align="center">Tonkatsu Box</h1>
+<h1 align="center">Tonkatsu Box CN</h1>
 
 <p align="center">
-  <b>Your personal collection manager for games, movies, TV shows, anime, visual novels, manga, books, music and podcasts</b>
+  <b>为中文用户改造的媒体收藏管理器</b><br>
+  游戏 · 电影 · 剧集 · 动画 · 视觉小说 · 漫画 · 图书 · 音乐 · 播客
 </p>
 
 <p align="center">
-  <a href="https://github.com/hacan359/tonkatsu_box/releases/latest"><img src="https://img.shields.io/badge/Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows"></a>
-  <a href="https://github.com/hacan359/tonkatsu_box/releases/latest"><img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux"></a>
-    <a href="https://github.com/hacan359/tonkatsu_box/releases/latest"><img src="https://img.shields.io/badge/macOS-979797?style=for-the-badge&logo=apple&logoColor=white" alt="macOS"></a>
-  <a href="https://github.com/hacan359/tonkatsu_box/releases/latest"><img src="https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android"></a>
-  <a href="https://www.rustore.ru/catalog/app/com.hacan359.tonkatsubox?utm_source=available_in_rustore&utm_medium=com.hacan359.tonkatsubox&rsm=1&mt_link_id=iios36&mt_sub1=com.hacan359.tonkatsubox"><img src="https://img.shields.io/badge/RuStore-0066FF?style=for-the-badge&logo=rustore&logoColor=white" alt="RuStore"></a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/hacan359/tonkatsu_box/actions/workflows/test.yml"><img src="https://github.com/hacan359/tonkatsu_box/actions/workflows/test.yml/badge.svg" alt="Tests"></a>
-  <a href="https://github.com/hacan359/tonkatsu_box/actions/workflows/test.yml"><img src="https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/hacan359/7ed48e87a6bd59afeb08eaf656fd2adb/raw/tonkatsu-box-coverage.json" alt="Coverage"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-3.38+-02569B?logo=flutter&logoColor=white" alt="Flutter 3.38+"></a>
-  <a href="https://discord.gg/JZVNPF7cS2"><img src="https://img.shields.io/badge/Discord-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
+  <img src="https://img.shields.io/badge/Windows-0078D4?style=flat-square&logo=windows&logoColor=white" alt="Windows">
+  <img src="https://img.shields.io/badge/Android-3DDC84?style=flat-square&logo=android&logoColor=white" alt="Android">
+  <img src="https://img.shields.io/badge/Web-4285F4?style=flat-square&logo=googlechrome&logoColor=white" alt="Web">
 </p>
 
-<p align="center">
-  <img src="docs/screenshots/mockup_main_themes.jpg" width="800" alt="Main screen in the dark and Sakura themes">
-</p>
 ---
+
+> [!IMPORTANT]
+> **本仓库是 [`hacan359/tonkatsu_box`](https://github.com/hacan359/tonkatsu_box) 的国内化分支**（上游 0.44.0，MIT 许可）。
+>
+> 上游的数据源以海外服务为主（TMDB、IGDB、AniList、Google Books…），在国内网络下要么不可达，要么只提供英文元数据。本分支的目标是**接入国内可直连、带中文元数据的数据源**，让搜索与入库真正可用。
+>
+> 本分支**尚未发布任何构建产物**。需要可用版本请先从源码构建，或使用上游的[官方 Release](https://github.com/hacan359/tonkatsu_box/releases/latest)（不含本分支的国内源）。
+
+---
+
+## 国内数据源接入进度
+
+这是本分支与上游的**核心差异**，也是唯一的改造主线。
+
+| 媒体类型 | 数据源 | 状态 | 备注 |
+|---------|--------|:----:|------|
+| 动画 | [Bangumi](https://bgm.tv/) | ✅ **已接入** | 免密钥直连；中文标题与标签；分类 / 年份 / 评分 / 排名四类筛选；详情含制作公司与简介 |
+| 动画 | [NeoDB](https://neodb.social/) | 📋 计划中 | 免密钥，书影音游戏全覆盖，可作为动漫与图书的共用源 |
+| 电影 / 剧集 | [豆瓣](https://www.douban.com/) | 📋 计划中 | 元数据最全；需 HMAC-SHA1 签名，且连打约 10 次即 403、冷却数分钟 —— **接入前须先补 403 退避** |
+| 电影 / 剧集 | [优酷](https://www.youku.com/) / [爱奇艺](https://www.iqiyi.com/) | 📋 计划中 | 搜索接口免密钥可用，字段偏少，适合做列表与海报 |
+| 图书 | [微信读书](https://weread.qq.com/) | 📋 计划中 | 书城搜索接口免密钥可用；中文书目覆盖好 |
+| 图书 | 豆瓣 ISBN 直查 | 📋 计划中 | 以 ISBN 为入口，字段稳定、无需签名 |
+| 漫画 | —— | 🔍 待调研 | 主流中文漫画站多不可达（B 站漫画、快看等已实测失败） |
+
+> 状态图例：✅ 已并入主线并通过全部关卡 · 📋 已选型待实现 · 🔍 尚未确定可行路径。
+> 接入一个源需要改动的准确清单与验收口径见 [`RULES.md`](RULES.md) 与 [`TASK.md`](TASK.md)。
+
+---
+
+## 功能总览
+
+上游的功能本分支全部保留（仅数据源侧做增量），以下为概要。
+
+| | 功能 | 说明 |
+|:-:|------|------|
+| 📦 | **收藏管理** | 按平台、类型或任意维度组织；网格 / 列表 / 表格 / 看板四种视图，支持手动拖拽排序与批量操作 |
+| 🔍 | **统一搜索** | 一个搜索框背后是全部目录服务，各有专属筛选器与空关键词浏览模式；一条结果可同时加入多个收藏 |
+| ✅ | **进度追踪** | 状态、1–10 评分、起止日期、重看次数、耗时；图书按页、漫画按章、专辑按曲目 |
+| 📺 | **剧集追踪** | 季折叠面板，含剧照、播出日期与简介；一键标记单集 / 整季 / 下一集未看 |
+| ❤️ | **喜欢与笔记** | 对单集、季、章、卷、页做标记与批注，并可筛选出已标记项 |
+| 🏷️ | **标签系统** | 全局标签管理器，支持分组、筛选与批量增删 |
+| 📊 | **统计** | 全部时间或单一年度的数据总览：计数器、分类型统计、月度带状图、平台与格式分布、优劣势对比、可分享的总结卡片 |
+| ☁️ | **个性化** | 由收藏生成的类型 / 平台 / 年代词云，以及基于已完结与评分的推荐 |
+| 🔔 | **播出日历** | 关注的作品自动进入月 / 周 / 日视图，也可自行添加日期 |
+| 📝 | **愿望单** | 顶层独立清单；导入器未能匹配的条目会安放于此 |
+| 🎨 | **画板** | 拖拽式画布，可放海报、便签与连线 |
+| 🏆 | **等级表与情绪网格** | S/A/B/C 分级或 N×M 可视排布，均可导出 PNG |
+| 📥 | **数据导入** | Simkl、Steam、IGDB CSV、Trakt.tv、Kinorium、RetroAchievements、MyAnimeList、AniList、Hardcover，以及自有的 JSON / CSV |
+| 🎬 | **Kodi 同步** | 通过 JSON-RPC 拉取电影观看状态与评分 |
+| 🎧 | **Discord 状态** | 在 Discord 中显示当前正在玩的 / 看的 / 读的（桌面端） |
+| 👤 | **多用户档案** | 一次安装可供多人使用，各自独立收藏、画板与封面 |
+| 💾 | **导出与备份** | `.xcoll` / `.xcollx` 文件、设备间同步、一键备份，支持完全离线 |
+| 🎮 | **手柄操作** | Xbox 手柄导航（桌面端与安卓掌机） |
+
+## 支持的数据源
+
+上游共 22 个搜索源，覆盖 17 个目录服务。**"国内直连"一列仅标注本分支实测过的结论**，未评估的留空 —— 上游源的海外可达性随网络环境而异，本仓库不做保证。
+
+| 类型 | 目录服务 | 密钥 | 国内直连 |
+|------|---------|------|:--------:|
+| 游戏 | [IGDB](https://www.igdb.com/) | 内置 | |
+| 电影 / 剧集 | [TMDB](https://www.themoviedb.org/) | 内置 | |
+| 剧集 | [TVmaze](https://www.tvmaze.com/) | 免密钥 | |
+| 剧集 / 电影 | [TheTVDB](https://thetvdb.com/) | 需密钥 | |
+| 视觉小说 | [VNDB](https://vndb.org/) | 免密钥 | |
+| 动画 / 漫画 | [AniList](https://anilist.co/) | 免密钥 | |
+| **动画** | **[Bangumi](https://bgm.tv/)** | **免密钥** | **✅ 已实测** |
+| 漫画 | [MangaBaka](https://mangabaka.org/) | 免密钥 | |
+| 漫画 | [MangaDex](https://mangadex.org/) | 免密钥 | |
+| 动画 / 漫画 | [Kitsu](https://kitsu.io/) | 免密钥 | |
+| 图书 | [OpenLibrary](https://openlibrary.org/) | 免密钥 | |
+| 图书 | [Fantlab](https://fantlab.ru/) | 免密钥 | |
+| 图书 | [Google Books](https://books.google.com/) | 可选免费密钥 | |
+| 图书 | [Hardcover](https://hardcover.app/) | 需免费令牌 | |
+| 漫画 | [ComicVine](https://comicvine.gamespot.com/) | 需免费密钥 | |
+| 音乐 | [MusicBrainz](https://musicbrainz.org/) | 免密钥 | |
+| 播客 | [Podcast Index](https://podcastindex.org/) | 内置 | |
+
+另有三个非搜索用途的服务：封面用的 [SteamGridDB](https://www.steamgriddb.com/)（内置密钥）、复古媒体图库 [ScreenScraper](https://www.screenscraper.fr/)（需账号）、成就同步 [RetroAchievements](https://retroachievements.org/)（需账号）。
+
+## 支持的语言
+
+界面支持运行时切换，在 **设置 → 应用语言** 中选择，无需重启。
+
+| 语言 | 状态 |
+|------|:----:|
+| 简体中文 | ✅ 完整 |
+| English | ✅ 完整 |
+| Русский | ✅ 完整 |
+| Español | ✅ 完整 |
+| Português (BR) | ✅ 完整 |
+| Français | ✅ 完整 |
+
+## 界面预览
+
+| 主页 | 收藏 |
+|---|---|
+| <img src="docs/screenshots/mockup_main.jpg" alt="主页"> | <img src="docs/screenshots/mockup_collection.jpg" alt="收藏"> |
+
+| 搜索 | 条目预览 |
+|---|---|
+| <img src="docs/screenshots/mockup_search.jpg" alt="搜索"> | <img src="docs/screenshots/mockup_title.jpg" alt="条目预览"> |
+
+| 条目详情 | 筛选器 |
+|---|---|
+| <img src="docs/screenshots/mockup_card.jpg" alt="条目详情"> | <img src="docs/screenshots/mockup_filters.jpg" alt="筛选器"> |
+
+| 剧集追踪 | 等级表 |
+|---|---|
+| <img src="docs/screenshots/mockup_episode_tracker.jpg" alt="剧集追踪"> | <img src="docs/screenshots/mockup_tierlist.jpg" alt="等级表"> |
+
+## 平台支持
+
+| 功能 | Windows | Linux | macOS | Android | Web |
+|------|:-------:|:-----:|:-----:|:-------:|:---:|
+| 收藏与搜索 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 进度与剧集追踪 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 统计与个性化 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 画板 / 等级表 / 情绪网格 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 数据导入 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 备份与设备间同步 | ✅ | ✅ | ✅ | ✅ | — |
+| Kodi 同步 | ✅ | ✅ | ✅ | ✅ | — |
+| 手柄操作 | ✅ | ✅ | ✅ | ✅ | — |
+| Discord 状态 | ✅ | ✅ | ✅ | — | — |
+| VGMaps 浏览器 | ✅ | — | — | — | — |
+
+> macOS 构建未经维护者测试，且未签名，首次启动会有安全提示。Web 端为自托管形态，浏览器内不保留数据库，深度功能（画板以外）与桌面端有差异。
+
+## 从源码构建
+
+需要 **Flutter 3.38+ / Dart 3.10+**。
+
+```bash
+git clone https://github.com/shingo110/tonkatsu_box_CN.git
+cd tonkatsu_box_CN
+
+flutter pub get
+# 两个子包各自解析依赖，根目录的 pub get 不会代劳
+dart pub get --directory packages/core
+dart pub get --directory server
+
+flutter run -d windows   # 或 linux / android / chrome
+```
+
+> [!NOTE]
+> Windows 环境下有四个已探明的坑会伪装成"项目坏了"，实为环境问题 —— 代理变量打死测试、子包依赖未装导致上万条假报错、桌面构建缺 Visual Studio C++ 工作负载、两份 `flutter test` 不可并发。逐条说明与规避命令见 [`RULES.md`](RULES.md)。
+
+### Android 发布版
+
+调试构建开箱可用。打**发布** APK 需要自己的签名密钥（`android/key.properties`），过程见 [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)。
+
+## 自托管 Web 版
+
+一个 Docker 容器即可把应用跑在浏览器里，数据库留在服务器上，局域网内所有设备共享同一份收藏。
+
+```bash
+git clone https://github.com/shingo110/tonkatsu_box_CN.git
+cd tonkatsu_box_CN
+docker compose up -d --build
+# 首次构建需数分钟（容器内编译 Web 端），随后访问 http://<服务器IP>:8080
+```
+
+配置项（`TONKATSU_DATA_PATH` / `TONKATSU_PORT` / `PUID` / `PGID` / API 密钥）见 [`.env.example`](.env.example)。服务端细节见 [`server/README.md`](server/README.md)，接口契约见 [`server/PROTOCOL.md`](server/PROTOCOL.md)。
 
 > [!WARNING]
-> **This app is in active development.** Updates may include database migrations that change data format. Please **create a backup** before updating (Settings → Backup → Create Backup). Alternatively, you can manually copy the app data folder:
-> - **Windows:** `%APPDATA%\Roaming\Tonkatsu Box\Tonkatsu Box`
-> - **Linux:** `~/.local/share/tonkatsu_box` (or `$XDG_DATA_HOME/tonkatsu_box`)
-> - **macOS:** `~/Library/Application Support/com.hacan359.tonkatsuBox`
-> - **Android:** use the built-in backup feature (Settings → Backup)
+> Web 版没有账号与密码体系，**只应暴露在可信局域网内**。
+>
+> 由于浏览器无法直连外部 API（跨域、User-Agent 被剥离、密钥不能下发到标签页），Web 端的所有外部请求都会经由服务端的 `/proxy/<slug>/…` 转发。可转发的目标在 [`packages/core/lib/api/proxy_targets.dart`](packages/core/lib/api/proxy_targets.dart) 中白名单化 —— 它是一张允许清单，不是开放中继。
 
----
+## 数据安全
 
-Tonkatsu Box is a free, open-source app to organize your media collections. Search millions of titles across fifteen catalogs, track your progress episode by episode, rate everything, see your library in numbers, build visual boards, tier lists and mood grids, and bring in what you already track elsewhere.
+收藏数据全部在本地，不需要账号或云服务。升级前请先备份（**设置 → 备份**），因为版本更新可能包含改变数据结构的数据库迁移。
 
-### Search fifteen catalogs
+| 平台 | 数据目录 |
+|------|---------|
+| Windows | `%APPDATA%\Roaming\Tonkatsu Box\Tonkatsu Box` |
+| Linux | `~/.local/share/tonkatsu_box` |
+| macOS | `~/Library/Application Support/com.hacan359.tonkatsuBox` |
+| Android | 使用内置备份功能（设置 → 备份） |
 
-| | | | | | | |
-|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| <img src="assets/images/icon_igdb_color.png" width="34" alt="IGDB"><br>IGDB | <img src="assets/images/icon_tmdb_color.png" width="34" alt="TMDB"><br>TMDB | <img src="assets/images/icon_twm_color.png" width="34" alt="TVmaze"><br>TVmaze | <img src="assets/images/icon_vndb_color.png" width="34" alt="VNDB"><br>VNDB | <img src="assets/images/icon_anilist_color.png" width="34" alt="AniList"><br>AniList | <img src="assets/images/icon_kitsu_color.png" width="34" alt="Kitsu"><br>Kitsu | <img src="assets/images/icon_mangabaka_color.png" width="34" alt="MangaBaka"><br>MangaBaka |
-| <img src="assets/images/icon_mangadex_color.png" width="34" alt="MangaDex"><br>MangaDex | <img src="assets/images/open_library_color.png" width="34" alt="OpenLibrary"><br>OpenLibrary | <img src="assets/images/icon_fantlab_color.png" width="34" alt="Fantlab"><br>Fantlab | <img src="assets/images/icon_google_book_color.png" width="34" alt="Google Books"><br>Google&nbsp;Books | <img src="assets/images/icon_hardcover_color.png" width="34" alt="Hardcover"><br>Hardcover | <img src="assets/images/comic_vine_color.png" width="34" alt="ComicVine"><br>ComicVine | <img src="assets/images/music_brainz_color.png" width="34" alt="MusicBrainz"><br>MusicBrainz |
-| <img src="assets/images/podcastindex_color.png" width="34" alt="Podcast Index"><br>Podcast&nbsp;Index | | | | | | |
+## 测试与质量关卡
 
-### Bring your library from
-
-| | | | | | |
-|:-:|:-:|:-:|:-:|:-:|:-:|
-| <img src="assets/images/icon_steam_color.png" width="34" alt="Steam"><br>Steam | <img src="assets/images/icon_igdb_color.png" width="34" alt="IGDB"><br>IGDB&nbsp;list | <img src="assets/images/icon_trakt_color.png" width="34" alt="Trakt.tv"><br>Trakt.tv | <img src="assets/images/icon_simkl_color.png" width="34" alt="Simkl"><br>Simkl | <img src="assets/images/icon_kinorium_color.png" width="34" alt="Kinorium"><br>Kinorium | <img src="assets/images/ra_logo.png" width="34" alt="RetroAchievements"><br>RetroAch. |
-| <img src="assets/images/icon_myanimelist_color.png" width="34" alt="MyAnimeList"><br>MyAnimeList | <img src="assets/images/icon_anilist_color.png" width="34" alt="AniList"><br>AniList | <img src="assets/images/icon_hardcover_color.png" width="34" alt="Hardcover"><br>Hardcover | 📁<br>JSON&nbsp;/&nbsp;CSV | 📦<br>.xcollx | |
-
-## Contents
-
-[Languages](#languages) · [Screenshots](#screenshots) · [Features](#features) · [Download](#download) · [Quick Start](#quick-start) · [Ready-made Collections](#ready-made-collections) · [Import Your Data](#import-your-data) · [Sync & Backup](#sync--backup) · [Data Sources](#data-sources) · [Platform Support](#platform-support) · [Self-Hosting](#self-hosting-web) · [Building from Source](#building-from-source) · [Contributing](#contributing)
-
-## Languages
-
-The whole interface is localized with runtime switching. Pick your language in **Settings → App Language**, no restart needed.
-
-| | Language | Status |
-|:-:|---|:-:|
-| 🇬🇧 | English | ✅ Complete |
-| 🇷🇺 | Русский (Russian) | ✅ Complete |
-| 🇨🇳 | 简体中文 (Simplified Chinese) | ✅ Complete |
-| 🇪🇸 | Español (Spanish) | ✅ Complete |
-| 🇧🇷 | Português (Brazilian Portuguese) | ✅ Complete |
-| 🇫🇷 | Français (French) | ✅ Complete |
-
-## Screenshots
-
-| Home | Collections |
-|---|---|
-| <img src="docs/screenshots/mockup_main.jpg" alt="Home"> | <img src="docs/screenshots/mockup_collection.jpg" alt="Collections"> |
-
-| Search | Title Preview |
-|---|---|
-| <img src="docs/screenshots/mockup_search.jpg" alt="Search"> | <img src="docs/screenshots/mockup_title.jpg" alt="Title preview"> |
-
-| Item Details | Filters |
-|---|---|
-| <img src="docs/screenshots/mockup_card.jpg" alt="Item details"> | <img src="docs/screenshots/mockup_filters.jpg" alt="Filters"> |
-
-| Episode Tracker | Tier List |
-|---|---|
-| <img src="docs/screenshots/mockup_episode_tracker.jpg" alt="Episode tracker"> | <img src="docs/screenshots/mockup_tierlist.jpg" alt="Tier list"> |
-
-| Genre Cloud | Import |
-|---|---|
-| <img src="docs/screenshots/mockup_genre_cloud.jpg" alt="Genre cloud"> | <img src="docs/screenshots/mockup_import.jpg" alt="Import"> |
-
-## Features
-
-| | | |
-|:-:|---|---|
-| 📦 | **Collections** | Organize by platform, genre, or any way you like. Grid, list, table and board views, manual drag-and-drop order, bulk actions over a selection |
-| 🔍 | **Search** | Fifteen catalogs behind one search field, each with its own filters and an empty-query browse mode. Add a result to several collections at once |
-| ✅ | **Progress tracking** | Status, ratings 1-10, start and finish dates, replays, time spent. Reading progress by page for books, chapters for manga, a listened-track checklist for albums |
-| 📺 | **Episode tracker** | Season accordion with posters, episode stills, air dates and synopses. Mark an episode, a whole season, or the next unwatched one in a tap. TMDB, TVmaze and Kitsu titles |
-| ❤️ | **Likes & notes** | Like and annotate a single episode, season, chapter, volume or page, and filter the list down to what you starred |
-| 🏷️ | **Tags** | Global tags with their own manager, grouping and filtering — add or remove them across a whole selection |
-| 📊 | **Statistics** | Your library in numbers, for all time or one year: counters, per-type breakdowns, a month-by-month ribbon, platforms, formats, tags, best vs worst, and a shareable summary card |
-| ☁️ | **Personalization** | A genre / platform / decade cloud built from your library, and recommendations from what you completed and rated |
-| 🔔 | **Releases & calendar** | Follow a show and its upcoming episodes land on a month / week / day calendar, together with any date you add yourself |
-| 📝 | **Wishlist** | Dedicated top-level list for what you want to play, watch, or read next — importers park anything they could not match here |
-| 🎨 | **Visual boards** | Drag-and-drop canvas with posters, notes, and connections |
-| 🏆 | **Tier lists & mood grids** | Rank items into S/A/B/C tiers, or arrange them on a visual N×M board with labels — export either as PNG |
-| 📥 | **Import** | Simkl, Steam, IGDB list CSV, Trakt.tv, Kinorium CSV, RetroAchievements, MyAnimeList XML, AniList and Hardcover by username, plus your own cards from JSON / CSV |
-| 🎬 | **Kodi sync** | Pull watched status and ratings for your movies from a Kodi media server over JSON-RPC |
-| 🎧 | **Discord Rich Presence** | Show what you're playing/watching/reading in Discord (desktop) |
-| 👤 | **Profiles** | Several people on one install — separate collections, boards and covers per profile, with the API keys and app language shared |
-| 💾 | **Export & share** | .xcoll / .xcollx files with full offline support, device-to-device sync, one-click backups |
-| 🎮 | **Gamepad** | Navigate with Xbox controller (desktop and Android handhelds) |
-
-## Download
-
-| Platform | Link |
-|----------|------|
-| Windows | [**Download .zip**](https://github.com/hacan359/tonkatsu_box/releases/latest) |
-| Linux | [**Download .tar.gz**](https://github.com/hacan359/tonkatsu_box/releases/latest) |
-| macOS | [**Download .dmg**](https://github.com/hacan359/tonkatsu_box/releases/latest) |
-| Android | [**Download .apk**](https://github.com/hacan359/tonkatsu_box/releases/latest) or [**RuStore**](https://www.rustore.ru/catalog/app/com.hacan359.tonkatsubox) |
-
-> The Linux build ships as a plain bundle: unpack it anywhere and run `tonkatsu_box`. It needs GTK 3 and SQLite from your distribution, plus `zenity` for the file dialogs and `xdg-utils` for opening links.
-
-> macOS support is experimental. That build has not been tested by the maintainers yet, so expect rough edges. It is also unsigned, so macOS will warn about an unidentified developer on first launch.
-
-> On Android you have three options: grab the APK from Releases, install from [RuStore](https://www.rustore.ru/catalog/app/com.hacan359.tonkatsubox), or set up Obtainium for auto-updates (below). RuStore handles updates for you through its own store.
-
-### Auto-updates on Android (Obtainium)
-
-[Obtainium](https://github.com/ImranR98/Obtainium) checks GitHub Releases and installs new APKs for you, so you don't have to download updates by hand.
-
-1. Install Obtainium.
-2. Tap **Add App** and paste this into **App source URL**:
-   ```
-   https://github.com/hacan359/tonkatsu_box
-   ```
-3. Tap **Add**.
-4. The first time it updates, Android asks you to allow installs from Obtainium. Allow it once.
-5. In the app settings, pick how often Obtainium checks for releases and turn on auto-update, or just refresh manually whenever you want.
-
-When a new release ships, Obtainium downloads the APK and shows the system install dialog to confirm. Silent background installs are not possible on Android without root.
-
-## Quick Start
-
-1. **Download and install** from the links above
-2. **Launch the app** — Welcome Wizard guides you through setup
-3. **Start adding items** from Search, or import ready-made collections
-
-The app works offline after setup. API keys are built-in.
-
-> [Full guide on Wiki](https://github.com/hacan359/tonkatsu_box/wiki/Getting-Started)
-
-## Ready-made Collections
-
-**[Tonkatsu Collections](https://github.com/hacan359/tonkatsu-collections)** — 25,000+ games across 23 platforms, top movies, TV shows & anime. Download `.xcollx` → Import → Done.
-
-## Import Your Data
-
-Already tracking elsewhere? Bring your data:
-
-| | Source | What's imported |
-|:-:|--------|-----------------|
-| <img src="assets/images/icon_steam_color.png" width="28" alt="Steam"> | **Steam** | Owned games, playtime, last played date |
-| <img src="assets/images/icon_igdb_color.png" width="28" alt="IGDB"> | **IGDB** | A game list exported as CSV — matched by IGDB id, with a status you pick for the list |
-| <img src="assets/images/icon_trakt_color.png" width="28" alt="Trakt.tv"> | **Trakt.tv** | Watch history, ratings, watchlist, episode progress |
-| <img src="assets/images/icon_simkl_color.png" width="28" alt="Simkl"> | **Simkl** | Movies, TV shows and anime from one account, signed in with a short code — statuses, ratings, notes and the episode watch history with its original dates |
-| <img src="assets/images/icon_kinorium_color.png" width="28" alt="Kinorium"> | **Kinorium** | Movies, TV & animation from a CSV export — ratings and watch dates |
-| <img src="assets/images/ra_logo.png" width="28" alt="RetroAchievements"> | **RetroAchievements** | Retro game library, achievement progress, awards |
-| <img src="assets/images/icon_myanimelist_color.png" width="28" alt="MyAnimeList"> | **MyAnimeList** | Anime and manga lists with scores, status and progress from an XML export |
-| <img src="assets/images/icon_anilist_color.png" width="28" alt="AniList"> | **AniList** | Anime and manga directly by a public username — no API key required |
-| <img src="assets/images/icon_hardcover_color.png" width="28" alt="Hardcover"> | **Hardcover** | Book library by username — statuses, ratings, dates and re-reads |
-| 📁 | **Your own cards** | A JSON or CSV file of custom entries — titles, types, covers, notes, tags and personal fields |
-| 📦 | **.xcollx files** | Collections shared by others |
-
-> [Import guides on Wiki](https://github.com/hacan359/tonkatsu_box/wiki)
-
-## Sync & Backup
-
-Everything lives on your device. Nothing here needs an account or a cloud.
-
-| | What | Where |
-|:-:|---|---|
-| 🔄 | **Device-to-device sync** — copy the whole database to another device over your home network | Settings → Database → Device-to-device sync |
-| 💾 | **Backup & restore** — one archive with collections, tags, boards, tier lists, mood grids, wishlist, watch progress, calendar and settings | Settings → Backup |
-| 📁 | **Custom data folder** — keep the database on an SD card or any folder you pick | Settings → Database → Storage location |
-| <img src="assets/images/icon_kodi_color.png" width="24" alt="Kodi"> | **Kodi sync** — pull watched status and ratings for your movies from a Kodi media server | Settings → Kodi |
-| <img src="assets/images/icon_discord_color.png" width="24" alt="Discord"> | **Discord Rich Presence** — show what you're playing, watching or reading | Settings → Discord |
-
-> [Details on the Wiki](https://github.com/hacan359/tonkatsu_box/wiki/Data-Sync-Backup)
-
-### Device-to-Device Sync
-
-Move your whole collection from one device to another over your home network. No cloud, no account: the two devices talk to each other directly.
-
-How it works:
-
-1. Open **Settings → Database → Device-to-device sync** on both devices. While the screen is open, each device announces itself on the local network and finds the other one.
-2. On the device that should **receive** the data, tap the other device in the list.
-3. Confirm on both sides: the receiving device shows what it is about to download (device name, date, collection and item counts), and the sending device asks you to allow the transfer.
-4. The full database is copied over and **replaces** everything on the receiving device. Restart the app when asked.
-
-This is a full replace, not a merge. Changes made on the receiving device that the sender doesn't have are gone after the transfer.
-
-Before replacing anything, the app keeps the previous database as a backup. **Settings → Database → Backup → Restore** swaps the current database with that backup, and restoring again swaps them back.
-
-> [!CAUTION]
-> **This feature can destroy data. Read this before using it.**
-> - Receiving a snapshot **overwrites your entire local database**. Anything you added on this device and nowhere else is lost.
-> - There is only **one backup slot**. Receiving a second snapshot overwrites the backup made before the first one — after that, the original data is gone for good.
-> - The transfer is **not encrypted** and there is no pairing between devices. Use it only on a network you trust (your home Wi-Fi), never on public or shared networks.
-> - If the app is killed or the device loses power in the middle of a transfer or restore, the database can end up corrupted. Keep a regular backup (Settings → Backup) before syncing.
-
-### Custom Data Folder
-
-By default the database lives in the app's private folder. **Settings → Database → Storage location** lets you move it to any folder you pick — for example an SD card or a folder synced by a cloud client.
-
-When you pick an empty folder, the app copies your current data there. When you pick a folder that already holds Tonkatsu Box data, the app switches to that data instead. Either way a restart is required. If the custom folder is missing on startup (unplugged drive, dead network share), the app falls back to the default location instead of failing — Settings shows a warning when that happens.
-
-> [!CAUTION]
-> - Pointing two devices or a cloud client at the **same live folder** is not supported and can corrupt the database. Sync clients copy files while they are being written; SQLite does not survive that.
-> - When the custom folder is unavailable, the app silently runs on the default (possibly empty) data. Your collection is not lost — plug the drive back in and restart — but anything you add meanwhile lands in the default folder, not the custom one.
-> - On Android this feature needs the "All files access" permission, which the app requests only when you actually pick a folder.
-
-## Data Sources
-
-| | Type | Source | API Key |
-|:-:|------|--------|---------|
-| <img src="assets/images/icon_igdb_color.png" width="28" alt="IGDB"> | Games | [IGDB](https://www.igdb.com/) | Built-in |
-| <img src="assets/images/icon_tmdb_color.png" width="28" alt="TMDB"> | Movies & TV | [TMDB](https://www.themoviedb.org/) | Built-in |
-| <img src="assets/images/icon_twm_color.png" width="28" alt="TVmaze"> | TV Shows | [TVmaze](https://www.tvmaze.com/) | Not required |
-| <img src="assets/images/icon_vndb_color.png" width="28" alt="VNDB"> | Visual Novels | [VNDB](https://vndb.org/) | Not required |
-| <img src="assets/images/icon_anilist_color.png" width="28" alt="AniList"> | Anime & Manga | [AniList](https://anilist.co/) | Not required |
-| <img src="assets/images/icon_mangabaka_color.png" width="28" alt="MangaBaka"> | Manga | [MangaBaka](https://mangabaka.org/) | Not required |
-| <img src="assets/images/icon_mangadex_color.png" width="28" alt="MangaDex"> | Manga | [MangaDex](https://mangadex.org/) | Not required |
-| <img src="assets/images/icon_kitsu_color.png" width="28" alt="Kitsu"> | Anime & Manga | [Kitsu](https://kitsu.io/) | Not required |
-| <img src="assets/images/open_library_color.png" width="28" alt="OpenLibrary"> | Books | [OpenLibrary](https://openlibrary.org/) | Not required |
-| <img src="assets/images/icon_fantlab_color.png" width="28" alt="Fantlab"> | Books | [Fantlab](https://fantlab.ru/) | Not required |
-| <img src="assets/images/icon_google_book_color.png" width="28" alt="Google Books"> | Books | [Google Books](https://books.google.com/) | Optional (free key) |
-| <img src="assets/images/icon_hardcover_color.png" width="28" alt="Hardcover"> | Books | [Hardcover](https://hardcover.app/) | Required (free token) |
-| <img src="assets/images/comic_vine_color.png" width="28" alt="ComicVine"> | Comics | [ComicVine](https://comicvine.gamespot.com/) | Required (free key) |
-| <img src="assets/images/music_brainz_color.png" width="28" alt="MusicBrainz"> | Music | [MusicBrainz](https://musicbrainz.org/) | Not required |
-| <img src="assets/images/podcastindex_color.png" width="28" alt="Podcast Index"> | Podcasts | [Podcast Index](https://podcastindex.org/) | Built-in |
-| <img src="assets/images/icon_steamgriddb_color.png" width="28" alt="SteamGridDB"> | Artwork | [SteamGridDB](https://www.steamgriddb.com/) | Built-in |
-| <img src="assets/images/icon_scrapper_color.png" width="28" alt="ScreenScraper"> | Retro media gallery | [ScreenScraper](https://www.screenscraper.fr/) | Required (user account) |
-| <img src="assets/images/ra_logo.png" width="28" alt="RetroAchievements"> | Achievements | [RetroAchievements](https://retroachievements.org/) | Required |
-
-> [API Keys Setup](https://github.com/hacan359/tonkatsu_box/wiki/API-Keys-Setup)
-
-## Platform Support
-
-| Feature | Windows | Linux | macOS | Android |
-|---------|:-------:|:-----:|:-----:|:-------:|
-| Collections & search | ✅ | ✅ | ✅ | ✅ |
-| Progress & episode tracker | ✅ | ✅ | ✅ | ✅ |
-| Statistics & personalization | ✅ | ✅ | ✅ | ✅ |
-| Visual boards | ✅ | ✅ | ✅ | ✅ |
-| Tier lists & mood grids | ✅ | ✅ | ✅ | ✅ |
-| Imports (Simkl / Steam / Trakt / RA / …) | ✅ | ✅ | ✅ | ✅ |
-| Device-to-device sync & backups | ✅ | ✅ | ✅ | ✅ |
-| Kodi sync | ✅ | ✅ | ✅ | ✅ |
-| VGMaps browser | ✅ | — | — | — |
-| Gamepad | ✅ | ✅ | ✅ | ✅ |
-| Discord Rich Presence | ✅ | ✅ | ✅ | — |
-
-## Self-Hosting (Web)
-
-Run Tonkatsu Box as a web app on your own machine or home server. One Docker
-container serves the app in the browser and keeps the database on the server,
-so every device on your network works with the same library.
-
-### Requirements
-
-- Docker with Docker Compose
-
-### Install and run
+提交前必须全绿：
 
 ```bash
-git clone https://github.com/hacan359/tonkatsu_box.git
-cd tonkatsu_box
-docker compose up -d --build
+flutter analyze --fatal-infos --fatal-warnings
+flutter test
+dart test --directory packages/core
+dart test --directory server
 ```
 
-The first build takes several minutes (it compiles the web app inside Docker —
-no Flutter needed on your machine). Then open:
+若改动了 DAO 或其返回的模型，还须重新生成 RPC 桩并提交生成物：
 
+```bash
+cd packages/core && dart run tool/generate_rpc.dart
 ```
-http://<server-ip>:8080
-```
 
-### Configuration (optional)
+## 项目文档
 
-Copy `.env.example` to `.env` next to `docker-compose.yml` and uncomment what
-you need. Without a `.env` everything uses defaults.
-
-| Variable | Default | What it does |
-|----------|---------|--------------|
-| `TONKATSU_DATA_PATH` | `./data` | Host folder with all server data |
-| `TONKATSU_PORT` | `8080` | Port the web UI answers on |
-| `PUID` / `PGID` | `1000` / `1000` | Owner of the files in the data folder |
-| `TONKATSU_KEY_*` | — | API keys (e.g. `TONKATSU_KEY_TMDB`) |
-
-API keys can also be entered in the app itself (**Settings → API Keys**) —
-they are stored on the server in `data/keys.json`. Keys set via `.env`
-override `keys.json`.
-
-### Files
-
-| Path | What |
+| 文档 | 内容 |
 |------|------|
-| `.env` | Your local configuration (not committed) |
-| `data/tonkatsu_box.db` | The database |
-| `data/keys.json` | API keys entered in the app |
-| `data/images/` | Cover cache |
-| `data/snapshots/` | Automatic DB snapshots taken before migrations |
+| [`PROJECT.md`](PROJECT.md) | 项目全景：定位、目标、架构地图、里程碑、关键决策 |
+| [`TASK.md`](TASK.md) | 任务清单：已完成、进行中、待办与各自的验收口径 |
+| [`RULES.md`](RULES.md) | 规约总纲与已知坑点登记册 —— **动手前先读这份** |
+| [`CHANGELOG.md`](CHANGELOG.md) | 版本历史（本分支条目以 `[cn]` 标记） |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | 架构分层与模块职责 |
+| [`docs/CODESTYLE.md`](docs/CODESTYLE.md) | 编码规范细目 |
+| [`docs/COMMITS.md`](docs/COMMITS.md) | 提交信息与分支命名约定 |
+| [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) | 开发环境与贡献流程 |
+| [`docs/GAMEPAD.md`](docs/GAMEPAD.md) | 手柄导航实现细节 |
+| [`docs/RCOLL_FORMAT.md`](docs/RCOLL_FORMAT.md) | `.xcoll` / `.xcollx` 导出格式规范 |
+| [`server/README.md`](server/README.md) | 自托管服务端 |
+| [`server/PROTOCOL.md`](server/PROTOCOL.md) | `/rpc` 与 `/proxy` 线上契约 |
 
-### Backup
+## 上游致谢
 
-Copy the `data/` folder while the container is stopped — that is the whole
-backup. There is also **Settings → Backup** in the web UI, which downloads a
-portable archive to whatever device you are browsing from.
+本分支的全部功能来自 [`hacan359/tonkatsu_box`](https://github.com/hacan359/tonkatsu_box)，在此致谢原作者与上游贡献者。上游仓库同时提供[使用文档 Wiki](https://github.com/hacan359/tonkatsu_box/wiki)（英文）与[现成收藏库](https://github.com/hacan359/tonkatsu-collections)（25 000+ 游戏，23 个平台）。
 
-### Update
+目录服务：IGDB · TMDB · TVmaze · TheTVDB · VNDB · AniList · **Bangumi** · MangaBaka · MangaDex · Kitsu · OpenLibrary · Fantlab · Google Books · Hardcover · ComicVine · MusicBrainz · Podcast Index
 
-```bash
-git pull
-docker compose up -d --build
-```
-
-Pending database migrations run on start; a snapshot of the old database is
-saved to `data/snapshots/` first.
-
-### HTTPS and a custom domain (optional)
-
-Caddy in front gives `https://tonkatsu.box`, HTTP/2 and PWA install support:
-
-```bash
-# .env: TONKATSU_DOMAIN=tonkatsu.box (default), keep TONKATSU_PORT at 8080
-docker compose -f docker-compose.yml -f docker-compose.caddy.yml up -d
-```
-
-1. Point the domain at the server: an entry in the router's DNS, or in
-   `hosts` (`<server-ip> tonkatsu.box`) on each device.
-2. Trust Caddy's local root certificate once per device — the file is
-   `data/caddy/caddy/pki/authorities/local/root.crt` (on Windows:
-   double-click → Install Certificate → Trusted Root Certification
-   Authorities).
-
-Plain HTTP keeps working without any of this — Caddy is an add-on, not a
-requirement.
-
-### Notes
-
-- The web build has no accounts or passwords — expose it to your LAN only.
-- Desktop-only features (VGMaps, Discord Rich Presence, Kodi, gamepad, LAN
-  sync) are hidden in the browser.
-
-## Documentation
-
-- [**Wiki**](https://github.com/hacan359/tonkatsu_box/wiki) — user guides & FAQ
-- [**Changelog**](CHANGELOG.md) — version history
-
-## Building from Source
-
-```bash
-git clone https://github.com/hacan359/tonkatsu_box.git
-cd tonkatsu_box
-flutter pub get
-flutter run -d windows  # or linux / macos / android
-```
-
-Requires Flutter 3.38+ / Dart 3.10+. See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for details.
-
-## Community
-
-- [Discord](https://discord.gg/JZVNPF7cS2) — chat & support
-- [Issues](https://github.com/hacan359/tonkatsu_box/issues) — bug reports
-
-## Contributing
-
-Contributions welcome! See [CONTRIBUTING.md](docs/CONTRIBUTING.md) for build instructions, code style, and PR guidelines.
-
-## Credits
-
-Catalogs: [IGDB](https://www.igdb.com/) · [TMDB](https://www.themoviedb.org/) · [TVmaze](https://www.tvmaze.com/) · [VNDB](https://vndb.org/) · [AniList](https://anilist.co/) · [MangaBaka](https://mangabaka.org/) · [MangaDex](https://mangadex.org/) · [Kitsu](https://kitsu.io/) · [OpenLibrary](https://openlibrary.org/) · [Fantlab](https://fantlab.ru/) · [Google Books](https://books.google.com/) · [Hardcover](https://hardcover.app/) · [ComicVine](https://comicvine.gamespot.com/) · [MusicBrainz](https://musicbrainz.org/) · [Cover Art Archive](https://coverartarchive.org/) · [ListenBrainz](https://listenbrainz.org/) · [Podcast Index](https://podcastindex.org/)
-
-Imports and extras: [Simkl](https://simkl.com/) · [Trakt.tv](https://trakt.tv/) · [Steam](https://store.steampowered.com/) · [Kinorium](https://kinorium.com/) · [MyAnimeList](https://myanimelist.net/) · [RetroAchievements](https://retroachievements.org/) · [SteamGridDB](https://www.steamgriddb.com/) · [ScreenScraper](https://www.screenscraper.fr/) · [Kodi](https://kodi.tv/)
+导入与扩展：Simkl · Trakt.tv · Steam · Kinorium · MyAnimeList · RetroAchievements · SteamGridDB · ScreenScraper · Kodi
 
 *This product uses the TMDB API but is not endorsed or certified by TMDB.*
 
-## License
+## 许可
 
-[MIT](LICENSE)
+[MIT](LICENSE) —— 与上游一致。衍生分发时请保留上游版权声明。

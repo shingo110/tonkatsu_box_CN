@@ -11,8 +11,8 @@ description: Code optimization for performance, memory, and readability. Use to 
 
 #### Flutter DevTools:
 ```bash
-# Flutter SDK lives on Windows — run via powershell.exe from WSL:
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter run -d windows --profile"
+# Flutter SDK lives on Windows — run from the repo root:
+flutter run -d windows --profile
 # Open DevTools and analyze:
 # - CPU Profiler
 # - Memory
@@ -189,11 +189,11 @@ void onSearchChanged(String query) {
 
 After optimization:
 ```bash
-# Verify nothing is broken (Flutter SDK is on Windows only):
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter analyze --fatal-infos --fatal-warnings"
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter test"
+# Verify nothing is broken:
+flutter analyze --fatal-infos --fatal-warnings
+flutter test
 
 # Check performance:
-powershell.exe -Command "cd '$(wslpath -w "$PWD")'; flutter run -d windows --profile"
+flutter run -d windows --profile
 # Use Performance overlay (P in console)
 ```
