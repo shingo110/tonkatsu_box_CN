@@ -317,6 +317,45 @@ D11 留下一条"未做"：豆瓣密钥**无官方申请入口**（Frodo 已停�
 
 **四关**：analyze 干净 · **5703 应用**（+1）/ **2380 core** / **110 server**（+2）· RPC 字节一致。
 
+### D13 · 报错链路补全与「境外源」可达性认定（2026-09-21，起源：少爷真机反馈）
+
+少爷真机搜「哈利波特」：**豆瓣出结果了**（D12 内置密钥生效），但 **NeoDB 报
+`NeoDBApiException: Connection timeout (status:null)`**。查下来是**两件事叠在一起** —— 一件是环境，
+一件是真 bug。
+
+**真因一（环境，非 bug）：手机那条网络到 `neodb.social` 不通。** `neodb.social` 在 **Cloudflare**
+上（`104.21.37.245` / `172.67.216.112`），少爷手机无代理 ⇒ 连接超时；同一次搜索里 **TMDB（同样境外）
+也超时**，而**豆瓣（`frodo.douban.com`，解析到 `120.53.130.158` 等腾讯云 IP）正常** —— 一致的
+「**境外全不通、境内通**」规律。反证：本机侧测什么都通（NeoDB 5 个实例全 200、0.84s），是因为
+**这台电脑跑着 TUN 模式代理** —— 宿主机 TCP 到境外站只要 **1–28ms**（`ProxyServer=127.0.0.1:7897`，
+Clash 默认口），这种延迟不可能是直连。**故本机测试不能作为「手机也能通」的依据。**
+
+**真因二（真 bug，已修）：`extractApiError` 漏了 9 个异常类。** 它的 switch 是**手写枚举**，
+而 `lib/core/api` 下有 27 个 `implements Exception` 的类，**9 个不在表里** ⇒ 全部落到兜底
+`e.toString()`。这 9 个是：本次新增的 **NeoDB / Bangumi / WeRead**，以及**上游本就漏的**
+Kitsu / MangaDex / MusicBrainz / Podcast Index / TheTVDB / TVMaze。少爷看到的
+`NeoDBApiException: Connection timeout (status:null)` 就是这么来的 —— 内部类名与内部字段直接糊到
+用户脸上，同时 `detail` 被丢（Tooltip 原本该有的 URL / Type / Cause 全空）。
+
+- `lib/core/api/api_error_extract.dart` —— 补 9 个分支 + 9 个 facade import。
+- `test/core/api/api_error_extract_test.dart` —— 用例表补 9 条；**并新增源码扫描护栏**：遍历
+  `lib/core/api` 下所有 `implements Exception` 的类，缺一即红。已用「**临时抽掉 NeoDB 分支**」**证伪**
+  过（两条测试确实炸），不是摆设。
+
+**认定（重要，务必记住）**：本项目的源要分清「境内」与「境外中文站」两种 ——
+
+| 源 | 主机 | 托管 | 无代理时 |
+|---|---|---|---|
+| 豆瓣 | `frodo.douban.com` | 腾讯云（境内 IP） | ✅ 可直连 |
+| 微信读书 | `weread.qq.com` | 腾讯（境内） | ✅ 可直连 |
+| Bangumi | `api.bgm.tv` | Cloudflare（境外） | ❌ 不稳 / 不通 |
+| NeoDB | `neodb.social` | Cloudflare（境外） | ❌ 不稳 / 不通 |
+
+即：**「接入国内数据源」≠「全部免代理可用」**。豆瓣与微信读书是**境内服务**，装完即用；Bangumi 与
+NeoDB 是**境外托管的中文站**，**需要国际网络**。后续给人介绍本 fork 时不要含糊。
+
+**四关**：analyze 干净 · **5707 应用**（+1 护栏）/ 2380 core / 110 server · RPC 字节一致。
+
 ## 📋 候选（下一步从这里挑）
 
 > 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > Bangumi 漫画 ✅ > 优酷/爱奇艺**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
@@ -391,6 +430,20 @@ D11 留下一条"未做"：豆瓣密钥**无官方申请入口**（Frodo 已停�
 
 ---
 
+### T6 · 原生端网络代理设置（待少爷定夺）
+
+D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可达** —— 而这是物理事实，代码改不动。
+但可以让 App 自己会走代理。
+
+- **做法**：设置页加一项「网络代理」（`http://host:port`，留空＝直连），在 `createApiDio`
+  （`lib/core/api/api_dio.dart`，全仓唯一 HTTP 出口）里给 native 的 `IOHttpClientAdapter` 装
+  `findProxy`。一次投入可救**全部**境外源（NeoDB / Bangumi / AniList / TMDB / TheTVDB / TVmaze …）。
+- **零代码替代（优先建议先试）**：手机端开 **TUN 模式**代理（Clash 等）即可让所有 App 流量走代理 ——
+  Android 上 Flutter 的 `HttpClient` **不读系统「Wi-Fi 代理」设置**（那套只给 WebView / OkHttp 用），
+  所以必须是 TUN/VPN 形态，填普通 HTTP 代理无效。
+- **待定**：是否需要「只让境外 host 走代理」的白名单开关（国内源绕开代理更快）。少爷风格是「越简单
+  越好」，所以先做**全局开关**即可。
+
 ## 🔧 阻塞与长期债
 
 | # | 事项 | 现状 | 影响 |
@@ -412,3 +465,4 @@ D11 留下一条"未做"：豆瓣密钥**无官方申请入口**（Frodo 已停�
 8. `lib/core/api/episode_source/tv_episode_source.dart` —— **影视源必须给 `tvEpisodeSourceResolverProvider` 加一支**（它是 `_ => tmdb` 兜底）。漏了不报任何错，但 `TvShowCacheWarmer` 与 `_refreshedTvShow` 会拿新源的 id 去 TMDB 查，**可能把不相干的剧写进缓存**。
 9. **影视的 `CollectionItem.nativeId` 恒为 null**（该 getter 只对 book / audio 生效）—— 刷新与 `.xcoll` 导入一律用 `externalId`。
 10. `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导的**输入框数**与**"获取密钥"链接数**，**按 `kDataSourceCatalog` 派生**（需密钥源数，双字段源另加）。加**需密钥**源必炸；反过来，某源若漏在向导 `_KeyEditor` 的 switch 里，这条也会炸 —— D9 时代它硬编码数字，所以漏了豆瓣照样绿（D11 根治）。双字段源集合现为 **igdb / podcastIndex** 两个（豆瓣 D12 退出）。
+11. `test/core/api/api_error_extract_test.dart` —— **遍历 `lib/core/api` 下所有 `implements Exception` 的类，缺一即炸**。加源的 `XxxApiException` 必须同时进 `extractApiError`（`lib/core/api/api_error_extract.dart`）的 switch，否则搜索错误条会显示类名与 `(status: null)`、且 `detail` 丢失。D13 补 9 个：本次新增的 NeoDB / Bangumi / WeRead ＋ 上游本就漏的 Kitsu / MangaDex / MusicBrainz / Podcast Index / TheTVDB / TVMaze。

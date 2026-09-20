@@ -26,7 +26,7 @@
 | R7 | **改动 DAO 或模型**：必须 `cd packages/core && dart run tool/generate_rpc.dart` 并提交生成物 | `generated_up_to_date_test` 必挂 |
 | R8 | **引用路径必须已被 git 跟踪**：写进提交文件前用 `git ls-files <path>` 核验 | 幽灵链接，克隆后即死 |
 
-## 三、加数据源 SOP（七步 + 两处连带 + 七处护栏）
+## 三、加数据源 SOP（八步 + 三处连带 + 八处护栏）
 
 新增一个数据源 = 增量七步，顺序可参考：
 
@@ -43,10 +43,14 @@
 
 **Web 端另加**：`packages/core/lib/api/proxy_targets.dart` 一行；带密钥的还在 `server/lib/src/proxy_handler.dart` 的 `ApiProxy._authorize` 加分支。
 
-**两个「漏了必串源」连带点**：
+**三个「漏了不报错、只静默降级」连带点**：
 
 - `lib/features/collections/helpers/collection_actions.dart` —— 该媒体类型刷新 switch，新源 id 必须发对的查询目标（例子：Bangumi id 发去 AniList 查）
 - 相似推荐等按源支配的穷尽 switch —— 不是我们源可用的端点，返回空即可
+- `lib/core/api/api_error_extract.dart` —— 新源的 `XxxApiException` 必须在 `extractApiError` 的
+  switch 里占一支。**这张表是手写枚举，漏了不报编译错**，后果是搜索错误条直接显示
+  `XxxApiException: … (status: null)`（内部类名 + 内部字段）而不是一句人话，且 `detail` 一并丢失、
+  Tooltip 空白。D13 一次补齐 9 个（新源 NeoDB / Bangumi / WeRead + 上游本就漏的 6 个）。
 
 **五个「加了必炸」护栏**：
 
@@ -56,6 +60,8 @@
 - `test/features/search/sources/source_output_media_type_test.dart` —— 输出媒体类型断言
 - `test/shared/constants/source_catalog_test.dart` —— "哪些源要密钥"的集合写死（**加需密钥源必炸**）
 - `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导输入框数与"获取密钥"链接数，按目录派生（**加需密钥源必炸**；漏源同样炸）
+- `test/core/api/api_error_extract_test.dart` —— **遍历 `lib/core/api` 下所有 `implements Exception`
+  的类，缺一即炸**（D13 加）。此前只有手写的用例表，所以 NeoDB / Bangumi 漏了照样绿。
 - RPC 一致性（见 R7，无幸免）
 
 ## 四、Windows 环境坑（全部伪装成"项目坏了"）

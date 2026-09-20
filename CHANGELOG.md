@@ -12,6 +12,21 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — the search strip shows a message, not a class name
+
+`extractApiError` unwraps typed API exceptions by hand, and nine classes under
+`lib/core/api` were never listed: NeoDB, Bangumi and WeRead (added by this fork)
+plus Kitsu, MangaDex, MusicBrainz, Podcast Index, TheTVDB and TVMaze (missing
+upstream). Each fell through to `toString()`, so the strip rendered
+`NeoDBApiException: Connection timeout (status: null)` and dropped the copyable
+detail block — the tooltip had nothing to show either.
+
+- `extractApiError` (`lib/core/api/api_error_extract.dart`) gains the nine cases
+  and their facade imports.
+- `test/core/api/api_error_extract_test.dart` extends its case list, but no longer
+  relies on it: a second test walks `lib/core/api` for every class that implements
+  `Exception` and fails when one is absent from the extractor.
+
 ## [cn] Changed — Douban needs no key screen
 
 Frodo stopped issuing API keys, so the Douban fields asked for something no user
