@@ -189,11 +189,11 @@
 | B1 | Windows 桌面运行 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 → `flutter run -d windows` 不可用 | 无法桌面预览；写码/分析/测试不受影响 |
 | B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` 与 `neodb.social`，均未做真实自托管 + 浏览器链路验证 | 发布 Web 前必须补 |
 | B3 | 上游同步 | fork 基线 0.44.0；上游以周为节奏发版 | 每次同步人造裁决冲突清单见 PROJECT.md §3 |
-| B4 | 中文数据源覆盖 | 动画 ✅；图书 ✅；电影/剧集候选排期中；漫画未定 | 尽快先取 T2（NeoDB 影视）缩小空白 |
+| B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书）；电影 / 剧集 ✅（NeoDB）；漫画未定 | 漫画线（T5）已知候选全灭，待找免密钥可直连的库 |
 
 ## 护栏速查（改代码前看一眼，防炸）
 
-1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 21），加枚举即炸。。
+1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 22），加枚举即炸。
 2. `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码，加源即炸。
 3. `test/features/search/sources/search_sources_test.dart` —— 注册表 id 顺序表，加源须补序。
 4. RPC：改 DAO/模型 → `dart run tool/generate_rpc.dart` → 提交生成物，否则 `dart test` 必挂，无幸免。
