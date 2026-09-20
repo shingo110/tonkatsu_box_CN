@@ -95,6 +95,13 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
     url: 'https://weread.qq.com/',
   ),
   SourceInfo(
+    source: DataSource.douban,
+    mediaTypes: <MediaType>[MediaType.book],
+    url: 'https://book.douban.com/',
+    // Every request is signed, so a key and secret pair is not optional.
+    keyRequirement: SourceKeyRequirement.mandatory,
+  ),
+  SourceInfo(
     source: DataSource.openLibrary,
     mediaTypes: <MediaType>[MediaType.book],
     url: 'https://openlibrary.org/',

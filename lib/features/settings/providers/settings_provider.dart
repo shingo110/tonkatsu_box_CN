@@ -10,6 +10,7 @@ import '../../../shared/theme/app_theme_id.dart';
 import '../../../shared/constants/rich_hero_style.dart';
 import '../../../core/services/discord_rpc_service.dart';
 import '../../../core/api/comicvine_api.dart';
+import '../../../core/api/douban_api.dart';
 import '../../../core/api/google_books_api.dart';
 import '../../../core/api/hardcover_api.dart';
 import '../../../core/api/igdb_api.dart';
@@ -42,6 +43,9 @@ abstract class SettingsKeys {
   static const String podcastIndexApiKey = 'podcastindex_api_key';
 
   static const String podcastIndexApiSecret = 'podcastindex_api_secret';
+
+  static const String doubanApiKey = 'douban_api_key';
+  static const String doubanApiSecret = 'douban_api_secret';
 
   static const String googleBooksApiKey = 'google_books_api_key';
 
@@ -184,6 +188,8 @@ class SettingsState {
     this.hardcoverApiKey,
     this.podcastIndexApiKey,
     this.podcastIndexApiSecret,
+    this.doubanApiKey,
+    this.doubanApiSecret,
     this.screenScraperSsid,
     this.screenScraperSspassword,
     this.screenScraperDevId,
@@ -240,6 +246,10 @@ class SettingsState {
   final String? podcastIndexApiKey;
 
   final String? podcastIndexApiSecret;
+
+  final String? doubanApiKey;
+
+  final String? doubanApiSecret;
 
   final String? screenScraperSsid;
 
@@ -353,6 +363,13 @@ class SettingsState {
   bool get hasHardcoverKey =>
       hardcoverApiKey != null && hardcoverApiKey!.isNotEmpty;
 
+  /// Douban signs every request, so it needs both halves of the pair.
+  bool get hasDoubanKeys =>
+      doubanApiKey != null &&
+      doubanApiKey!.isNotEmpty &&
+      doubanApiSecret != null &&
+      doubanApiSecret!.isNotEmpty;
+
   bool get hasSteamGridDbKey =>
       steamGridDbApiKey != null && steamGridDbApiKey!.isNotEmpty;
 
@@ -409,6 +426,8 @@ class SettingsState {
     String? hardcoverApiKey,
     String? podcastIndexApiKey,
     String? podcastIndexApiSecret,
+    String? doubanApiKey,
+    String? doubanApiSecret,
     String? screenScraperSsid,
     String? screenScraperSspassword,
     String? screenScraperDevId,
@@ -447,6 +466,8 @@ class SettingsState {
       podcastIndexApiKey: podcastIndexApiKey ?? this.podcastIndexApiKey,
       podcastIndexApiSecret:
           podcastIndexApiSecret ?? this.podcastIndexApiSecret,
+      doubanApiKey: doubanApiKey ?? this.doubanApiKey,
+      doubanApiSecret: doubanApiSecret ?? this.doubanApiSecret,
       googleBooksApiKey: googleBooksApiKey ?? this.googleBooksApiKey,
       hardcoverApiKey: hardcoverApiKey ?? this.hardcoverApiKey,
       screenScraperSsid: screenScraperSsid ?? this.screenScraperSsid,
@@ -516,6 +537,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
   late TvdbApi _tvdbApi;
   late ComicVineApi _comicVineApi;
   late PodcastIndexApi _podcastIndexApi;
+  late DoubanApi _doubanApi;
   late GoogleBooksApi _googleBooksApi;
   late HardcoverApi _hardcoverApi;
   late ScreenScraperApi _screenScraperApi;
@@ -545,6 +567,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
     _tvdbApi = ref.watch(tvdbApiProvider);
     _comicVineApi = ref.watch(comicVineApiProvider);
     _podcastIndexApi = ref.watch(podcastIndexApiProvider);
+    _doubanApi = ref.watch(doubanApiProvider);
     _googleBooksApi = ref.watch(googleBooksApiProvider);
     _hardcoverApi = ref.watch(hardcoverApiProvider);
     _screenScraperApi = ref.watch(screenScraperApiProvider);
@@ -616,6 +639,10 @@ class SettingsNotifier extends Notifier<SettingsState> {
     // Hardcover: personal token from prefs only, no built-in.
     final String? hardcoverApiKey =
         _prefs.getString(SettingsKeys.hardcoverApiKey);
+    // Douban: the user's key and secret from prefs only, no built-in.
+    final String? doubanApiKey = _prefs.getString(SettingsKeys.doubanApiKey);
+    final String? doubanApiSecret =
+        _prefs.getString(SettingsKeys.doubanApiSecret);
     final String? screenScraperSsid =
         _prefs.getString(SettingsKeys.screenScraperSsid);
     final String? screenScraperSspassword =
@@ -686,6 +713,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
       comicVineApiKey: comicVineApiKey,
       podcastIndexApiKey: podcastIndexApiKey,
       podcastIndexApiSecret: podcastIndexApiSecret,
+      doubanApiKey: doubanApiKey,
+      doubanApiSecret: doubanApiSecret,
       googleBooksApiKey: googleBooksApiKey,
       hardcoverApiKey: hardcoverApiKey,
       screenScraperSsid: screenScraperSsid,
@@ -778,6 +807,9 @@ class SettingsNotifier extends Notifier<SettingsState> {
         state.podcastIndexApiKey!,
         state.podcastIndexApiSecret!,
       );
+    }
+    if (state.hasDoubanKeys) {
+      _doubanApi.setCredentials(state.doubanApiKey!, state.doubanApiSecret!);
     }
     if (state.googleBooksApiKey != null &&
         state.googleBooksApiKey!.isNotEmpty) {
@@ -989,6 +1021,20 @@ class SettingsNotifier extends Notifier<SettingsState> {
       podcastIndexApiKey: apiKey,
       podcastIndexApiSecret: apiSecret,
     );
+  }
+
+  /// Douban signs every request, so a lone half is worth nothing and the
+  /// pair is saved together.
+  Future<void> setDoubanKeys(String apiKey, String apiSecret) async {
+    await _writeCredential(SettingsKeys.doubanApiKey, apiKey);
+    await _writeCredential(SettingsKeys.doubanApiSecret, apiSecret);
+    if (apiKey.isNotEmpty && apiSecret.isNotEmpty) {
+      _doubanApi.setCredentials(apiKey, apiSecret);
+    } else {
+      _doubanApi.clearCredentials();
+    }
+
+    state = state.copyWith(doubanApiKey: apiKey, doubanApiSecret: apiSecret);
   }
 
   Future<void> setGoogleBooksApiKey(String apiKey) async {
@@ -1224,6 +1270,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
     return _podcastIndexApi.validateCredentials();
   }
 
+  Future<bool> validateDoubanKeys() => _doubanApi.validateCredentials();
+
   Future<bool> validateGoogleBooksKey() async {
     if (!state.hasGoogleBooksKey) return false;
     return _googleBooksApi.validateApiKey(state.googleBooksApiKey!);
@@ -1276,6 +1324,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
     await _writeCredential(SettingsKeys.hardcoverApiKey, '');
     await _writeCredential(SettingsKeys.podcastIndexApiKey, '');
     await _writeCredential(SettingsKeys.podcastIndexApiSecret, '');
+    await _writeCredential(SettingsKeys.doubanApiKey, '');
+    await _writeCredential(SettingsKeys.doubanApiSecret, '');
     await _writeCredential(SettingsKeys.screenScraperSsid, '');
     await _writeCredential(SettingsKeys.screenScraperSspassword, '');
     await _writeCredential(SettingsKeys.screenScraperDevId, '');
@@ -1306,6 +1356,7 @@ class SettingsNotifier extends Notifier<SettingsState> {
     _googleBooksApi.clearApiKey();
     _hardcoverApi.clearApiKey();
     _podcastIndexApi.clearCredentials();
+    _doubanApi.clearCredentials();
 
     state = const SettingsState();
   }

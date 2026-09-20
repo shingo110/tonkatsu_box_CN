@@ -42,6 +42,7 @@ import '../api/anilist_api.dart';
 import '../api/comicvine_api.dart';
 import '../api/fantlab_api.dart';
 import '../api/google_books_api.dart';
+import '../api/douban_api.dart';
 import '../api/hardcover_api.dart';
 import '../api/igdb_api.dart';
 import '../api/kitsu_api.dart';
@@ -83,6 +84,7 @@ final Provider<ImportService> importServiceProvider =
     hardcoverApi: ref.watch(hardcoverApiProvider),
     fantlabApi: ref.watch(fantlabApiProvider),
     neodbApi: ref.watch(neodbApiProvider),
+    doubanApi: ref.watch(doubanApiProvider),
     musicBrainzApi: ref.watch(musicBrainzApiProvider),
     podcastIndexApi: ref.watch(podcastIndexApiProvider),
     database: ref.watch(databaseServiceProvider),
@@ -154,6 +156,7 @@ class ImportService {
     HardcoverApi? hardcoverApi,
     FantlabApi? fantlabApi,
     NeoDBApi? neodbApi,
+    DoubanApi? doubanApi,
     MusicBrainzApi? musicBrainzApi,
     PodcastIndexApi? podcastIndexApi,
     CanvasRepository? canvasRepository,
@@ -177,6 +180,7 @@ class ImportService {
         _hardcoverApi = hardcoverApi,
         _fantlabApi = fantlabApi,
         _neodbApi = neodbApi,
+        _doubanApi = doubanApi,
         _musicBrainzApi = musicBrainzApi,
         _podcastIndexApi = podcastIndexApi,
         _database = database,
@@ -201,6 +205,7 @@ class ImportService {
   final HardcoverApi? _hardcoverApi;
   final FantlabApi? _fantlabApi;
   final NeoDBApi? _neodbApi;
+  final DoubanApi? _doubanApi;
   final MusicBrainzApi? _musicBrainzApi;
   final PodcastIndexApi? _podcastIndexApi;
   final DatabaseService _database;
@@ -1332,6 +1337,8 @@ class ImportService {
           // WeRead has no by-id endpoint, and the export carries no title
           // to search with, so these books resolve from embedded data only.
           return null;
+        case DataSource.douban:
+          return await _doubanApi?.getBook(nativeId);
         default:
           return null;
       }

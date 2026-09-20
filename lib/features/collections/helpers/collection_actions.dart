@@ -23,6 +23,7 @@ import '../../../core/api/bangumi_api.dart';
 import '../../../core/api/episode_source/tv_episode_source.dart';
 import '../../../core/api/comicvine_api.dart';
 import '../../../core/api/google_books_api.dart';
+import '../../../core/api/douban_api.dart';
 import '../../../core/api/hardcover_api.dart';
 import '../../../core/api/fantlab_api.dart';
 import '../../../core/api/neodb_api.dart';
@@ -758,6 +759,11 @@ class CollectionActions {
                   title: cached.title,
                   nativeId: cached.nativeId,
                 );
+            if (full == null) return _RefreshOutcome.notFound();
+            await db.bookDao.upsertBook(full);
+          } else if (item.source == DataSource.douban) {
+            final Book? full =
+                await ref.read(doubanApiProvider).getBook(cached.nativeId);
             if (full == null) return _RefreshOutcome.notFound();
             await db.bookDao.upsertBook(full);
           } else {

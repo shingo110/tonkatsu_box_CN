@@ -25,6 +25,8 @@ const Map<String, String> kConfigKeyToCredential = <String, String>{
   'simkl_client_id': CredentialNames.simklClientId,
   'podcastindex_api_key': CredentialNames.podcastIndexKey,
   'podcastindex_api_secret': CredentialNames.podcastIndexSecret,
+  'douban_api_key': CredentialNames.doubanKey,
+  'douban_api_secret': CredentialNames.doubanSecret,
   'screenscraper_ssid': CredentialNames.ssSsid,
   'screenscraper_sspassword': CredentialNames.ssSspassword,
   'screenscraper_dev_id': CredentialNames.ssDevId,

@@ -42,6 +42,7 @@ void main() {
         'neodb_movie',
         'neodb_tv',
         'neodb',
+        'douban',
         'weread',
         'openlibrary',
         'fantlab',

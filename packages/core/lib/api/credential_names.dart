@@ -14,6 +14,8 @@ abstract final class CredentialNames {
   static const String simklClientId = 'simkl_client_id';
   static const String podcastIndexKey = 'podcastindex_key';
   static const String podcastIndexSecret = 'podcastindex_secret';
+  static const String doubanKey = 'douban_key';
+  static const String doubanSecret = 'douban_secret';
 
   // ScreenScraper needs four: the dev pair comes from the operator's env or
   // keys.json, the user pair from the settings screen.
@@ -36,6 +38,8 @@ abstract final class CredentialNames {
     simklClientId,
     podcastIndexKey,
     podcastIndexSecret,
+    doubanKey,
+    doubanSecret,
     ssDevId,
     ssDevPassword,
     ssSsid,

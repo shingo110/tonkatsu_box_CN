@@ -21,6 +21,8 @@ class ApiKeys {
     this.hardcoverApiKey,
     this.podcastIndexApiKey,
     this.podcastIndexApiSecret,
+    this.doubanApiKey,
+    this.doubanApiSecret,
   });
 
   /// Key precedence: user key → built-in (ApiDefaults) → null.
@@ -74,6 +76,11 @@ class ApiKeys {
     // Hardcover: personal token from prefs only, no built-in.
     final String? hardcoverApiKey =
         prefs.getString(SettingsKeys.hardcoverApiKey);
+
+    // Douban: the user's key and secret from prefs only, no built-in.
+    final String? doubanApiKey = prefs.getString(SettingsKeys.doubanApiKey);
+    final String? doubanApiSecret =
+        prefs.getString(SettingsKeys.doubanApiSecret);
 
     // Podcast Index: user pair → built-in (CI secrets) → null. Key and secret
     // resolve together — mixing a user key with the built-in secret can't work.
@@ -129,6 +136,13 @@ class ApiKeys {
           (podcastIndexApiSecret != null && podcastIndexApiSecret.isNotEmpty)
               ? podcastIndexApiSecret
               : null,
+      doubanApiKey: (doubanApiKey != null && doubanApiKey.isNotEmpty)
+          ? doubanApiKey
+          : null,
+      doubanApiSecret:
+          (doubanApiSecret != null && doubanApiSecret.isNotEmpty)
+              ? doubanApiSecret
+              : null,
     );
   }
 
@@ -157,6 +171,10 @@ class ApiKeys {
   final String? podcastIndexApiKey;
 
   final String? podcastIndexApiSecret;
+
+  final String? doubanApiKey;
+
+  final String? doubanApiSecret;
 }
 
 /// Overridden in main() via `apiKeysProvider.overrideWithValue(...)`.

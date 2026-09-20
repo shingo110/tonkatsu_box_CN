@@ -484,6 +484,63 @@ class Book {
     );
   }
 
+
+  /// Douban record — the by-id and by-ISBN responses are the record itself,
+  /// while a search row wraps it in `target` and flattens author / year /
+  /// publisher into `card_subtitle`. [isbn] carries the ISBN a lookup used,
+  /// which the response never echoes back.
+  factory Book.fromDoubanItem(
+    Map<String, dynamic> json, {
+    String? isbn,
+  }) {
+    // Search rows nest the record under `target`; the detail rows do not.
+    final Object? wrapper = json['target'];
+    final Map<String, dynamic> row =
+        wrapper is Map<String, dynamic> ? wrapper : json;
+    final String subjectId = _trimmed(row['id']).isNotEmpty
+        ? _trimmed(row['id'])
+        : _trimmed(json['target_id']);
+    if (subjectId.isEmpty) {
+      throw const FormatException('Douban row without a subject id');
+    }
+
+    final List<String> subtitleParts = _doubanSubtitleParts(row);
+    final List<String> authors = _stringList(row['author']);
+    final List<String> publishers = _stringList(row['press']);
+    final String cleanIsbn = (isbn ?? '').replaceAll('-', '');
+
+    return Book(
+      id: subjectId,
+      source: DataSource.douban,
+      nativeId: subjectId,
+      title: _nonEmpty(row['title']) ?? 'Unknown',
+      // A search row loses the author list to `card_subtitle`, whose first
+      // part is the name every Douban book card leads with.
+      authors: authors.isNotEmpty
+          ? authors
+          : (subtitleParts.isNotEmpty
+              ? <String>[subtitleParts.first]
+              : const <String>[]),
+      // The store's intro is plain text with newlines; a search row carries
+      // only the one-line `abstract`.
+      description: _nonEmpty(row['intro']) ?? _nonEmpty(row['abstract']),
+      coverUrl: _nonEmpty(row['cover_url']) ?? _doubanCover(row['pic']),
+      pageCount: _intOrNull(_firstString(row['pages'])),
+      publishYear: _yearFrom(_firstString(row['pubdate'])) ??
+          _doubanYearFromSubtitle(subtitleParts),
+      publishers: publishers.isNotEmpty
+          ? publishers
+          : _doubanPublisherFromSubtitle(subtitleParts),
+      isbn10: cleanIsbn.length == 10 ? cleanIsbn : null,
+      isbn13: cleanIsbn.length == 13 ? cleanIsbn : null,
+      subjects: _cleanSubjects(_doubanTags(row['tags'])),
+      rating: _doubanRating(row['rating']),
+      ratingCount: _doubanRatingCount(row['rating']),
+      externalUrl: _nonEmpty(row['url']) ??
+          'https://book.douban.com/subject/$subjectId/',
+    );
+  }
+
   /// `TEXT` as headroom for a future non-numeric id, but always digits today —
   /// so [externalIdInt] feeds the INTEGER `external_id` without loss.
   final String id;
@@ -1197,5 +1254,70 @@ class Book {
     if (list.isNotEmpty) return list;
     final String? house = _nonEmpty(json['pub_house']);
     return house != null ? <String>[house] : const <String>[];
+  }
+
+
+  /// A search row flattens "author / year / publisher" into `card_subtitle`
+  /// while the full record spells each out — splitting it lets both shapes
+  /// yield the same fields.
+  static List<String> _doubanSubtitleParts(Map<String, dynamic> row) {
+    return _trimmed(row['card_subtitle'])
+        .split('/')
+        .map((String part) => part.trim())
+        .where((String part) => part.isNotEmpty)
+        .toList();
+  }
+
+  /// The publisher trails `card_subtitle` when that part is not the year;
+  /// authors and translators fill everything before it.
+  static List<String> _doubanPublisherFromSubtitle(List<String> parts) {
+    if (parts.isEmpty) return const <String>[];
+    final String last = parts.last;
+    if (_yearFrom(last) != null) return const <String>[];
+    return <String>[last];
+  }
+
+  static int? _doubanYearFromSubtitle(List<String> parts) {
+    for (final String part in parts) {
+      final int? year = _yearFrom(part);
+      if (year != null) return year;
+    }
+    return null;
+  }
+
+  /// `rating` is `{count, max, star_count, value}` and `value` is already out
+  /// of 10 — the scale this app's books use, so it must not be doubled.
+  static double? _doubanRating(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    final Object? value = raw['value'];
+    return value is num && value > 0 ? value.toDouble() : null;
+  }
+
+  static int? _doubanRatingCount(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    return _intOrNull(raw['count']);
+  }
+
+  /// Douban tags are `{name, count}` objects; a bare string is tolerated in
+  /// case an endpoint ever flattens them.
+  static List<String> _doubanTags(Object? raw) {
+    if (raw is! List<dynamic>) return const <String>[];
+    final List<String> out = <String>[];
+    for (final Object? tag in raw) {
+      if (tag is Map<String, dynamic>) {
+        final String name = _trimmed(tag['name']);
+        if (name.isNotEmpty) out.add(name);
+      } else if (tag is String && tag.isNotEmpty) {
+        out.add(tag);
+      }
+    }
+    return out;
+  }
+
+  /// `pic` pairs a `large` and a `normal` URL; only a record that lacks
+  /// `cover_url` leans on it.
+  static String? _doubanCover(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    return _nonEmpty(raw['large']) ?? _nonEmpty(raw['normal']);
   }
 }

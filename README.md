@@ -39,7 +39,7 @@
 | 电影 / 剧集 | [豆瓣](https://www.douban.com/) | 📋 计划中 | 元数据最全；需 HMAC-SHA1 签名，且连打约 10 次即 403、冷却数分钟 —— **接入前须先补 403 退避** |
 | 电影 / 剧集 | [优酷](https://www.youku.com/) / [爱奇艺](https://www.iqiyi.com/) | 📋 计划中 | 搜索接口免密钥可用，字段偏少，适合做列表与海报 |
 | 图书 | [微信读书](https://weread.qq.com/) | ✅ **已接入** | 免密钥；中文电子书与网文覆盖面最广；推荐值 0–1000 换算到 0–10；**仅搜索**（官方无 by-id 详情接口） |
-| 图书 | 豆瓣 ISBN 直查 | 📋 计划中 | 实测 `book.douban.com/isbn/{isbn}` 只做 301 跳转到 subject 页（HTML），免签的 `subject_suggest` 对 ISBN 返回空数组 —— 只剩签名 API 一条路，**须先补 403 退避** |
+| 图书 | [豆瓣](https://book.douban.com/) | ✅ **已接入** | 元数据最全；走 HMAC-SHA1 签名的 Frodo 接口，**需自备 API Key / Secret**；输入 ISBN 时自动改走 by-ISBN 端点；受 403 断路器保护（连打 9 次即冷却 5 分钟） |
 | 漫画 | —— | 🔍 待调研 | 主流中文漫画站多不可达（B 站漫画、快看等已实测失败） |
 
 > 状态图例：✅ 已并入主线并通过全部关卡 · 📋 已选型待实现 · 🔍 尚未确定可行路径。
@@ -74,7 +74,7 @@
 
 ## 支持的数据源
 
-本分支共 **26 个搜索源、覆盖 19 个目录服务**（上游基线 21 源 / 16 服务 + 本分支新增的 Bangumi、NeoDB 的图书 / 电影 / 剧集三个源，以及微信读书）。**"国内直连"一列仅标注本分支实测过的结论**，未评估的留空 —— 上游源的海外可达性随网络环境而异，本仓库不做保证。
+本分支共 **27 个搜索源、覆盖 20 个目录服务**（上游基线 21 源 / 16 服务 + 本分支新增的 Bangumi、NeoDB 的图书 / 电影 / 剧集三个源，微信读书，以及豆瓣图书）。**"国内直连"一列仅标注本分支实测过的结论**，未评估的留空 —— 上游源的海外可达性随网络环境而异，本仓库不做保证。
 
 | 类型 | 目录服务 | 密钥 | 国内直连 |
 |------|---------|------|:--------:|
@@ -90,6 +90,7 @@
 | 动画 / 漫画 | [Kitsu](https://kitsu.io/) | 免密钥 | |
 | 图书 / 电影 / 剧集 | [NeoDB](https://neodb.social/) | 免密钥 | **✅ 已实测** |
 | **图书** | **[微信读书](https://weread.qq.com/)** | **免密钥** | **✅ 已实测** |
+| **图书** | **[豆瓣](https://book.douban.com/)** | **需密钥** | **✅ 已实测** |
 | 图书 | [OpenLibrary](https://openlibrary.org/) | 免密钥 | |
 | 图书 | [Fantlab](https://fantlab.ru/) | 免密钥 | |
 | 图书 | [Google Books](https://books.google.com/) | 可选免费密钥 | |
@@ -238,7 +239,7 @@ cd packages/core && dart run tool/generate_rpc.dart
 
 本分支的全部功能来自 [`hacan359/tonkatsu_box`](https://github.com/hacan359/tonkatsu_box)，在此致谢原作者与上游贡献者。上游仓库同时提供[使用文档 Wiki](https://github.com/hacan359/tonkatsu_box/wiki)（英文）与[现成收藏库](https://github.com/hacan359/tonkatsu-collections)（25 000+ 游戏，23 个平台）。
 
-目录服务：IGDB · TMDB · TVmaze · TheTVDB · VNDB · AniList · **Bangumi** · MangaBaka · MangaDex · Kitsu · **NeoDB** · **微信读书** · OpenLibrary · Fantlab · Google Books · Hardcover · ComicVine · MusicBrainz · Podcast Index
+目录服务：IGDB · TMDB · TVmaze · TheTVDB · VNDB · AniList · **Bangumi** · MangaBaka · MangaDex · Kitsu · **NeoDB** · **微信读书** · **豆瓣** · OpenLibrary · Fantlab · Google Books · Hardcover · ComicVine · MusicBrainz · Podcast Index
 
 导入与扩展：Simkl · Trakt.tv · Steam · Kinorium · MyAnimeList · RetroAchievements · SteamGridDB · ScreenScraper · Kodi
 

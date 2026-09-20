@@ -4,6 +4,7 @@ enum ProxyTarget {
   anilist('graphql.anilist.co'),
   bangumi('api.bgm.tv'),
   comicvine('comicvine.gamespot.com'),
+  douban('frodo.douban.com'),
   fantlab('api.fantlab.ru'),
   googlebooks('www.googleapis.com'),
   hardcover('api.hardcover.app'),

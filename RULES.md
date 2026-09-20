@@ -75,7 +75,7 @@
 
 **稳定可用**：Bangumi `api.bgm.tv/v0` · NeoDB `neodb.social/api/catalog/search` · 微信读书 `weread.qq.com/web/search/global`（**已接入，仅搜索** —— 无 by-id 端点，见七之四）· 优酷 `search.youku.com/api/search` · 爱奇艺 `mesh.if.iqiyi.com/.../homePageV3` · 网易云 · QQ 音乐。
 
-**可用但限流极狠**：豆瓣 Frodo `frodo.douban.com/api/v2/*` —— HMAC-SHA1 签名（secret `bf7dddc7c9cfe6f7` + apiKey `0dad551ec0f84ed02907ff5c42e8ec70` + 配对 UA）；**连打 10 次即 403，冷却 3–5 分钟**；签名 path 必须等于最终请求 path（剧集 `/tv/{id}`，用 `/movie/{id}` 会 996）。
+**可用但限流极狠**：豆瓣 Frodo `frodo.douban.com/api/v2/*` —— HMAC-SHA1 签名（secret `bf7dddc7c9cfe6f7` + apiKey `0dad551ec0f84ed02907ff5c42e8ec70` + 配对 UA）；**连打 10 次即 403，冷却 3–5 分钟**；签名 path 必须等于最终请求 path（剧集 `/tv/{id}`，用 `/movie/{id}` 会 996）。**图书源已接入（ISBN 直查 + 关键词搜索），契约详见七之六。**
 
 **免签补充**：`movie.douban.com/j/subject_suggest`（需 Referer），无限流，字段少。
 
@@ -130,6 +130,19 @@
 - **豆瓣取值**：`maxBurst: 9`、`cooldown: 5min`、间隔 `800ms`。实测十连打即 403、冷却 3–5 分钟，故**比实测少放一次**再开闸，让封禁永远挣不到。
 - **`acquire()` 抛错不得污染队列**：`_tail` 必须用 `then(onError:)` 吞掉被拒的那一对 future，否则后续调用会链在已作废的 future 上，抛的是**上一个**异常而不是自己的判断。
 - **文案的现实折衷（务必知悉）**：冷却文案挂在 `DioException.error` 上。但**各源的 `handleDioException` 会把 DioException 包成自家异常并套通用措辞**（全仓 112 处 `on DioException catch`），故对**既有源**而言用户看到的仍是该源的通用文案，精确原因（主机 + 剩余秒数）落在「详情」面板的 `Cause:` 行（`buildApiErrorDetail` 自动收 `exception.error.toString()`）。`extractApiError` 已为 `HostCooldownException` 注册分支，供未被包装的路径与**新写的源**取用 —— **接豆瓣源时，其 `handleDioException` 应优先判 `e.error is HostCooldownException` 并采用其文案**。
+
+### 七之六、豆瓣接入要点（2026-09-20，`douban`，图书）
+
+- **签名**：`_sig = base64(HMAC-SHA1(secret, "GET&" + urlencode(path, safe='') + "&" + _ts))`，path **不含 query**、**含前导 `/`**，且必须与最终请求路径逐字符一致。实现 `packages/core/lib/api/douban_signature.dart`（放 `core` 而非 `lib`，因为 **server 端签名要用同一份**），已与 Python 参考实现 **5 组向量逐字节锁定**（`packages/core/test/api/douban_signature_test.dart`）。客户端每条请求现算（`_ts` 分钟级过期），不做缓存。
+- **凭据用户自填、源码不内置**：`SettingsKeys` → `ApiKeys.fromPrefs` → 凭据页（key + secret + 「测试」动作）→ 6 语言 l10n，照本仓已有四例（RA / ComicVine / Hardcover / Google Books）范式，**不新造存储设施**。**native 端无凭据则不发请求、直接返空**（`_canRequest` 守卫）；**Web 端豁免** —— 密钥在服务端，浏览器本就不该持有。
+- **UA 必须与客户端配对**（`api-client/1 com.douban.frodo/7.22.0(230) …`），否则 403。Web 端 `createApiDio` 会剥掉 UA，故 **由代理端补**（`proxy_handler` 的 `_authorize` 设 `kDoubanUserAgent`）。
+- **双后端单源**：查询词形如 ISBN（去连字符后 10 位 `[0-9Xx]` 或 13 位数字）→ `/api/v2/book/isbn/{isbn}`；否则 → `/api/v2/search/book`。**单后端会让每次关键词搜索都白发一发到易封主机**，双后端同时是省额度之选。
+- **分页是偏移制**：搜索用 `start` / `count`（`start = (page - 1) * count`），响应 `total` 给总命中数 ⇒ `hasMore = start + 本页条数 < total`；缺 `total` 时只能以「满页」兜底。
+- **搜索结果与详情记录是两种形状**（最易踩）：搜索响应顶层键是 **`items`**（不是 `books`），每条把记录包在 **`target`** 下，作者 / 年份 / 出版社被压成 **`card_subtitle`** 单串（`"刘慈欣 / 2008 / 重庆出版社"`）；**by-ISBN / by-id 的记录才是平铺的完整字段**。只按后者写解析 ⇒ **搜索结果全空且不报任何错**。
+- **量纲**：`rating.value` 已是 0–10，**直接用，不可乘 2**（与 NeoDB 同规矩）。**出版社在 `press`，没有 `publisher`**；`pubdate` / `pages` / `price` **都是数组**，取首元素；封面兜底 `pic.large`。
+- **响应不回显 ISBN** ⇒ `native_id` 存**查询所用的 ISBN**，刷新按 ISBN 重查，**不存在 id 反解问题**（比 NeoDB 影视省事）；有 by-id 端点 ⇒ `import_service` 的 `.xcoll` 降级路径**可以解析**（与微信读书相反，别照拄后者的 `return null`）。
+- **`handleDioException` 优先判 `e.error is HostCooldownException`** 并采用其文案（见七之五的「文案现实折衷」）—— 本源的断路器拒绝发生在发网之前，只有这条文案能告诉用户还要等多久。
+- 免签两路已确认死路，勿再试：`book.douban.com/isbn/{isbn}` 跳 301 到 HTML；`movie.douban.com/j/subject_suggest` 对 ISBN 返空数组。
 
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 

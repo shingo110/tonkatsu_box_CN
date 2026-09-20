@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:core/api/douban_constants.dart';
+import 'package:core/api/douban_signature.dart';
 import 'package:core/api/podcast_index_signature.dart';
 import 'package:core/api/proxy_targets.dart';
 import 'package:shelf/shelf.dart';
@@ -17,6 +19,9 @@ const String kProxyUserAgent =
 /// tab leaves with this server's IP, so the gap has to hold here.
 const Map<ProxyTarget, Duration> _minRequestGap = <ProxyTarget, Duration>{
   ProxyTarget.musicbrainz: Duration(milliseconds: 1100),
+  // One ban covers every tab behind this server, so Douban is paced here as
+  // well — the app's own breaker cannot see other browsers' traffic.
+  ProxyTarget.douban: Duration(milliseconds: 800),
 };
 
 final Map<ProxyTarget, UpstreamThrottle> _throttles =
@@ -191,6 +196,23 @@ class ApiProxy {
         headers['X-Auth-Key'] = key;
         headers[HttpHeaders.authorizationHeader] =
             podcastIndexSignature(key, secret, unixTime);
+      case ProxyTarget.douban:
+        // Frodo signs the request path with a timestamp and refuses any
+        // User-Agent but its own client's, so both are built here: the
+        // browser holds neither half of the pair.
+        final String doubanKey =
+            _require(CredentialNames.doubanKey, target);
+        final String doubanSecret =
+            _require(CredentialNames.doubanSecret, target);
+        final int doubanTime = _now().millisecondsSinceEpoch ~/ 1000;
+        query['apiKey'] = <String>[doubanKey];
+        query['_ts'] = <String>['$doubanTime'];
+        // The signed path keeps its leading slash; the proxy strips it from
+        // its own segments.
+        query['_sig'] = <String>[
+          doubanSignature(doubanSecret, '/$path', doubanTime),
+        ];
+        headers[HttpHeaders.userAgentHeader] = kDoubanUserAgent;
       case ProxyTarget.tvdb:
         if (path.endsWith('login')) {
           return utf8.encode(jsonEncode(<String, Object?>{

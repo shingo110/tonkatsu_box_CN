@@ -3157,6 +3157,10 @@ class SPt extends S {
       'A loja chinesa de livros digitais. Aqui cobre livros, incluindo web novels e edições digitais.';
 
   @override
+  String get welcomeSourceDescDouban =>
+      'O catálogo chinês de livros, com edições impressas e digitais. Requer um par de chave e segredo.';
+
+  @override
   String get welcomeTourTitle => 'Conheça o menu';
 
   @override
@@ -6035,6 +6039,27 @@ class SPt extends S {
   @override
   String get welcomeApiPodcastIndexDesc =>
       'Busca de podcasts e acompanhamento de episódios. Par chave/segredo gratuito em api.podcastindex.org.';
+
+  @override
+  String get credentialsDoubanSection => 'API do Douban (Livros)';
+
+  @override
+  String get credentialsEnterDoubanKey => 'Insira sua chave de API do Douban';
+
+  @override
+  String get credentialsEnterDoubanSecret =>
+      'Insira seu segredo de API do Douban';
+
+  @override
+  String get credentialsDoubanKeyValid => 'As chaves do Douban são válidas';
+
+  @override
+  String get credentialsDoubanKeyInvalid =>
+      'O Douban rejeitou as chaves. Verifique o par e o relógio do sistema';
+
+  @override
+  String get welcomeApiDoubanDesc =>
+      'O catálogo chinês do livro. Requer um par de chave e segredo para assinar cada pedido.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>

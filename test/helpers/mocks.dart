@@ -35,6 +35,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:tonkatsu_box/core/api/anilist/anilist_graphql_client.dart';
 import 'package:tonkatsu_box/core/api/anilist_api.dart';
 import 'package:tonkatsu_box/core/api/bangumi_api.dart';
+import 'package:tonkatsu_box/core/api/douban_api.dart';
 import 'package:tonkatsu_box/core/api/fantlab_api.dart';
 import 'package:tonkatsu_box/core/api/google_books_api.dart';
 import 'package:tonkatsu_box/core/api/hardcover_api.dart';
@@ -181,6 +182,7 @@ class MockBangumiApi extends Mock implements BangumiApi {}
 
 class MockNeoDBApi extends Mock implements NeoDBApi {}
 class MockWeReadApi extends Mock implements WeReadApi {}
+class MockDoubanApi extends Mock implements DoubanApi {}
 
 class MockMangaBakaApi extends Mock implements MangaBakaApi {}
 

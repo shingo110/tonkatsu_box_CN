@@ -7,6 +7,7 @@ import 'anilist_anime_source.dart';
 import 'anilist_manga_source.dart';
 import 'bangumi_anime_source.dart';
 import 'comicvine_source.dart';
+import 'douban_book_source.dart';
 import 'fantlab_source.dart';
 import 'google_books_source.dart';
 import 'hardcover_source.dart';
@@ -66,6 +67,9 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     NeoDBTvSource(),
     // Books — NeoDB leads because it is the one answering in Chinese.
     NeoDBBookSource(),
+    // Douban has the deepest Chinese metadata but needs a user-supplied
+    // key and secret, so it ranks behind the keyless NeoDB.
+    DoubanBookSource(),
     WeReadBookSource(),
     OpenLibrarySource(),
     FantlabSource(),

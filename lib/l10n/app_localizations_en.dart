@@ -3118,6 +3118,10 @@ class SEn extends S {
       'The Chinese e-book store. Covers books here, including web novels and digital-first editions.';
 
   @override
+  String get welcomeSourceDescDouban =>
+      'The Chinese book catalogue, covering print and e-book editions alike. Requires a free key and secret pair.';
+
+  @override
   String get welcomeTourTitle => 'Get to know the menu';
 
   @override
@@ -5979,6 +5983,26 @@ class SEn extends S {
   @override
   String get welcomeApiPodcastIndexDesc =>
       'Podcast search and episode tracking. Uses a free key/secret pair from api.podcastindex.org.';
+
+  @override
+  String get credentialsDoubanSection => 'Douban API (Books)';
+
+  @override
+  String get credentialsEnterDoubanKey => 'Enter your Douban API key';
+
+  @override
+  String get credentialsEnterDoubanSecret => 'Enter your Douban API secret';
+
+  @override
+  String get credentialsDoubanKeyValid => 'Douban keys are valid';
+
+  @override
+  String get credentialsDoubanKeyInvalid =>
+      'Douban rejected the keys. Check the pair and the system clock';
+
+  @override
+  String get welcomeApiDoubanDesc =>
+      'The Chinese book catalogue. Needs a key and secret pair to sign every request.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>

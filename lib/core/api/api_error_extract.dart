@@ -1,5 +1,6 @@
 import 'anilist_api.dart';
 import 'comicvine_api.dart';
+import 'douban_api.dart';
 import 'fantlab_api.dart';
 import 'google_books_api.dart';
 import 'hardcover_api.dart';
@@ -53,6 +54,8 @@ ApiError extractApiError(Exception e) {
     ScreenScraperApiException(:final String message) =>
       (message: message, detail: null),
     SimklApiException(:final String message, :final String? detail) =>
+      (message: message, detail: detail),
+    DoubanApiException(:final String message, :final String? detail) =>
       (message: message, detail: detail),
     // Raised by our own limiter rather than by a source, so it is the one error
     // here with no per-API wrapper to be unwrapped from.

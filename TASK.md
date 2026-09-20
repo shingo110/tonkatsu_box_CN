@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入 · M3 NeoDB 电影 / 剧集接入 · M4 微信读书图书接入 · D6 豆瓣 403 退避
+- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入 · M3 NeoDB 电影 / 剧集接入 · M4 微信读书图书接入 · D6 豆瓣 403 退避 · D7 豆瓣 ISBN 直查接入
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面构建可用性（缺 VS C++ 工作负载）
 
@@ -150,11 +150,42 @@
 
 **已知折衷（已记入 RULES §七之五）**：冷却文案挂在 `DioException.error` 上，但各源的 `handleDioException` 会把 DioException 包成自家异常并套通用措辞（全仓 112 处 `on DioException catch`），故**既有源**的用户主文案仍是通用措辞，精确原因落在「详情」面板的 `Cause:` 行。**新写的豆瓣源须在自己的 `handleDioException` 里优先判 `e.error is HostCooldownException` 并采用其文案。**
 
+### D7 · 豆瓣 ISBN 直查接入（2026-09-20，第四个国内源 · 首个需密钥源）
+
+豆瓣 Frodo 的签名图书接口。**双后端单源**：查询词形如 ISBN（去连字符后 10 / 13 位）时走 `/api/v2/book/isbn/{isbn}`，否则走 `/api/v2/search/book`。后者不只是功能之别 —— 单后端会让每次关键词搜索都白发一发到易封主机。凭据由用户自填，源码不内置（照 RA / ComicVine / Hardcover / Google Books 范式）。
+
+**改动面**：
+
+- 签名与常量：`packages/core/lib/api/douban_signature.dart`（HMAC-SHA1；放 core 而非 lib，因为**自托管服务端要用同一份**）· `douban_constants.dart`
+- API：`lib/core/api/douban/{douban_types,douban_http_client,douban_search_api}.dart` + `lib/core/api/douban_api.dart`（facade + `doubanApiProvider`）
+- 模型：`DataSource.douban` 枚举 + `Book.fromDoubanItem`
+- 源实现：`lib/features/search/sources/douban_book_source.dart`（id `douban`，无筛选器、`supportsBrowse=false`）
+- 注册面：`data_source_ui.dart` · `source_catalog.dart`（`keyRequirement: mandatory`）· `search_sources.dart`（排在 NeoDB 之后、微信读书之前）
+- 凭据：`api_key_initializer.dart` · `settings_provider.dart`（`SettingsKeys` / `hasDoubanKeys` / `setDoubanKeys` / `validateDoubanKeys`）· `credentials_content.dart`（key + secret + 「测试」动作）
+- Web：`proxy_targets.dart` 加 `douban('frodo.douban.com')` · `credential_names.dart` · `server_credentials.dart` · `proxy_handler.dart` 的 `_authorize` 加**服务端签名**分支（签 `/$path` + 补 Frodo UA）
+- 本地化：6 语言 ARB × 7 键（6 凭据键 + `welcomeSourceDescDouban`），各语言 **1752** 条
+
+**连带必修（漏了会静默失效，不报错）**：`collection_actions.dart`（刷新分派）· `media_handlers.dart`（`_fetchFullBook`）· `import_service.dart`（`_fetchOneBook` + 注入；豆瓣**有** by-id，可解析，与微信读书相反）· `welcome_step_sources.dart` · `api_error_extract.dart`
+
+**验收记录**：
+
+- [x] `flutter analyze --fatal-infos --fatal-warnings`：No issues found
+- [x] `flutter test`：**5639 通过 / 3 跳过 / 0 失败**
+- [x] `dart test`（packages/core）：**2340 通过**（基线 2323，+17 = 签名 6 + 解析 11）
+- [x] `dart test`（server）：**99 通过**（+1）
+- [x] RPC 生成物 `git diff --exit-code`：字节一致（未改模型字段）
+- [x] 新增测试：`douban_signature_test` 6（与 Python 参考向量**逐字节锁定**）· `book_douban_test` 11 · `douban_api_test` 21 · `douban_book_source_test` 10 · `proxy_handler_test` 的**服务端验签**用例 1（断言 `_sig` 恰为参考向量 `g9+l253xM80riZQoEdnRsPFqgAs=`）
+- [x] **在线活体验证**（4 发全 200，压在 10 发以内）：ISBN-13 `9787536692930` → 6042 字节 / `id=36892731` / `三体` / `authors=[刘慈欣]` / `rating=9.4`（**未翻倍**）/ `publishers=[重庆出版社]`（**`press` 生效**）/ `pages=300` / `year=2021` / 外链正确；ISBN-10 `7536692935` → **同一 subject id**；关键词「三体」第 1 页 → 200 / 11086 字节 / **解析 20 条** / `total=269` / `hasMore=true`（中文标题无乱码）；第 2 页 → 首条换书（`三体 2`，id 35092666），**分页有效**。注：响应 `tags` 是空数组、搜索行**根本没有 `tags` 字段** ⇒ `subjects` 为空是**正确行为**，非缺陷。
+- [x] 既有护栏同步：`source_badge_test` 22→**23** · **`source_catalog_test` 的密钥集合加 `douban`**（第五处硬编码护栏，本轮才编目）· `search_sources_test` id 表 · `source_output_media_type_test` · `mocks.dart` 补 `MockDoubanApi`
+- [ ] **未做**：Web 端 `/proxy/douban/**` 的真实自托管在线验证（需自托管环境；**服务端签名逻辑已有单测钉死**，见上）
+
+**探测阶段推翻的自造结论**：曾按详情端点的形状推断搜索响应顶层键是 `books`，实测是 **`items`**，且每条把记录包在 `target` 下、作者 / 年份 / 出版社被压成 `card_subtitle` 单串。只按详情形状写解析 ⇒ **搜索结果全空且不报任何错**。
+
 ---
 
 ## 📋 候选（下一步从这里挑）
 
-> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 优酷/爱奇艺 > 豆瓣**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故排在最后。**403 退避这一前置已于 D6 落地**，豆瓣线只剩签名与源本身。
+> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 优酷/爱奇艺 > 漫画**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣**影视**线仍待接。
 
 ### T1 · 豆瓣 403 退避（✅ 2026-09-20 完成 → D6）
 
@@ -183,7 +214,7 @@
 
 ### T3. 图书线：微信读书 + 豆瓣 ISBN
 
-> **2026-09-20 更新**：微信读书已落地（见 D5）。豆瓣 ISBN **已完成接口实证（见下）** —— 先前「只剩签名一条路」的判断被证实，且那条路已走通；T1 的 403 退避也已就位，故本项**已无前置阻塞**。
+> **2026-09-20 更新**：微信读书已落地（见 D5）；豆瓣 ISBN **亦已落地（见 D7）** —— T3 整项完成。以下为选型阶段的实证与定案，留作记录。
 
 **豆瓣 ISBN 实证结论（2026-09-20，`probe/douban_isbn_probe.py` + 存档 `probe/douban_isbn.json`）**：
 
@@ -196,7 +227,7 @@
 - 第三方 `isbn.work` 需 appkey（`probe/isbnwork.json` 记 `code 1 appkey无效`）⇒ 违背 ADR-3 免密钥原则，**弃用**。
 
 - [x] 微信读书：`weread.qq.com/web/search/global`（免密钥，仅搜索）→ D5
-- [ ] 豆瓣 ISBN：**实证已完成、前置 T1 已就位、设计已定**（见下），待实现源。
+- [x] 豆瓣 ISBN：**已落地 → D7**（双后端单源 + 凭据自填 + Web 端服务端签名）。
 - 验收：ISBN 精确命中返回对应中文图书；关键词搜索中文书名无乱码；在线验证。
 
 **设计定案（2026-09-20 拍板）**：
@@ -229,15 +260,16 @@
 | # | 事项 | 现状 | 影响 |
 |:-:|------|------|------|
 | B1 | Windows 桌面运行 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 → `flutter run -d windows` 不可用 | 无法桌面预览；写码/分析/测试不受影响 |
-| B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` 与 `neodb.social`，均未做真实自托管 + 浏览器链路验证 | 发布 Web 前必须补 |
+| B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` / `neodb.social` / `weread.qq.com` / `frodo.douban.com`，**均未做真实自托管 + 浏览器链路验证**（豆瓣的服务端签名逻辑已有单测钉死） | 发布 Web 前必须补 |
 | B3 | 上游同步 | fork 基线 0.44.0；上游以周为节奏发版 | 每次同步人造裁决冲突清单见 PROJECT.md §3 |
-| B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书）；电影 / 剧集 ✅（NeoDB）；漫画未定 | 漫画线（T5）已知候选全灭，待找免密钥可直连的库 |
+| B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB）；漫画未定 | 漫画线（T5）已知候选全灭，待找免密钥可直连的库 |
 
 ## 护栏速查（改代码前看一眼，防炸）
 
-1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 22），加枚举即炸。
-2. `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码，加源即炸。
+1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 **23**），加枚举即炸。
+2. `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码，加源即炸（**仅可浏览类型**；图书走 `textQueryOnly`，无此断言）。
 3. `test/features/search/sources/search_sources_test.dart` —— 注册表 id 顺序表，加源须补序。
-4. RPC：改 DAO/模型 → `dart run tool/generate_rpc.dart` → 提交生成物，否则 `dart test` 必挂，无幸免。
-5. mocktail 断言命名参数：**不要用 `verify(...).captured` 按位取**（顺序无保证），在 `thenAnswer` 里按 `Symbol('x')` 取。
-6. **同一条消息里对同一个文件不要发两次编辑** —— 实测最多只有一次生效，其余静默丢失且不报错。改完同一文件的多处，务必拆成多次调用并逐处 grep 复核。
+4. `test/shared/constants/source_catalog_test.dart` —— **「哪些源要密钥」的集合写死**（断言 `keyRequirement != none` 的源**恰好等于**那组枚举）。加任何**需密钥**的源即炸；D7 才把它编入护栏。
+5. RPC：改 DAO/模型 → `dart run tool/generate_rpc.dart` → 提交生成物，否则 `dart test` 必挂，无幸免。
+6. mocktail 断言命名参数：**不要用 `verify(...).captured` 按位取**（顺序无保证），在 `thenAnswer` 里按 `Symbol('x')` 取。
+7. **同一条消息里对同一个文件不要发两次编辑** —— 实测最多只有一次生效，其余静默丢失且不报错。改完同一文件的多处，务必拆成多次调用并逐处 grep 复核。

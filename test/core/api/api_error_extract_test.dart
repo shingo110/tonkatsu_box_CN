@@ -4,6 +4,7 @@ import 'package:tonkatsu_box/core/api/api_error_extract.dart';
 import 'package:tonkatsu_box/core/api/comicvine_api.dart';
 import 'package:tonkatsu_box/core/api/fantlab_api.dart';
 import 'package:tonkatsu_box/core/api/google_books_api.dart';
+import 'package:tonkatsu_box/core/api/douban_api.dart';
 import 'package:tonkatsu_box/core/api/hardcover_api.dart';
 import 'package:tonkatsu_box/core/api/host_rate_limiter.dart';
 import 'package:tonkatsu_box/core/api/igdb_api.dart';
@@ -50,6 +51,14 @@ void main() {
       final ApiError r = extractApiError(ScreenScraperApiException('ss'));
       expect(r.message, 'ss');
       expect(r.detail, isNull);
+    });
+
+    test('maps Douban message and keeps its detail', () {
+      final ApiError r = extractApiError(
+        const DoubanApiException('db', detail: 'cause'),
+      );
+      expect(r.message, 'db');
+      expect(r.detail, 'cause');
     });
 
     test('states the wait a host cooldown still owes', () {

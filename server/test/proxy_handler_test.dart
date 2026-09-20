@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:core/api/douban_constants.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 import 'package:tonkatsu_server/src/api_credentials.dart';
@@ -333,6 +334,33 @@ void main() {
           await get(handler, '/proxy/tvdb/v4/search?query=fox');
 
       expect(response.statusCode, HttpStatus.serviceUnavailable);
+    });
+
+    test('should sign a Douban request server-side and wear its client UA',
+        () async {
+      final Handler handler = handlerWith(
+        <String, String>{
+          CredentialNames.doubanKey: '0dad551ec0f84ed02907ff5c42e8ec70',
+          CredentialNames.doubanSecret: 'bf7dddc7c9cfe6f7',
+        },
+        clock: () => DateTime.fromMillisecondsSinceEpoch(1700000000000),
+      );
+
+      await get(handler, '/proxy/douban/api/v2/book/isbn/9787536692930');
+
+      final Map<String, String> query =
+          upstream.sent.single.url.queryParameters;
+      expect(upstream.sent.single.url.host, 'frodo.douban.com');
+      expect(upstream.sent.single.url.path, '/api/v2/book/isbn/9787536692930');
+      expect(query['apiKey'], '0dad551ec0f84ed02907ff5c42e8ec70');
+      expect(query['_ts'], '1700000000');
+      // The vector `probe/douban_sig_vectors.py` prints for this path and
+      // timestamp, so the proxy is pinned to the same bytes as the client.
+      expect(query['_sig'], 'g9+l253xM80riZQoEdnRsPFqgAs=');
+      expect(
+        upstream.sent.single.headers[HttpHeaders.userAgentHeader],
+        kDoubanUserAgent,
+      );
     });
 
     test('should replace the key in a TheTVDB login body', () async {

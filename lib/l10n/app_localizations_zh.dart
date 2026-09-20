@@ -2921,6 +2921,9 @@ class SZh extends S {
   String get welcomeSourceDescWeRead => '中文电子书与网文商店，此处接入图书，含网文与数字首发版本。';
 
   @override
+  String get welcomeSourceDescDouban => '中文图书目录，纸质书与电子书版本均有收录。需要一对密钥来签名请求。';
+
+  @override
   String get welcomeTourTitle => '了解菜单';
 
   @override
@@ -5679,6 +5682,24 @@ class SZh extends S {
   @override
   String get welcomeApiPodcastIndexDesc =>
       '播客搜索与单集追踪。使用 api.podcastindex.org 的免费密钥对。';
+
+  @override
+  String get credentialsDoubanSection => '豆瓣 API（书籍）';
+
+  @override
+  String get credentialsEnterDoubanKey => '输入你的豆瓣 API 密钥';
+
+  @override
+  String get credentialsEnterDoubanSecret => '输入你的豆瓣 API 密文';
+
+  @override
+  String get credentialsDoubanKeyValid => '豆瓣密钥有效';
+
+  @override
+  String get credentialsDoubanKeyInvalid => '豆瓣拒绝了密钥。请检查密钥对和系统时间';
+
+  @override
+  String get welcomeApiDoubanDesc => '中文图书目录。需要密钥对为每次请求签名。';
 
   @override
   String get welcomeSourceDescMusicBrainz => '开放的音乐百科：专辑、艺术家与版本。无需密钥。';

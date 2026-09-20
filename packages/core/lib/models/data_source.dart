@@ -66,6 +66,10 @@ enum DataSource {
   /// database lists.
   weread('WeRead', 0xFF2A6AE9),
 
+  /// Douban (book.douban.com) — the Chinese book catalogue. Reached through
+  /// its signed Frodo API, so it asks the user for a key and a secret.
+  douban('Douban', 0xFF2E963D),
+
   /// MusicBrainz — open keyless music database (albums as release-groups).
   /// Feeds the `audio` media type with `AudioKind.album` records.
   musicBrainz('MusicBrainz', 0xFFBA478F),

@@ -18,6 +18,7 @@ import '../../../core/api/comicvine_api.dart';
 import '../../../core/api/google_books_api.dart';
 import '../../../core/api/musicbrainz_api.dart';
 import '../../../core/api/podcast_index_api.dart';
+import '../../../core/api/douban_api.dart';
 import '../../../core/api/hardcover_api.dart';
 import '../../../core/api/fantlab_api.dart';
 import '../../../core/api/neodb_api.dart';
@@ -449,6 +450,8 @@ Future<Book?> _fetchFullBook(WidgetRef ref, Book book) async {
       return ref
           .read(wereadApiProvider)
           .findByNativeId(title: book.title, nativeId: book.nativeId);
+    case DataSource.douban:
+      return ref.read(doubanApiProvider).getBook(book.nativeId);
     default:
       return null;
   }

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tonkatsu_box/features/search/sources/anilist_anime_source.dart';
 import 'package:tonkatsu_box/features/search/sources/anilist_manga_source.dart';
 import 'package:tonkatsu_box/features/search/sources/bangumi_anime_source.dart';
+import 'package:tonkatsu_box/features/search/sources/douban_book_source.dart';
 import 'package:tonkatsu_box/features/search/sources/fantlab_source.dart';
 import 'package:tonkatsu_box/features/search/sources/igdb_games_source.dart';
 import 'package:tonkatsu_box/features/search/sources/neodb_book_source.dart';
@@ -59,6 +60,10 @@ void main() {
 
     test('NeoDBBookSource → MediaType.book', () {
       expect(NeoDBBookSource().outputMediaType, MediaType.book);
+    });
+
+    test('DoubanBookSource → MediaType.book', () {
+      expect(DoubanBookSource().outputMediaType, MediaType.book);
     });
 
     test('WeReadBookSource → MediaType.book', () {

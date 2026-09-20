@@ -12,6 +12,55 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — Douban book source
+
+The fullest Chinese book catalogue, reached through the signed Frodo API. It
+needs a key and a secret the user supplies — the fork ships none — and answers
+403 both to a mismatched pair and to a client User-Agent, so the source rides
+the breaker that was added ahead of it. ISBN-13 and ISBN-10 resolve to the same
+record.
+
+- `DoubanBookSource` (`lib/features/search/sources/douban_book_source.dart`):
+  id `douban`, book only, no filters. A query shaped like an ISBN-10 or ISBN-13
+  takes the by-ISBN endpoint instead of search, which is also what keeps a
+  keyword search from spending its call on a host that bans after ten.
+- `DoubanSearchApi` (`lib/core/api/douban/douban_search_api.dart`):
+  `searchBooks` pages through `/api/v2/search/book` with `start` / `count` and
+  reads `total` for the page count; `getBook` and `getBookByIsbn` return the
+  flat record. A search row nests its data under `target` and folds author,
+  year and publisher into `card_subtitle`, so both shapes are parsed — only the
+  by-id shape would have left every search page silently empty. A row that will
+  not parse is dropped rather than failing the page.
+- `DoubanHttpClient` (`lib/core/api/douban/douban_http_client.dart`):
+  `createApiDio` with the shipped Frodo User-Agent, since the wrong one is a
+  403 too. `DoubanAuthInterceptor` adds `apiKey`, `_ts` and `_sig` per request
+  on native; the browser holds no secret and lets the selfhost proxy sign.
+  `handleDioException` reads `HostCooldownException` first — the breaker refuses
+  before anything leaves, so only its wording can tell the user how long to
+  wait — then 403 and 401.
+- `doubanSignature` (`packages/core/lib/api/douban_signature.dart`):
+  `base64(hmac-sha1(secret, "GET&<urlencoded path>&<ts>"))`, byte-for-byte
+  against the Python reference vectors. It sits in `core` rather than `lib`
+  because the selfhost server signs with it too.
+- `Book.fromDoubanItem` (`packages/core/lib/models/book.dart`): `press` holds the
+  publisher, `pubdate` / `pages` / `price` are single-element lists, and
+  `rating.value` is already 0–10 — doubling it, as the 0–5 scale sources need,
+  would be wrong. The response never echoes the ISBN, so the queried ISBN is
+  stored as `native_id`; that also lets the `.xcoll` import path resolve, which
+  WeRead's cannot.
+- Credentials (`lib/core/services/api_key_initializer.dart`,
+  `lib/features/settings/providers/settings_provider.dart`,
+  `lib/features/settings/content/credentials_content.dart`): read from
+  preferences only, following RetroAchievements, ComicVine, Hardcover and
+  Google Books. Six l10n keys, plus one for the welcome step.
+- Web: `douban` gains a host in `packages/core/lib/api/proxy_targets.dart`, and
+  `ApiProxy._authorize` (`server/lib/src/proxy_handler.dart`) gains a branch
+  that signs `/$path` and sets the Frodo User-Agent, since `createApiDio`
+  strips the header in the browser.
+- Registration: `DataSource.douban` and its icon switch, `source_catalog.dart`,
+  the refresh dispatch in `collection_actions.dart`, `_fetchFullBook`,
+  `import_service.dart` and the welcome step.
+
 ## [cn] Added — host 403 backoff ahead of the Douban work
 
 Douban serves a burst of ten calls and then 403s for three to five minutes,

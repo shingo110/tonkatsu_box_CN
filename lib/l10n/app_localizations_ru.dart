@@ -3181,6 +3181,10 @@ class SRu extends S {
       'Китайский магазин электронных книг. Здесь — книги, включая сетевые романы и цифровые издания.';
 
   @override
+  String get welcomeSourceDescDouban =>
+      'Китайский книжный каталог: и печатные, и электронные издания. Нужна пара ключа и секрета.';
+
+  @override
   String get welcomeTourTitle => 'Знакомство с меню';
 
   @override
@@ -6080,6 +6084,26 @@ class SRu extends S {
   @override
   String get welcomeApiPodcastIndexDesc =>
       'Поиск подкастов и трекинг эпизодов. Бесплатная пара ключей с api.podcastindex.org.';
+
+  @override
+  String get credentialsDoubanSection => 'Douban API (книги)';
+
+  @override
+  String get credentialsEnterDoubanKey => 'Введите API-ключ Douban';
+
+  @override
+  String get credentialsEnterDoubanSecret => 'Введите API-секрет Douban';
+
+  @override
+  String get credentialsDoubanKeyValid => 'Ключи Douban действительны';
+
+  @override
+  String get credentialsDoubanKeyInvalid =>
+      'Douban отклонил ключи. Проверьте пару и системные часы';
+
+  @override
+  String get welcomeApiDoubanDesc =>
+      'Китайский книжный каталог. Нужна пара ключа и секрета для подписи каждого запроса.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>
