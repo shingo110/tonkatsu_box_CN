@@ -183,11 +183,20 @@
 
 ### T3. 图书线：微信读书 + 豆瓣 ISBN
 
-> **2026-09-20 更新**：微信读书已落地（见 D5）。豆瓣 ISBN 直查**仍未做** —— 实测 `book.douban.com/isbn/{isbn}` 会 301 跳到 subject 页（HTML，且受封禁影响），`movie.douban.com/j/subject_suggest` 对 ISBN 返回空数组，故只剩「签名 Frodo API」一条路，依赖 T1 的 403 退避。
+> **2026-09-20 更新**：微信读书已落地（见 D5）。豆瓣 ISBN **已完成接口实证（见下）** —— 先前「只剩签名一条路」的判断被证实，且那条路已走通；T1 的 403 退避也已就位，故本项**已无前置阻塞**。
+
+**豆瓣 ISBN 实证结论（2026-09-20，`probe/douban_isbn_probe.py` + 存档 `probe/douban_isbn.json`）**：
+
+- **签名 Frodo 的 ISBN 端点可用**：`GET frodo.douban.com/api/v2/book/isbn/{isbn}`，带 `apiKey` / `_ts` / `_sig`，其中 `_sig = base64(HMAC-SHA1(secret, "GET&" + urlencoded(path) + "&" + ts))`，UA 需用 `api-client/1 com.douban.frodo/...` 那一串 → **HTTP 200 / 6042 字节 / 55 字段**。ISBN-13 与 ISBN-10 命中同一本书。
+- **五发全 200，未见限流**（另含 3 发对照：ISBN 当关键词搜、书名搜索、图书详情，均 200）。
+- **返回的是完整记录**（与详情端点同级）：`id`（字符串主体 id）、`title`、`author`（数组）、`translator`、`press`（数组 —— **出版社在 `press`，没有 `publisher`**）、`pubdate` / `pages` / `price`（**三者都是数组**）、`rating`、`intro`、`catalog`、`author_intro`、`cover_url` / `pic`、`url`、`tags`。
+- **关键：`rating.value` 已是 0–10**（本例 9.4，`max: 10`）⇒ **直接用，不可乘 2**（与 NeoDB 同规矩）。
+- **响应不回显 ISBN**（无 `isbn13` / `isbn10`）⇒ `nativeId` 宜存**查询所用的 ISBN**，刷新按 ISBN 重查即可，**不存在 id 反解问题**（比 NeoDB 影视省事）。
+- 先前记录的两条依然成立，故**免签路径不再考虑**：`book.douban.com/isbn/{isbn}` 会 301 跳 HTML；`movie.douban.com/j/subject_suggest` 对 ISBN 返空数组。
+- 第三方 `isbn.work` 需 appkey（`probe/isbnwork.json` 记 `code 1 appkey无效`）⇒ 违背 ADR-3 免密钥原则，**弃用**。
 
 - [x] 微信读书：`weread.qq.com/web/search/global`（免密钥，仅搜索）→ D5
-- [ ] 豆瓣 ISBN：以 ISBN 直查；**须先补 T1 的 403 退避**，否则连打十次即封
-- 候选面：新增 `Book` 模型解析 + 两个源（或一个源双后端）。
+- [ ] 豆瓣 ISBN：**实证已完成，待实现源**（前置 T1 已就位）。尚待决策两事：① **签名密钥与 apiKey 以明文进开源客户端**（形式上与现有 TMDB / IGDB 等源同构，但豆瓣这对凭据是借用方 App 的，须明示）；② **源形态** —— ISBN 专用源，还是「关键词搜索 + ISBN 自动识别」双后端。
 - 验收：ISBN 精确命中返回对应中文图书；关键词搜索中文书名无乱码；在线验证。
 
 ### T4. 影视线：优酷 / 爱奇艺
