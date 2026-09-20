@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../utils/neodb_json.dart';
+import '../utils/stable_id.dart';
 import '../utils/tvdb_json.dart';
 import 'data_source.dart';
 
@@ -96,6 +98,31 @@ class Movie {
       externalUrl: tvdbRecordUrl('movies', json['slug'], id),
       cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       source: DataSource.tvdb,
+    );
+  }
+
+  /// NeoDB item — shared verbatim by `/api/catalog/search` rows and a full
+  /// `/api/movie/{uuid}` response. Keyless, Chinese-first, and the only movie
+  /// provider here whose `external_resources` reach a Douban page.
+  factory Movie.fromNeoDBItem(Map<String, dynamic> json) {
+    final String uuid = neodbItemUuid(json);
+    final String? title = neodbItemTitle(json);
+    final List<String> genres = neodbItemGenres(json['genre']);
+
+    return Movie(
+      tmdbId: fnv1a64(uuid),
+      title: title ?? 'Unknown',
+      originalTitle: neodbItemOriginalTitle(json, title),
+      posterUrl: neodbItemCoverUrl(json),
+      overview: neodbItemDescription(json),
+      genres: genres.isEmpty ? null : genres,
+      releaseYear: neodbItemYear(json),
+      // NeoDB already rates out of 10 — do not double it.
+      rating: neodbItemRating(json['rating']),
+      runtime: neodbRuntimeMinutes(json['length']),
+      externalUrl: neodbItemUrl(json),
+      cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      source: DataSource.neodb,
     );
   }
 

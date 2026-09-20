@@ -1146,6 +1146,12 @@ class ImportService {
       if (ref.source == DataSource.tvdb) {
         return await _tvdbApi?.getMovie(ref.externalId);
       }
+      if (ref.source == DataSource.neodb) {
+        // The integer id is a hash of NeoDB's uuid, so an export that kept no
+        // native id has nothing left to resolve.
+        final String? uuid = ref.nativeId;
+        return uuid == null ? null : await _neodbApi?.getMovieById(uuid);
+      }
       return await _tmdbApi?.getMovie(ref.externalId);
     } on Exception catch (e) {
       // One unavailable movie must not abort the batch.
@@ -1162,6 +1168,11 @@ class ImportService {
       }
       if (ref.source == DataSource.tvdb) {
         return await _tvdbApi?.getSeries(ref.externalId);
+      }
+      if (ref.source == DataSource.neodb) {
+        // Same as movies: only an export that kept the uuid can be resolved.
+        final String? uuid = ref.nativeId;
+        return uuid == null ? null : await _neodbApi?.getTvShowById(uuid);
       }
       return await _tmdbApi?.getTvShow(ref.externalId);
     } on Exception catch (e) {

@@ -12,6 +12,28 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — NeoDB movie and TV sources
+
+The same keyless catalog extended to film. NeoDB files TV as seasons, so every
+result is a season record whose Chinese title carries the number; movies and
+seasons both link back to a Douban page. Sources `neodb_movie` and `neodb_tv`,
+search-only like the book source, registered behind the browsable TMDB and
+TheTVDB sources.
+
+- `Movie.fromNeoDBItem` and `TvShow.fromNeoDBItem` (packages/core/lib/models/),
+  plus `packages/core/lib/utils/neodb_json.dart` — the shared localized-title /
+  rating / year / runtime helpers the book mapper now delegates to.
+- `NeoDBSearchApi.search` / `getItem` are generic over the row parser, so all
+  three media types ride one request path; `NeoDBApi` gains `searchMovies`,
+  `searchTvShows`, `getMovieById` and `getTvShowById` (the last one addressing
+  `/api/tv/season/{uuid}`).
+- Refresh and the `.xcoll` fallback resolve the provider uuid out of the
+  record's stored URL (`neodbUuidFromUrl`), because `Movie` / `TvShow` key on an
+  integer id and carry no native-id column.
+- Registered in `kDataSourceCatalog` (book + movie + tvShow), the search-source
+  list, the refresh dispatch in `collection_actions.dart` and the fetch paths in
+  `import_service.dart`.
+
 ## [cn] Added — NeoDB book source
 
 The second domestic catalog, and the first Chinese-language book source: search

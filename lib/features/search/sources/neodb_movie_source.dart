@@ -1,6 +1,6 @@
-import 'package:core/models/book.dart';
 import 'package:core/models/data_source.dart';
 import 'package:core/models/media_type.dart';
+import 'package:core/models/movie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,26 +8,25 @@ import '../../../core/api/neodb_api.dart';
 import '../../../l10n/app_localizations.dart';
 import '../models/search_source.dart';
 
-/// NeoDB book catalog. The only Chinese-language book source here: titles,
-/// descriptions and tags all arrive in Chinese, and `external_resources`
-/// points at the matching Douban entry. Keyless.
-class NeoDBBookSource extends SearchSource {
+/// NeoDB movie catalog. The only movie source here answering in Chinese, with
+/// a Douban link on every record — keyless, so no Douban signature to carry.
+class NeoDBMovieSource extends SearchSource {
   @override
-  String get id => 'neodb';
+  String get id => 'neodb_movie';
 
   @override
-  MediaType get outputMediaType => MediaType.book;
+  MediaType get outputMediaType => MediaType.movie;
 
   @override
   DataSource get dataSource => DataSource.neodb;
 
   @override
-  String label(S l) => l.collectionFilterBooks;
+  String label(S l) => l.collectionFilterMovies;
 
   @override
-  IconData get icon => Icons.auto_stories;
+  IconData get icon => Icons.movie_outlined;
 
-  // A missing `query` is a 422 and an empty one a 400, so unlike Bangumi this
+  // A missing `query` is a 422 and an empty one a 400, so unlike TMDB this
   // source searches only and never browses.
   @override
   bool get supportsBrowse => false;
@@ -47,7 +46,7 @@ class NeoDBBookSource extends SearchSource {
       ];
 
   @override
-  String searchHint(S l) => l.searchHintBooks;
+  String searchHint(S l) => l.searchHintMovies;
 
   @override
   Future<BrowseResult> fetch(
@@ -59,16 +58,16 @@ class NeoDBBookSource extends SearchSource {
   }) async {
     final String? trimmed = query?.trim();
     if (trimmed == null || trimmed.length < kNeoDBMinQueryLength) {
-      return const BrowseResult(items: <Object>[], mediaType: MediaType.book);
+      return const BrowseResult(items: <Object>[], mediaType: MediaType.movie);
     }
 
     final NeoDBApi api = ref.read(neodbApiProvider);
-    final (List<Book> books, bool hasMore, int totalPages) =
-        await api.searchBooks(query: trimmed, page: page);
+    final (List<Movie> movies, bool hasMore, int totalPages) =
+        await api.searchMovies(query: trimmed, page: page);
 
     return BrowseResult(
-      items: books,
-      mediaType: MediaType.book,
+      items: movies,
+      mediaType: MediaType.movie,
       hasMore: hasMore,
       totalPages: totalPages,
       currentPage: page,

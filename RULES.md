@@ -101,6 +101,15 @@
 - **`rating` 已是 0–10，直接使用，不可乘 2**。×2 只适用于 OpenLibrary / Google Books / Hardcover 那类 0–5 刻度源；`Anime` 模型才是 0–100（Bangumi ×10）。**刻度搞错不会报错，只会显示离谱的分数**，务必看模型注释。
 - **加图书源的连带点比动画更多**：`collection_actions.dart`（刷新，`if/else` 链，漏了就 unsupported）、`media_handlers.dart`（`_fetchFullBook`，漏了详情页无简介）、`import_service.dart`（`_fetchOneBook` + 构造注入 + provider watch，漏了导入丢条目）、`welcome_step_sources.dart`（漏了向导描述为空）。这四处都不报编译错。
 
+### 七之三、NeoDB 影视类目补充（2026-09-20，`neodb_movie` / `neodb_tv`）
+
+- **影视的 `display_title` 是英文名**，中文在 `localized_title` / `orig_title`。图书的 `display_title` 才是中文，别把图书经验套过来。
+- **TV 只能以「季」为粒度**：`category=tv` 的搜索结果 `type` 恒为 `TVSeason`，标题自带季号；`TVShow` 本体只有打 `/api/tv/{parent_uuid}` 才拿得到，且它的 `localized_title` 常缺 `zh-cn`。所以映射到 `TvShow` 模型时用季记录的字段，**不要为每行结果再补一次 parent 请求**。
+- **详情路径 = 类目（+ 段）**：电影 `/api/movie/{uuid}`；剧集是 `/api/tv/season/{uuid}`（多一段 `season`）。
+- **搜索行没有 `year` / `length`**：年份只能扫 `tags` 里第一个「四位纯数字」，且要排除 `1990s` 这类年代段（实测年份漂在 `tags[0]` 或 `tags[1]`）；`length` 是**秒**，模型存分钟。`year` / `duration` / `imdb` 只有详情接口才有。
+- **整型 id 反推不出 uuid**：`Movie` / `TvShow` 只有整型 id（`fnv1a64(uuid)`）且**没有 native-id 列**，`.xcoll` 与刷新都拿不回 uuid。刷新靠记录里的 `externalUrl` 反解（`neodbUuidFromUrl`）；纯 `native_id` 的降级导入路径对影视无效。**给影视加新源时若需要详情重取，必须先解决"id 不可逆"这件事**。
+- 解析逻辑统一在 `packages/core/lib/utils/neodb_json.dart`，图书 / 电影 / 剧集共用；`book.dart` 的等价私有 helper 已改为委托，**别再各写一份**。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。

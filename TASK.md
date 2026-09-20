@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入
+- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入 · M3 NeoDB 电影 / 剧集接入
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面构建可用性（缺 VS C++ 工作负载）
 
@@ -109,13 +109,15 @@
 - 要做的：为豆瓣主机加「连打 N 次 → 冷却 M 分钟」的退避策略；接在「FIFO 间隔」之后，402/429/403 触发冷却；冷却期内请求直接失败并给出用户可读提示。
 - 验收：模拟 10 连击后第 11 次被冷却；冷却期间请求不发出网；冷却结束自动恢复。带单测。
 
-### T2 · NeoDB 扩电影 / 剧集（**推荐下一个开工**）
+### T2 · NeoDB 扩电影 / 剧集（✅ 2026-09-20 完成 → M3）
 
 图书类目已于 D4 落地，客户端、代理白名单、限流条目都是现成的，扩一个类目的边际成本只剩模型映射与筛选器。
 
+**落地结果**：类目常量扩为 book / movie / tv；`NeoDBSearchApi` 的解析泛型化（`search<T>` / `getItem<T>`），`NeoDBApi` 新增 `searchMovies` / `searchTvShows` / `getMovieById` / `getTvShowById`；`Movie.fromNeoDBItem` 与 `TvShow.fromNeoDBItem` 落地，解析逻辑抽到 `packages/core/lib/utils/neodb_json.dart` 供三类共用（`book.dart` 的私有 helper 一并改为委托）；新源 `neodb_movie` / `neodb_tv` 注册在可浏览的 TMDB / TheTVDB **之后**（搜索型源不做主源）。**剧集以「季」为粒度**（`category=tv` 只返回 `TVSeason`），刷新用 `externalUrl` 反解 uuid。文档侧：`kDataSourceCatalog` 的 NeoDB 补 movie / tvShow。
+
 **实测契约（2026-09-19 二轮探测 + D4 落地时复核）**：
 
-- **六大类目全通**：book / movie / tv / music / game / podcast；换 `category` 参数即可复用 `NeoDBSearchApi.searchItems`。
+- **六大类目全通**：book / movie / tv / music / game / podcast；换 `category` 参数即可复用 `NeoDBSearchApi.search<T>`。
 - **它是豆瓣数据的免密钥代理**：`external_resources` 挂 `book.douban.com` / `movie.douban.com`，中文简介与 tags 带豆瓣血统。→ T1（豆瓣签名 + 403 退避）可整体推迟。
 - **不要求自定义 UA**（实测默认 UA / 空 UA 均 200），与 Bangumi 的 Cloudflare 403 相反。
 - **无限流**：25 连打 0 个非 200，延迟中位数 770ms → 已加 250ms 礼貌间隔即可，无需退避。

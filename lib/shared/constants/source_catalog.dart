@@ -82,7 +82,11 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
   ),
   SourceInfo(
     source: DataSource.neodb,
-    mediaTypes: <MediaType>[MediaType.book],
+    mediaTypes: <MediaType>[
+      MediaType.book,
+      MediaType.movie,
+      MediaType.tvShow,
+    ],
     url: 'https://neodb.social/',
   ),
   SourceInfo(

@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'data_source.dart';
 import '../utils/html_text.dart';
+import '../utils/neodb_json.dart';
+import '../utils/stable_id.dart';
 import '../utils/tvdb_json.dart';
 import '../utils/tvmaze_json.dart';
 
@@ -127,6 +129,33 @@ class TvShow {
       externalUrl: json['url'] as String?,
       cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       source: DataSource.tvmaze,
+    );
+  }
+
+  /// NeoDB item. The catalogue files TV as seasons, so
+  /// `/api/catalog/search` answers with `TVSeason` records whose title already
+  /// carries the season number ("甄嬛传 第 1 季") — one season is one record.
+  factory TvShow.fromNeoDBItem(Map<String, dynamic> json) {
+    final String uuid = neodbItemUuid(json);
+    final String? title = neodbItemTitle(json);
+    final List<String> genres = neodbItemGenres(json['genre']);
+
+    return TvShow(
+      tmdbId: fnv1a64(uuid),
+      title: title ?? 'Unknown',
+      originalTitle: neodbItemOriginalTitle(json, title),
+      posterUrl: neodbItemCoverUrl(json),
+      overview: neodbItemDescription(json),
+      genres: genres.isEmpty ? null : genres,
+      firstAirYear: neodbItemYear(json),
+      // A season record carries no season count and no airing status, and the
+      // show endpoint that has them costs a second request per row.
+      totalEpisodes: neodbItemEpisodeCount(json),
+      // NeoDB already rates out of 10 — do not double it.
+      rating: neodbItemRating(json['rating']),
+      externalUrl: neodbItemUrl(json),
+      cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      source: DataSource.neodb,
     );
   }
 

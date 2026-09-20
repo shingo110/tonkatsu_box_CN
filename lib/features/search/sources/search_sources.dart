@@ -18,6 +18,8 @@ import 'mangadex_source.dart';
 import 'musicbrainz_albums_source.dart';
 import 'podcast_index_source.dart';
 import 'neodb_book_source.dart';
+import 'neodb_movie_source.dart';
+import 'neodb_tv_source.dart';
 import 'openlibrary_source.dart';
 import 'tmdb_anime_source.dart';
 import 'tmdb_movies_source.dart';
@@ -56,6 +58,11 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     KitsuMangaSource(),
     // VNDB
     VndbSource(),
+    // NeoDB — the Chinese catalogue. Its movie / TV endpoints only search, so
+    // they rank behind the browsable TMDB / TheTVDB sources instead of
+    // displacing them as primary.
+    NeoDBMovieSource(),
+    NeoDBTvSource(),
     // Books — NeoDB leads because it is the one answering in Chinese.
     NeoDBBookSource(),
     OpenLibrarySource(),

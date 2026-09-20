@@ -13,6 +13,7 @@ import 'package:core/models/steamgriddb_image.dart';
 import 'package:core/models/tv_show.dart';
 import 'package:core/models/visual_novel.dart';
 import 'package:core/models/xcoll_file.dart';
+import 'package:core/utils/neodb_json.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -628,17 +629,12 @@ class CollectionActions {
           if (game == null) return _RefreshOutcome.notFound();
           await db.gameDao.upsertGame(game);
         case MediaType.movie:
-          final Movie? movie = item.source == DataSource.tvdb
-              ? await ref.read(tvdbApiProvider).getMovie(item.externalId)
-              : await ref.read(tmdbApiProvider).getMovie(item.externalId);
+          final Movie? movie = await _refreshedMovie(ref, item);
           if (movie == null) return _RefreshOutcome.notFound();
           await db.movieDao.upsertMovie(movie);
         case MediaType.tvShow:
         case MediaType.animation:
-          final TvEpisodeSource api = ref.read(tvEpisodeSourceResolverProvider)(
-            item.source ?? item.mediaType.defaultSource,
-          );
-          final TvShow? show = await api.getShow(item.externalId);
+          final TvShow? show = await _refreshedTvShow(ref, item);
           if (show == null) return _RefreshOutcome.notFound();
           await db.tvShowDao.upsertTvShow(show);
         case MediaType.anime:
@@ -766,6 +762,34 @@ class CollectionActions {
       return _RefreshOutcome.failed(e.toString());
     }
   }
+}
+
+/// TMDB and TheTVDB resolve a movie from its integer id. NeoDB hashes its
+/// uuid into that id, so the stored provider URL is the only way back.
+Future<Movie?> _refreshedMovie(WidgetRef ref, CollectionItem item) async {
+  if (item.source == DataSource.neodb) {
+    final String? uuid = neodbUuidFromUrl(item.movie?.externalUrl);
+    if (uuid == null) return null;
+    return ref.read(neodbApiProvider).getMovieById(uuid);
+  }
+  if (item.source == DataSource.tvdb) {
+    return ref.read(tvdbApiProvider).getMovie(item.externalId);
+  }
+  return ref.read(tmdbApiProvider).getMovie(item.externalId);
+}
+
+/// TMDB / TVmaze / TheTVDB resolve a show from its integer id; NeoDB needs its
+/// uuid back out of the stored provider URL.
+Future<TvShow?> _refreshedTvShow(WidgetRef ref, CollectionItem item) async {
+  if (item.source == DataSource.neodb) {
+    final String? uuid = neodbUuidFromUrl(item.tvShow?.externalUrl);
+    if (uuid == null) return null;
+    return ref.read(neodbApiProvider).getTvShowById(uuid);
+  }
+  final TvEpisodeSource api = ref.read(tvEpisodeSourceResolverProvider)(
+    item.source ?? item.mediaType.defaultSource,
+  );
+  return api.getShow(item.externalId);
 }
 
 enum _RefreshMessage { success, notFound, unsupported, failed }

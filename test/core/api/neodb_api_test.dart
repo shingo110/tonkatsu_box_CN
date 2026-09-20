@@ -1,5 +1,7 @@
 import 'package:core/models/book.dart';
 import 'package:core/models/data_source.dart';
+import 'package:core/models/movie.dart';
+import 'package:core/models/tv_show.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -243,6 +245,118 @@ void main() {
           ),
         ),
       );
+    });
+  });
+
+  group('movies and TV', () {
+    Map<String, dynamic> movieRow(String uuid) => <String, dynamic>{
+          'uuid': uuid,
+          'id': 'https://neodb.social/movie/$uuid',
+          'url': '/movie/$uuid',
+          'category': 'movie',
+          'type': 'Movie',
+          'display_title': 'Farewell My Concubine',
+          'orig_title': '霸王别姬',
+          'localized_title': <Map<String, dynamic>>[
+            <String, dynamic>{'lang': 'zh-cn', 'text': '霸王别姬'},
+          ],
+          'rating': 9.5,
+          'tags': <String>['1993'],
+          'year': 1993,
+          'length': 10260,
+        };
+
+    Map<String, dynamic> tvRow(String uuid) => <String, dynamic>{
+          'uuid': uuid,
+          'id': 'https://neodb.social/tv/season/$uuid',
+          'url': '/tv/season/$uuid',
+          'category': 'tv',
+          'type': 'TVSeason',
+          'display_title': 'Empresses in the Palace',
+          'localized_title': <Map<String, dynamic>>[
+            <String, dynamic>{'lang': 'zh-cn', 'text': '甄嬛传 第 1 季'},
+          ],
+          'rating': 8.8,
+          'tags': <String>['2011'],
+          'year': 2011,
+          'episode_count': 76,
+        };
+
+    test('searchMovies asks for the movie category', () async {
+      stubGet(page(<dynamic>[movieRow('m1')], pages: 4));
+
+      final (List<Movie> movies, bool hasMore, int totalPages) =
+          await api.searchMovies(query: '霸王别姬', page: 2);
+
+      expect(movies, hasLength(1));
+      expect(movies.single.title, '霸王别姬');
+      expect(movies.single.source, DataSource.neodb);
+      expect(movies.single.rating, 9.5);
+      expect(movies.single.runtime, 171);
+      expect(hasMore, isTrue);
+      expect(totalPages, 4);
+      expect(
+        captureGet()[1],
+        <String, dynamic>{'query': '霸王别姬', 'category': 'movie', 'page': 2},
+      );
+    });
+
+    test('searchTvShows asks for the tv category', () async {
+      stubGet(page(<dynamic>[tvRow('t1')]));
+
+      final (List<TvShow> shows, _, _) = await api.searchTvShows(query: '甄嬛传');
+
+      expect(shows, hasLength(1));
+      expect(shows.single.title, '甄嬛传 第 1 季');
+      expect(shows.single.totalEpisodes, 76);
+      final Map<String, dynamic> params =
+          captureGet()[1] as Map<String, dynamic>;
+      expect(params['category'], 'tv');
+    });
+
+    test('drops a malformed movie row without failing the page', () async {
+      stubGet(page(<dynamic>[movieRow('m1'), 'not an object']));
+
+      final (List<Movie> movies, _, _) = await api.searchMovies(query: 'x');
+
+      expect(movies, hasLength(1));
+    });
+
+    test('getMovieById reads the movie path', () async {
+      stubGet(movieRow('4RQwAeTa5E2DKPPbFt4UVJ'));
+
+      final Movie? movie = await api.getMovieById('4RQwAeTa5E2DKPPbFt4UVJ');
+
+      expect(movie, isNotNull);
+      expect(captureGet()[0], 'api/movie/4RQwAeTa5E2DKPPbFt4UVJ');
+    });
+
+    test('getTvShowById reads the season path', () async {
+      // Search files TV as seasons, so the detail path carries the segment.
+      stubGet(tvRow('2yMJKWEPBoYGHeRF2qTiX5'));
+
+      final TvShow? show = await api.getTvShowById('2yMJKWEPBoYGHeRF2qTiX5');
+
+      expect(show, isNotNull);
+      expect(captureGet()[0], 'api/tv/season/2yMJKWEPBoYGHeRF2qTiX5');
+    });
+
+    test('getMovieById returns null on a 404', () async {
+      when(() => mockDio.get<dynamic>(
+            any(),
+            queryParameters: any(named: 'queryParameters'),
+          )).thenThrow(dioError(statusCode: 404));
+
+      expect(await api.getMovieById('missing'), isNull);
+    });
+
+    test('getTvShowById returns null on a 404', () async {
+      when(() => mockDio.get<dynamic>(
+            any(),
+            queryParameters: any(named: 'queryParameters'),
+          )).thenThrow(dioError(statusCode: 404));
+
+      expect(await api.getTvShowById('missing'), isNull);
     });
   });
 
