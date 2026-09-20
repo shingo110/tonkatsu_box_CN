@@ -59,12 +59,14 @@
 |:-:|------|------|------|
 | P1 | 全部测试 `+0 -413`，报 `WebSocketException: Invalid WebSocket upgrade request` | `HTTP_PROXY` 指向沙箱代理，`NO_PROXY` 未设，flutter_tester 连 loopback 被拦 —— 极易误判为编译错误 | 带清代理跑：`env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy -u ALL_PROXY -u all_proxy NO_PROXY="127.0.0.1,localhost,::1" flutter test --no-pub` |
 | P2 | `flutter analyze` 刷出 1 万+ `package:test` 错 | 子包依赖未装：根 `pub get` 不生成 `packages/core` / `server` 的 package_config | `dart pub get --directory packages/core` 与 `server` 各跑一遍 |
-| P3 | `flutter run -d windows` 链接失败 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 | 写码/分析/测试不受影响；要跑桌面需装 VS 组件 |
+| P3 | `flutter run -d windows` 链接失败 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 | 写码/分析/测试不受影响。本机实测全盘无 VS 与 Windows SDK（`flutter doctor` 报 `[X] Visual Studio`），要跑桌面须装 VS 2022 + 「使用 C++ 的桌面开发」工作负载（含 Windows SDK）。**替代路径：上游 `release.yml` 已用 `windows-2022` runner 在 CI 里出 Windows 包，无需本机 VS** |
 | P4 | 两份 `flutter test` 并发 → 交替 `PathAccessException` / `errno=5` 崩的是工具本身 | 撞 `build/native_assets/windows/sqlite3.dll` 文件锁 | 测试串行，绝不并发 |
 | P5 | flutter_test 里没有真网络 | 测试绑定默认装「一律返回 400」的假 HttpOverrides | 在线验证需在 `ensureInitialized()` 后 `HttpOverrides.global = null;` |
 | P6 | `flutter.bat` 经 cmd 吃裸 `|` | 命令行参数含 `\|` 时（如 `--coverage-package="tonkatsu_box\|core"`）需写 `.ps1` 或加引号 | 见 `.claude/CLAUDE.md` Toolchain |
 | P7 | 覆盖率统计缺 `packages/core` | `flutter test --coverage` 默认只包当前包 | 永远传 `--coverage-package='tonkatsu_box\|core'` |
 | P8 | `git status` 恒显 `[ahead N]`，可远端其实早已收到推送 | `refs/remotes/origin/main` 卡在 fork 起点（`f2ed6e08`，只存在于 `.git/packed-refs`）；**本仓实测 `git update-ref` 返回 `rc=0` 却不落盘**，`.git/refs/remotes/` 始终为空 | **判据一律用 `git ls-remote origin main`**（权威），不要信 `git status` 的 ahead/behind。修法：`mkdir -p .git/refs/remotes/origin && git rev-parse refs/heads/main > .git/refs/remotes/origin/main`（纯 shell 直写能落盘） |
+| P9 | `flutter build apk --release` 首次耗时离谱（实测 **38 分钟**），中途可能抛 `Could not download core-1.15.0.aar … C:\Users\ZL\.gradle\.tmp\gradle_download*.bin (拒绝访问。)` | ① 首次要联网拉 Gradle 8.14-all（360 MB）+ Maven 依赖约 1.7 GB，经沙箱代理很慢；② 那句「拒绝访问」是临时文件被瞬时占用（**不是权限缺失** —— 同一目录手工读写正常），重试即过 | **直接重试**（缓存已留下，第二次 13 分钟）。进度判据：`du -sh ~/.gradle/caches/modules-2` 是否还在涨。另需 `android/key.properties`（已 gitignore，模板见 `docs/CONTRIBUTING.md`），缺则 release 签名直接失败 |
+| P10 | 构建日志刷 `this and base files have different roots: C:\Users\ZL\AppData\Local\Pub\Cache\… and D:\Projects\…\android` 的 suppressed 异常 | pub 缓存在 C:、项目在 D:，Kotlin 增量编译器无法跨盘相对化路径 | **不影响产物，APK 照常生成，可忽略**；实在碍眼就删 `build/<plugin>/kotlin/`，或把 `PUB_CACHE` 也挪到 D: |
 
 ## 五、测试设施坑（mocktail，都是血泪）
 
