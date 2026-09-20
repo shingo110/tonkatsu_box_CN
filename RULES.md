@@ -64,6 +64,7 @@
 | P5 | flutter_test 里没有真网络 | 测试绑定默认装「一律返回 400」的假 HttpOverrides | 在线验证需在 `ensureInitialized()` 后 `HttpOverrides.global = null;` |
 | P6 | `flutter.bat` 经 cmd 吃裸 `|` | 命令行参数含 `\|` 时（如 `--coverage-package="tonkatsu_box\|core"`）需写 `.ps1` 或加引号 | 见 `.claude/CLAUDE.md` Toolchain |
 | P7 | 覆盖率统计缺 `packages/core` | `flutter test --coverage` 默认只包当前包 | 永远传 `--coverage-package='tonkatsu_box\|core'` |
+| P8 | `git status` 恒显 `[ahead N]`，可远端其实早已收到推送 | `refs/remotes/origin/main` 卡在 fork 起点（`f2ed6e08`，只存在于 `.git/packed-refs`）；**本仓实测 `git update-ref` 返回 `rc=0` 却不落盘**，`.git/refs/remotes/` 始终为空 | **判据一律用 `git ls-remote origin main`**（权威），不要信 `git status` 的 ahead/behind。修法：`mkdir -p .git/refs/remotes/origin && git rev-parse refs/heads/main > .git/refs/remotes/origin/main`（纯 shell 直写能落盘） |
 
 ## 五、测试设施坑（mocktail，都是血泪）
 
