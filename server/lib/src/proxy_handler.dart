@@ -228,6 +228,7 @@ class ApiProxy {
       case ProxyTarget.steam:
       case ProxyTarget.tvmaze:
       case ProxyTarget.vndb:
+      case ProxyTarget.weread:
         break;
     }
     return body;

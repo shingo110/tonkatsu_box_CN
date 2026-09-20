@@ -1328,6 +1328,10 @@ class ImportService {
           return await _fantlabApi?.getWork(nativeId);
         case DataSource.neodb:
           return await _neodbApi?.getBookById(nativeId);
+        case DataSource.weread:
+          // WeRead has no by-id endpoint, and the export carries no title
+          // to search with, so these books resolve from embedded data only.
+          return null;
         default:
           return null;
       }

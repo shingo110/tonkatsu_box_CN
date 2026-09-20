@@ -139,6 +139,7 @@ class _SourceCard extends ConsumerWidget {
         DataSource.googleBooks => l.welcomeSourceDescGoogleBooks,
         DataSource.hardcover => l.welcomeSourceDescHardcover,
         DataSource.neodb => l.welcomeSourceDescNeoDB,
+        DataSource.weread => l.welcomeSourceDescWeRead,
         DataSource.musicBrainz => l.welcomeSourceDescMusicBrainz,
         DataSource.podcastIndex => l.welcomeSourceDescPodcastIndex,
         _ => '',

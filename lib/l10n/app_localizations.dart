@@ -5504,6 +5504,12 @@ abstract class S {
   /// **'A Chinese community catalog. Covers books here, with Chinese titles, descriptions and tags.'**
   String get welcomeSourceDescNeoDB;
 
+  /// No description provided for @welcomeSourceDescWeRead.
+  ///
+  /// In en, this message translates to:
+  /// **'The Chinese e-book store. Covers books here, including web novels and digital-first editions.'**
+  String get welcomeSourceDescWeRead;
+
   /// No description provided for @welcomeTourTitle.
   ///
   /// In en, this message translates to:

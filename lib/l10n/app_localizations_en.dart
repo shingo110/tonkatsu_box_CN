@@ -3114,6 +3114,10 @@ class SEn extends S {
       'A Chinese community catalog. Covers books here, with Chinese titles, descriptions and tags.';
 
   @override
+  String get welcomeSourceDescWeRead =>
+      'The Chinese e-book store. Covers books here, including web novels and digital-first editions.';
+
+  @override
   String get welcomeTourTitle => 'Get to know the menu';
 
   @override

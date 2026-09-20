@@ -2918,6 +2918,9 @@ class SZh extends S {
   String get welcomeSourceDescNeoDB => '中文社区资料库，此处接入图书，含中文标题、简介与标签。';
 
   @override
+  String get welcomeSourceDescWeRead => '中文电子书与网文商店，此处接入图书，含网文与数字首发版本。';
+
+  @override
   String get welcomeTourTitle => '了解菜单';
 
   @override

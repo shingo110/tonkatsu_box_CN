@@ -3163,6 +3163,10 @@ class SEs extends S {
       'Catálogo comunitario en chino. Aquí cubre libros, con títulos, descripciones y etiquetas en chino.';
 
   @override
+  String get welcomeSourceDescWeRead =>
+      'La tienda china de libros electrónicos. Aquí cubre libros, incluidas novelas web y ediciones digitales.';
+
+  @override
   String get welcomeTourTitle => 'Conoce el menú';
 
   @override

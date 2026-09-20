@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入 · M3 NeoDB 电影 / 剧集接入
+- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入 · M3 NeoDB 电影 / 剧集接入 · M4 微信读书图书接入
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面构建可用性（缺 VS C++ 工作负载）
 
@@ -97,9 +97,41 @@
 
 ---
 
+### D5 · 微信读书接入（2026-09-20，第三个国内源）
+
+中文电子书与网文商店，免密钥，**仅搜索**（无 by-id 详情端点）。排列在 NeoDB 之后、OpenLibrary 之前 —— 中文书目优先于海外目录。
+
+**改动面**：
+
+- 模型：`DataSource.weread` 枚举 + `Book.fromWeReadItem`（`packages/core/lib/models/book.dart`）
+- 注册面：`data_source_ui.dart`（无品牌资源 → `null`，回落 `Icons.local_library`）· `source_catalog.dart` · `search_sources.dart`
+- API 三件套 + facade：`lib/core/api/weread/{types,http_client,search_api}.dart` + `weread_api.dart`
+- 源实现：`lib/features/search/sources/weread_book_source.dart`（id `weread`，无筛选器、单排序项）
+- Web + 限流：`proxy_targets.dart` 加 `weread('weread.qq.com')`；`proxy_handler.dart` 免密钥分支；`kHostMinRequestGap` 加 200ms
+- 本地化：6 语言 ARB × 1 键（`welcomeSourceDescWeRead`）
+
+**连带必修（漏了会静默失效，不报错）**：
+
+- `collection_actions.dart` —— 图书刷新 `if/else if` 链加 `weread` 分支（按标题重搜 + 匹配 bookId）
+- `media_handlers.dart`（`_fetchFullBook`）—— 加 `DataSource.weread` case
+- `import_service.dart` —— 显式 case 注明「导出不含标题，无从重搜」，**不注入 API**（注入了也无处可用，会触发 `unused_field`）
+
+**验收记录**：
+
+- [x] `flutter analyze --fatal-infos --fatal-warnings`：No issues found
+- [x] `flutter test`：**5591 通过 / 3 跳过 / 0 失败**（基线 5566，+25）
+- [x] `dart test`（packages/core）：**2323 通过**（基线 2309，+14）
+- [x] `dart test`（server）：98 通过
+- [x] RPC 生成物 `git diff --exit-code`：字节一致（未改模型字段）
+- [x] **在线活体验证**：「三体」→ 20 条、`hasMore=true`、`totalPages=2`；首条「三体全集（全三册）」/ `authors=[刘慈欣]` / `rating=9.3`（930÷100）/ `publishers=[重庆出版社]` / deepLink 外链；第 2 页首条换书（印证 `maxIdx` 有效）；按标题重搜回填 `sameId=true`；空关键词 → 0 条、`hasMore=false`
+- [x] 既有护栏同步：`source_badge_test` 21→22 · `search_sources_test` id 表补 `weread` · `source_output_media_type_test` 补一条 · `mocks.dart` 补 `MockWeReadApi`
+- [ ] **未做**：Web 端 `/proxy/weread/**` 在线验证（需自托管环境）
+
+**探测阶段推翻的一条自造结论**：一度以为「微信读书要求浏览器 UA」（空 UA 返回 0 字节）。复测发现是**探测时走了沙箱代理**导致的偶发空体 —— 直连后 Chrome UA / 应用 UA / 空 UA **三者都返回 6303 字节**。**教训：探测网络接口必须按 P1 的规矩先清 `HTTP_PROXY` 等变量**，否则会把代理噪声当成服务端行为。
+
 ## 📋 候选（下一步从这里挑）
 
-> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 > 微信读书 > 优酷/爱奇艺 > 豆瓣**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故排在最后。
+> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 优酷/爱奇艺 > 豆瓣**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故排在最后。
 
 ### T1 · 豆瓣 403 退避（可推迟，见 T2）
 
@@ -130,8 +162,10 @@
 
 ### T3. 图书线：微信读书 + 豆瓣 ISBN
 
-- 微信读书：`weread.qq.com/web/search/global`（已实测可用，中文书目覆盖好，免密钥）。
-- 豆瓣 ISBN：以 ISBN 直查，无需签名；与微信读书互为补充（豆瓣有评分/页数，微信读书有阅读条目）。
+> **2026-09-20 更新**：微信读书已落地（见 D5）。豆瓣 ISBN 直查**仍未做** —— 实测 `book.douban.com/isbn/{isbn}` 会 301 跳到 subject 页（HTML，且受封禁影响），`movie.douban.com/j/subject_suggest` 对 ISBN 返回空数组，故只剩「签名 Frodo API」一条路，依赖 T1 的 403 退避。
+
+- [x] 微信读书：`weread.qq.com/web/search/global`（免密钥，仅搜索）→ D5
+- [ ] 豆瓣 ISBN：以 ISBN 直查；**须先补 T1 的 403 退避**，否则连打十次即封
 - 候选面：新增 `Book` 模型解析 + 两个源（或一个源双后端）。
 - 验收：ISBN 精确命中返回对应中文图书；关键词搜索中文书名无乱码；在线验证。
 

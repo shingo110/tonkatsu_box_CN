@@ -36,6 +36,7 @@ import '../../../core/api/openlibrary_api.dart';
 import '../../../core/api/tmdb_api.dart';
 import '../../../core/api/tvdb_api.dart';
 import '../../../core/api/vndb_api.dart';
+import '../../../core/api/weread_api.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/services/export_service.dart';
 import '../../../core/services/image_cache_service.dart';
@@ -749,6 +750,15 @@ class CollectionActions {
             if (full == null) return _RefreshOutcome.notFound();
             // Search rows and item detail carry the same field set, unlike
             // OpenLibrary, so nothing needs overlaying here.
+            await db.bookDao.upsertBook(full);
+          } else if (item.source == DataSource.weread) {
+            // WeRead has no by-id endpoint either, so the record is found
+            // again by searching its title and matching the bookId.
+            final Book? full = await ref.read(wereadApiProvider).findByNativeId(
+                  title: cached.title,
+                  nativeId: cached.nativeId,
+                );
+            if (full == null) return _RefreshOutcome.notFound();
             await db.bookDao.upsertBook(full);
           } else {
             return _RefreshOutcome.unsupported();

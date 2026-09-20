@@ -90,6 +90,11 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
     url: 'https://neodb.social/',
   ),
   SourceInfo(
+    source: DataSource.weread,
+    mediaTypes: <MediaType>[MediaType.book],
+    url: 'https://weread.qq.com/',
+  ),
+  SourceInfo(
     source: DataSource.openLibrary,
     mediaTypes: <MediaType>[MediaType.book],
     url: 'https://openlibrary.org/',

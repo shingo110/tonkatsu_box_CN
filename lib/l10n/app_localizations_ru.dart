@@ -3177,6 +3177,10 @@ class SRu extends S {
       'Китайский каталог сообщества. Здесь — книги с китайскими названиями, описаниями и тегами.';
 
   @override
+  String get welcomeSourceDescWeRead =>
+      'Китайский магазин электронных книг. Здесь — книги, включая сетевые романы и цифровые издания.';
+
+  @override
   String get welcomeTourTitle => 'Знакомство с меню';
 
   @override

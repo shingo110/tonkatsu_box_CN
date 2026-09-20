@@ -22,6 +22,7 @@ import '../../../core/api/hardcover_api.dart';
 import '../../../core/api/fantlab_api.dart';
 import '../../../core/api/neodb_api.dart';
 import '../../../core/api/openlibrary_api.dart';
+import '../../../core/api/weread_api.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/services/image_cache_service.dart';
 import '../../collections/providers/collections_provider.dart';
@@ -442,6 +443,12 @@ Future<Book?> _fetchFullBook(WidgetRef ref, Book book) async {
       return ref.read(hardcoverApiProvider).getBook(book.nativeId);
     case DataSource.neodb:
       return ref.read(neodbApiProvider).getBookById(book.nativeId);
+    case DataSource.weread:
+      // The store has no by-id endpoint, so the title is searched again and
+      // the row matched on its nativeId.
+      return ref
+          .read(wereadApiProvider)
+          .findByNativeId(title: book.title, nativeId: book.nativeId);
     default:
       return null;
   }

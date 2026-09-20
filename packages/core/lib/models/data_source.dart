@@ -61,6 +61,11 @@ enum DataSource {
   /// Douban entry, so it reaches Chinese metadata without a Douban key.
   neodb('NeoDB', 0xFF4A9B8E),
 
+  /// WeRead (weread.qq.com) — the Chinese e-book store. The only catalogue
+  /// here holding web novels and digital-first editions, which no ISBN
+  /// database lists.
+  weread('WeRead', 0xFF2A6AE9),
+
   /// MusicBrainz — open keyless music database (albums as release-groups).
   /// Feeds the `audio` media type with `AudioKind.album` records.
   musicBrainz('MusicBrainz', 0xFFBA478F),

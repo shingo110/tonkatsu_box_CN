@@ -12,6 +12,9 @@ const Map<String, Duration> kHostMinRequestGap = <String, Duration>{
   // NeoDB is a volunteer-run instance and never refused us, but a single call
   // already costs ~1s, so this only smooths bursts such as paging results.
   'neodb.social': Duration(milliseconds: 250),
+  // WeRead answers in ~250ms and never throttled a burst of eight, but its
+  // search runs while the user types, so pace the keystrokes' follow-ups.
+  'weread.qq.com': Duration(milliseconds: 200),
 };
 
 /// Serialises requests to one host: starts stay in FIFO order and at least

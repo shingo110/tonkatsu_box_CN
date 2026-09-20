@@ -53,6 +53,7 @@ import 'package:tonkatsu_box/core/api/tmdb_api.dart';
 import 'package:tonkatsu_box/core/api/tvdb_api.dart';
 import 'package:tonkatsu_box/core/api/tvmaze_api.dart';
 import 'package:tonkatsu_box/core/api/vndb_api.dart';
+import 'package:tonkatsu_box/core/api/weread_api.dart';
 import 'package:tonkatsu_box/core/database/database_service.dart';
 import 'package:tonkatsu_box/core/import/sources/kinorium/kinorium_import_service.dart';
 import 'package:tonkatsu_box/core/import/sources/steam/steam_import_service.dart';
@@ -179,6 +180,7 @@ class MockFantlabApi extends Mock implements FantlabApi {}
 class MockBangumiApi extends Mock implements BangumiApi {}
 
 class MockNeoDBApi extends Mock implements NeoDBApi {}
+class MockWeReadApi extends Mock implements WeReadApi {}
 
 class MockMangaBakaApi extends Mock implements MangaBakaApi {}
 

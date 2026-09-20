@@ -28,6 +28,7 @@ import 'tvdb_movies_source.dart';
 import 'tvdb_series_source.dart';
 import 'tvmaze_tv_source.dart';
 import 'vndb_source.dart';
+import 'weread_book_source.dart';
 
 /// All registered search sources. List order drives per-type primary /
 /// fallback resolution below; register a new source next to its provider.
@@ -65,6 +66,7 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     NeoDBTvSource(),
     // Books — NeoDB leads because it is the one answering in Chinese.
     NeoDBBookSource(),
+    WeReadBookSource(),
     OpenLibrarySource(),
     FantlabSource(),
     GoogleBooksSource(),

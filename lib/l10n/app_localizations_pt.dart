@@ -3153,6 +3153,10 @@ class SPt extends S {
       'Catálogo comunitário em chinês. Aqui cobre livros, com títulos, descrições e tags em chinês.';
 
   @override
+  String get welcomeSourceDescWeRead =>
+      'A loja chinesa de livros digitais. Aqui cobre livros, incluindo web novels e edições digitais.';
+
+  @override
   String get welcomeTourTitle => 'Conheça o menu';
 
   @override

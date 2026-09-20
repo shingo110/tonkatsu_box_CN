@@ -13,6 +13,7 @@ import 'package:tonkatsu_box/features/search/sources/tmdb_anime_source.dart';
 import 'package:tonkatsu_box/features/search/sources/tmdb_movies_source.dart';
 import 'package:tonkatsu_box/features/search/sources/tmdb_tv_source.dart';
 import 'package:tonkatsu_box/features/search/sources/vndb_source.dart';
+import 'package:tonkatsu_box/features/search/sources/weread_book_source.dart';
 
 void main() {
   group('SearchSource.outputMediaType', () {
@@ -58,6 +59,10 @@ void main() {
 
     test('NeoDBBookSource → MediaType.book', () {
       expect(NeoDBBookSource().outputMediaType, MediaType.book);
+    });
+
+    test('WeReadBookSource → MediaType.book', () {
+      expect(WeReadBookSource().outputMediaType, MediaType.book);
     });
 
     test('NeoDBMovieSource → MediaType.movie', () {

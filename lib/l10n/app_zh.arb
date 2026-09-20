@@ -1348,6 +1348,7 @@
   "welcomeSourceDescGoogleBooks": "来自 Google 图书目录的数百万版本，可按标题、作者或 ISBN 搜索。",
   "welcomeSourceDescHardcover": "社区图书目录：系列、类型、氛围和评分。需要免费的个人令牌。",
   "welcomeSourceDescNeoDB": "中文社区资料库，此处接入图书，含中文标题、简介与标签。",
+  "welcomeSourceDescWeRead": "中文电子书与网文商店，此处接入图书，含网文与数字首发版本。",
   "welcomeTourTitle": "了解菜单",
   "welcomeTourSubtitle": "快速导览主要导航——点击下一步逐步查看。",
   "welcomeTourStart": "开始探索",

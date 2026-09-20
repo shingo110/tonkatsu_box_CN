@@ -12,6 +12,39 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — WeRead book source
+
+The Chinese e-book store, and the first source here holding web novels and
+digital-first editions that no ISBN catalogue lists. Keyless and search-only:
+`web/book/info` answers `errCode -2010` without a signed-in cookie, so a search
+row is the only complete record the app ever sees.
+
+- `lib/core/api/weread/{weread_types,weread_http_client,weread_search_api}.dart`
+  plus `lib/core/api/weread_api.dart` (`wereadApiProvider`), all traffic through
+  `createApiDio`; source id `weread`, book kind only.
+- `Book.fromWeReadItem` divides the store's 0-1000 recommendation score by 100
+  to reach the app's 0-10 scale, keeps the author as one display string (the
+  store ships `曹雪芹著 无名氏续 程伟元 高鹗整理` whole), takes `intro` as the
+  description and `deepLink` as the item URL, and throws on a row without a
+  bookId so the page can drop it.
+- Paging trusts neither `totalCount` (59 across two pages, then 10087) nor
+  `hasMore` (pinned at 1): it follows the `maxIdx` offset and ends on an empty
+  page, with an offset ceiling. `findByNativeId` recovers a stored book by
+  searching its title again and matching the bookId, since there is no by-id
+  endpoint to call — the refresh path in `collection_actions` and the
+  `_fetchFullBook` case in `media_handlers` both use it.
+- `import_service` documents why a bare `.xcoll` ref cannot be resolved: the
+  export carries no title, which the re-search needs.
+- Add `ProxyTarget.weread` and its keyless `_authorize` group, a host
+  rate-limit row, the `DataSource.weread` enum, the catalog entry, the icon
+  fallback and `welcomeSourceDescWeRead` in all six locales.
+- Sync the hardcoded source-count guards (source_badge_test,
+  search_sources_test, source_output_media_type_test, mocks).
+- Verified against the live API: 「三体」 answered 20 rows with 三体全集（全三册）
+  first, author 刘慈欣, rating 9.3 from 930, publisher 重庆出版社 and a
+  book-detail link; page two started at a different book; the title lookup
+  returned the same record; an empty keyword answered an empty page.
+
 ## [cn] Added — NeoDB movie and TV sources
 
 The same keyless catalog extended to film. NeoDB files TV as seasons, so every

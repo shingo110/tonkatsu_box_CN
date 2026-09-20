@@ -446,6 +446,44 @@ class Book {
     );
   }
 
+  /// WeRead search row — `bookInfo` carries the record, the surrounding row
+  /// only a reading count. The store lists a publisher and a recommendation
+  /// score but never an ISBN, a page count or a publication year.
+  factory Book.fromWeReadItem(Map<String, dynamic> row) {
+    final Object? raw = row['bookInfo'];
+    final Map<String, dynamic> info =
+        raw is Map<String, dynamic> ? raw : const <String, dynamic>{};
+    final String bookId = _trimmed(info['bookId']);
+    if (bookId.isEmpty) {
+      throw const FormatException('WeRead row without a bookId');
+    }
+    final int? score = _intOrNull(info['newRating']);
+    final String? author = _nonEmpty(info['author']);
+    final String? publisher = _nonEmpty(info['publisher']);
+
+    return Book(
+      id: bookId,
+      source: DataSource.weread,
+      nativeId: bookId,
+      title: _nonEmpty(info['title']) ?? 'Unknown',
+      // One display string rather than a list: WeRead ships `[哥]加西亚·马尔克斯`
+      // and `曹雪芹著 无名氏续 程伟元 高鹗整理` whole, so splitting it would
+      // invent authors nobody named separately.
+      authors: author != null ? <String>[author] : const <String>[],
+      // The store's intro is plain text with newlines — no markup to strip.
+      description: _nonEmpty(info['intro']),
+      coverUrl: _nonEmpty(info['cover']),
+      publishers: publisher != null ? <String>[publisher] : const <String>[],
+      // The store rates out of 1000 (930 is shown as 93.0) while this app's
+      // books are out of 10, so divide rather than double.
+      rating: score != null && score > 0 ? score / 100 : null,
+      ratingCount: _intOrNull(info['newRatingCount']),
+      // `deepLink` embeds a share token that cannot be rebuilt from the id,
+      // so a row without one simply carries no link.
+      externalUrl: _nonEmpty(info['deepLink']),
+    );
+  }
+
   /// `TEXT` as headroom for a future non-numeric id, but always digits today —
   /// so [externalIdInt] feeds the INTEGER `external_id` without loss.
   final String id;

@@ -3165,6 +3165,10 @@ class SFr extends S {
       'Catalogue communautaire chinois. Couvre ici les livres, avec titres, résumés et étiquettes en chinois.';
 
   @override
+  String get welcomeSourceDescWeRead =>
+      'La librairie numérique chinoise. Couvre ici les livres, y compris les webromans et les éditions numériques.';
+
+  @override
   String get welcomeTourTitle => 'Apprenez à connaître le menu';
 
   @override

@@ -24,7 +24,8 @@ enum ProxyTarget {
   tmdb('api.themoviedb.org'),
   tvdb('api4.thetvdb.com'),
   tvmaze('api.tvmaze.com'),
-  vndb('api.vndb.org');
+  vndb('api.vndb.org'),
+  weread('weread.qq.com');
 
   const ProxyTarget(this.host);
 

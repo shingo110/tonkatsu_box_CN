@@ -73,7 +73,7 @@
 
 ## 六、数据源实测结论（2026-09-18）
 
-**稳定可用**：Bangumi `api.bgm.tv/v0` · NeoDB `neodb.social/api/catalog/search` · 微信读书 `weread.qq.com/web/search/global` · 优酷 `search.youku.com/api/search` · 爱奇艺 `mesh.if.iqiyi.com/.../homePageV3` · 网易云 · QQ 音乐。
+**稳定可用**：Bangumi `api.bgm.tv/v0` · NeoDB `neodb.social/api/catalog/search` · 微信读书 `weread.qq.com/web/search/global`（**已接入，仅搜索** —— 无 by-id 端点，见七之四）· 优酷 `search.youku.com/api/search` · 爱奇艺 `mesh.if.iqiyi.com/.../homePageV3` · 网易云 · QQ 音乐。
 
 **可用但限流极狠**：豆瓣 Frodo `frodo.douban.com/api/v2/*` —— HMAC-SHA1 签名（secret `bf7dddc7c9cfe6f7` + apiKey `0dad551ec0f84ed02907ff5c42e8ec70` + 配对 UA）；**连打 10 次即 403，冷却 3–5 分钟**；签名 path 必须等于最终请求 path（剧集 `/tv/{id}`，用 `/movie/{id}` 会 996）。
 
@@ -109,6 +109,15 @@
 - **搜索行没有 `year` / `length`**：年份只能扫 `tags` 里第一个「四位纯数字」，且要排除 `1990s` 这类年代段（实测年份漂在 `tags[0]` 或 `tags[1]`）；`length` 是**秒**，模型存分钟。`year` / `duration` / `imdb` 只有详情接口才有。
 - **整型 id 反推不出 uuid**：`Movie` / `TvShow` 只有整型 id（`fnv1a64(uuid)`）且**没有 native-id 列**，`.xcoll` 与刷新都拿不回 uuid。刷新靠记录里的 `externalUrl` 反解（`neodbUuidFromUrl`）；纯 `native_id` 的降级导入路径对影视无效。**给影视加新源时若需要详情重取，必须先解决"id 不可逆"这件事**。
 - 解析逻辑统一在 `packages/core/lib/utils/neodb_json.dart`，图书 / 电影 / 剧集共用；`book.dart` 的等价私有 helper 已改为委托，**别再各写一份**。
+
+### 七之四、微信读书接入要点（2026-09-20，`weread`）
+
+- **没有 by-id 详情端点**：`weread.qq.com/web/book/info?bookId=` 对未登录客户端返回 `{"errCode":-2010,"errMsg":"用户不存在"}`，官方没有公开的按 id 取书接口 → **只做搜索源**。详情与刷新靠「按标题重搜 + 精确匹配 `bookId`」（实测精确标题命中就在第 0 位）。`Book.nativeId` 存的就是 `bookId`，所以能对上。
+- **`totalCount` / `hasMore` 都不可信**：同一关键词前两页 `totalCount=59`，第 3 页起跳到 `10087`；`hasMore` 恒为 1。**只有 `maxIdx` 偏移可用**（`maxIdx=(page-1)*count`），判页规则是「返回空页即终点」—— `browse_provider` 本身也这么兜底（*An empty page is the end no matter what hasMore claims*）。`count` 上限 50；每页条数不规则（实测 20/20/28/17/20），**不能拿「行数 < 请求数」判尾页**。
+- **`newRating` 是 0–1000 刻度**（930 在客户端显示为 93.0）→ **除以 100** 得本应用的 0–10。既不是 ×2 也不是 ×10。缺 `newRating` 或为 0 的条目（网文常见）应留空，不要记 0 分。
+- **`author` 是自由格式展示串**：`[哥]加西亚·马尔克斯`、`曹雪芹著 无名氏续 程伟元 高鹗整理`。**不可按空格切分**，否则凭空造出作者；整串放进 `authors` 单元素列表。
+- **无 UA 要求**（Chrome / 应用 / 空 UA 实测均 200）。但注意：**用 curl 经沙箱代理探测时曾连续返回 0 字节**，一度误判为「UA 被拒」；清掉 `HTTP_PROXY` 等变量直连后同一请求正常返回 6303 字节。**探测网络接口务必先清代理**（同 P1 的规矩），否则会把代理噪声当成服务端行为。
+- **`.xcoll` 降级导入无法解析微信读书条目**：`CollectionItem.toExport()` 只导出 `media_type / external_id / native_id / source`，**不含标题**，而重搜必须有标题。故该分支显式 `return null` 并注明原因；正常导入走内嵌媒体数据，不受影响。
 
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
