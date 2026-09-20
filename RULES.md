@@ -72,6 +72,8 @@
 | P8 | `git status` 恒显 `[ahead N]`，可远端其实早已收到推送 | `refs/remotes/origin/main` 卡在 fork 起点（`f2ed6e08`，只存在于 `.git/packed-refs`）；**本仓实测 `git update-ref` 返回 `rc=0` 却不落盘**，`.git/refs/remotes/` 始终为空 | **判据一律用 `git ls-remote origin main`**（权威），不要信 `git status` 的 ahead/behind。修法：`mkdir -p .git/refs/remotes/origin && git rev-parse refs/heads/main > .git/refs/remotes/origin/main`（纯 shell 直写能落盘） |
 | P9 | `flutter build apk --release` 首次耗时离谱（实测 **38 分钟**），中途可能抛 `Could not download core-1.15.0.aar … C:\Users\ZL\.gradle\.tmp\gradle_download*.bin (拒绝访问。)` | ① 首次要联网拉 Gradle 8.14-all（360 MB）+ Maven 依赖约 1.7 GB，经沙箱代理很慢；② 那句「拒绝访问」是临时文件被瞬时占用（**不是权限缺失** —— 同一目录手工读写正常），重试即过 | **直接重试**（缓存已留下，第二次 13 分钟）。进度判据：`du -sh ~/.gradle/caches/modules-2` 是否还在涨。另需 `android/key.properties`（已 gitignore，模板见 `docs/CONTRIBUTING.md`），缺则 release 签名直接失败 |
 | P10 | 构建日志刷 `this and base files have different roots: C:\Users\ZL\AppData\Local\Pub\Cache\… and D:\Projects\…\android` 的 suppressed 异常 | pub 缓存在 C:、项目在 D:，Kotlin 增量编译器无法跨盘相对化路径 | **不影响产物，APK 照常生成，可忽略**；实在碍眼就删 `build/<plugin>/kotlin/`，或把 `PUB_CACHE` 也挪到 D: |
+| P11 | 用 Python 补丁脚本改本仓库文件时，多行锚点**看着一模一样**却 `count == 0` | 工作树是 **CRLF**，而脚本里的锚点习惯按 `\n` 书写 | 替换函数里按目标文件**实际行尾**归一化（`eol = '\r\n' if '\r\n' in text else '\n'`，读文件用 `newline=''`）。逐行改写 JSON / arb 时**要保留行尾的 `\r`**，否则整文件行尾被改写。新写的 Dart 文件默认 LF，提交前转 CRLF。**注**：Edit 工具本身会保留 CRLF，只有手写脚本要自己管 |
+| P12 | 想校验 APK 签名，`cmd //c "…apksigner.bat …"` 一条输出都没有 | 同「PowerShell 无 stdout」一类，沙箱 shim 截断 | **直接用 POSIX 路径调用 `.bat`**：`"D:/Software/Android/build-tools/37.0.0/apksigner.bat" verify --print-certs <apk>`。另：`llvm-objcopy … Permission denied`（x86_64 符号表）**不致命** —— APK 照常产出、三 ABI 齐全，只少 Play 用的调试符号 |
 
 ## 五、测试设施坑（mocktail，都是血泪）
 
