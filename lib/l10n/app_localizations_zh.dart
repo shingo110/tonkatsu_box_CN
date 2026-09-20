@@ -787,6 +787,9 @@ class SZh extends S {
   String get credentialsOwnKeyHint => '为了更好的速率限制，建议使用自己的 API 密钥。';
 
   @override
+  String get credentialsKeyRequiredHint => '必填——未配置密钥时该源保持关闭。';
+
+  @override
   String get credentialsConnected => '已连接';
 
   @override
@@ -5684,7 +5687,7 @@ class SZh extends S {
       '播客搜索与单集追踪。使用 api.podcastindex.org 的免费密钥对。';
 
   @override
-  String get credentialsDoubanSection => '豆瓣 API（书籍）';
+  String get credentialsDoubanSection => '豆瓣 API（图书与影视）';
 
   @override
   String get credentialsEnterDoubanKey => '输入你的豆瓣 API 密钥';
@@ -5699,7 +5702,7 @@ class SZh extends S {
   String get credentialsDoubanKeyInvalid => '豆瓣拒绝了密钥。请检查密钥对和系统时间';
 
   @override
-  String get welcomeApiDoubanDesc => '中文图书目录。需要密钥对为每次请求签名。';
+  String get welcomeApiDoubanDesc => '中文图书、电影与剧集目录。需要密钥对为每次请求签名。';
 
   @override
   String get welcomeSourceDescMusicBrainz => '开放的音乐百科：专辑、艺术家与版本。无需密钥。';

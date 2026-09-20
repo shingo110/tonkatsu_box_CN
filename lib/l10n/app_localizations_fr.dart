@@ -849,6 +849,10 @@ class SFr extends S {
       'Pour de moins grandes restrictions d\'utilisation, nous recommandons l\'utilisation de vos propres clés API.';
 
   @override
+  String get credentialsKeyRequiredHint =>
+      'Obligatoire — cette source reste désactivée tant qu\'aucune clé n\'est saisie.';
+
+  @override
   String get credentialsConnected => 'Connecté';
 
   @override
@@ -6078,7 +6082,7 @@ class SFr extends S {
       'Recherche de podcasts et suivi des épisodes. Paire clé/secret gratuite sur api.podcastindex.org.';
 
   @override
-  String get credentialsDoubanSection => 'API Douban (Livres)';
+  String get credentialsDoubanSection => 'API Douban (Livres et films)';
 
   @override
   String get credentialsEnterDoubanKey => 'Saisissez votre clé API Douban';
@@ -6096,7 +6100,7 @@ class SFr extends S {
 
   @override
   String get welcomeApiDoubanDesc =>
-      'Le catalogue chinois du livre. Nécessite une paire clé/secret pour signer chaque requête.';
+      'Le catalogue chinois des livres, films et séries. Nécessite une paire clé/secret pour signer chaque requête.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>

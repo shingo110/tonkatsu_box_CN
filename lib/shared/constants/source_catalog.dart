@@ -101,7 +101,9 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
       MediaType.movie,
       MediaType.tvShow,
     ],
-    url: 'https://book.douban.com/',
+    // One account covers all three media types, so the link is the site root
+    // rather than the books subsection.
+    url: 'https://www.douban.com/',
     // Every request is signed, so a key and secret pair is not optional.
     keyRequirement: SourceKeyRequirement.mandatory,
   ),

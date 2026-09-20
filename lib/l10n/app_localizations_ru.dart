@@ -852,6 +852,10 @@ class SRu extends S {
       'Для лучших лимитов рекомендуем использовать свой ключ API.';
 
   @override
+  String get credentialsKeyRequiredHint =>
+      'Обязательно — источник остаётся выключенным, пока не задан ключ.';
+
+  @override
   String get credentialsConnected => 'Подключено';
 
   @override
@@ -6086,7 +6090,7 @@ class SRu extends S {
       'Поиск подкастов и трекинг эпизодов. Бесплатная пара ключей с api.podcastindex.org.';
 
   @override
-  String get credentialsDoubanSection => 'Douban API (книги)';
+  String get credentialsDoubanSection => 'Douban API (книги и кино)';
 
   @override
   String get credentialsEnterDoubanKey => 'Введите API-ключ Douban';
@@ -6103,7 +6107,7 @@ class SRu extends S {
 
   @override
   String get welcomeApiDoubanDesc =>
-      'Китайский книжный каталог. Нужна пара ключа и секрета для подписи каждого запроса.';
+      'Китайский каталог книг, фильмов и сериалов. Нужна пара ключа и секрета для подписи каждого запроса.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>

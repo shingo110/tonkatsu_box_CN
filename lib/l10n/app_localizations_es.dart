@@ -854,6 +854,10 @@ class SEs extends S {
       'Para mejores límites de uso recomendamos usar tu propia clave API.';
 
   @override
+  String get credentialsKeyRequiredHint =>
+      'Obligatorio: esta fuente permanece desactivada hasta que se configure una clave.';
+
+  @override
   String get credentialsConnected => 'Conectado';
 
   @override
@@ -6060,7 +6064,7 @@ class SEs extends S {
       'Búsqueda de pódcasts y seguimiento de episodios. Par clave/secreto gratuito de api.podcastindex.org.';
 
   @override
-  String get credentialsDoubanSection => 'API de Douban (Libros)';
+  String get credentialsDoubanSection => 'API de Douban (Libros y cine)';
 
   @override
   String get credentialsEnterDoubanKey => 'Introduce tu clave de API de Douban';
@@ -6078,7 +6082,7 @@ class SEs extends S {
 
   @override
   String get welcomeApiDoubanDesc =>
-      'El catálogo chino del libro. Necesita un par de clave y secreto para firmar cada petición.';
+      'El catálogo chino de libros, películas y series. Necesita un par de clave y secreto para firmar cada petición.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>

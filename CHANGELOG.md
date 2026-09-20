@@ -12,6 +12,37 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — key screen gaps
+
+Two surfaces let a provider's API key be set: the settings screen and the
+first-run wizard. Both enumerate the keyed sources by hand, and both had
+drifted from the shared catalog.
+
+- The wizard's key editor had a branch for every keyed source except Douban, so
+  its card rendered nothing at all — no field, no link, no hint — and said
+  nothing about it. Added the branch.
+- Its status pill read `settings.hasCredentials` for Douban, which is IGDB's
+  credential flag, so a user who had only configured IGDB saw "key saved" next
+  to Douban. It reads `hasDoubanKeys` now.
+- The settings screen never linked to a provider's key page, although
+  `SourceInfo.url` documents itself as exactly that and the wizard had used it
+  all along. `_buildSourceHeader` takes a `DataSource` and renders the same link
+  from the catalog (`_keyUrlFor`), so the two surfaces cannot diverge again.
+- The Douban section still said books after the source grew to books, film and
+  TV: retitled and redescribed in all six ARB files, its book icon replaced,
+  and the catalog's URL moved from the books subsection to the site root.
+- Hardcover — and TheTVDB whenever no built-in key is compiled in — was shown
+  `credentialsOwnKeyHint`, which tells the reader a key is optional when it is
+  required. Added `credentialsKeyRequiredHint` in six languages and split the
+  hint by `keyRequirement`.
+- `welcome_step_sources_test.dart` hard-coded "nine fields", so a keyed source
+  missing from the wizard stayed green while its card went blank — precisely
+  the Douban bug. It derives the count from the catalog now, and the new
+  `credentials_content_key_links_test.dart` pins the per-section key link and
+  the Douban retitle.
+
+Gates: analyze clean; 5702 app / 2380 core / 108 server pass; RPC byte-identical.
+
 ## [cn] Added — self-host proxy verification
 
 The web build reaches every external API through the self-host server's

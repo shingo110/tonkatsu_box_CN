@@ -841,6 +841,10 @@ class SEn extends S {
       'For better rate limits we recommend using your own API key.';
 
   @override
+  String get credentialsKeyRequiredHint =>
+      'Required — this source stays off until a key is set.';
+
+  @override
   String get credentialsConnected => 'Connected';
 
   @override
@@ -5985,7 +5989,7 @@ class SEn extends S {
       'Podcast search and episode tracking. Uses a free key/secret pair from api.podcastindex.org.';
 
   @override
-  String get credentialsDoubanSection => 'Douban API (Books)';
+  String get credentialsDoubanSection => 'Douban API (Books & Film)';
 
   @override
   String get credentialsEnterDoubanKey => 'Enter your Douban API key';
@@ -6002,7 +6006,7 @@ class SEn extends S {
 
   @override
   String get welcomeApiDoubanDesc =>
-      'The Chinese book catalogue. Needs a key and secret pair to sign every request.';
+      'The Chinese catalogue for books, films and series. Needs a key and secret pair to sign every request.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>

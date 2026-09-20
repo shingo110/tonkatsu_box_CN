@@ -1,3 +1,4 @@
+import 'package:core/models/data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,10 +26,18 @@ void main() {
       child: const MaterialApp(
         localizationsDelegates: S.localizationsDelegates,
         supportedLocales: S.supportedLocales,
+        locale: Locale('en'),
         home: Scaffold(body: WelcomeStepSources()),
       ),
     );
   }
+
+  /// Sources the catalog says need a key — the wizard only renders a key
+  /// editor for these.
+  int keyedSourceCount() => kDataSourceCatalog
+      .where((SourceInfo info) =>
+          info.keyRequirement != SourceKeyRequirement.none)
+      .length;
 
   group('WelcomeStepSources', () {
     testWidgets('renders without exception', (WidgetTester tester) async {
@@ -50,15 +59,32 @@ void main() {
       );
     });
 
-    testWidgets(
-        'exposes key fields for IGDB, TMDB, TheTVDB, ComicVine, Google Books, '
-        'Hardcover and Podcast Index', (WidgetTester tester) async {
+    testWidgets('exposes a key field for every keyed source',
+        (WidgetTester tester) async {
       await tester.pumpWidget(createWidget());
       await tester.pumpAndSettle();
 
-      // IGDB (id + secret), TMDB, TheTVDB, ComicVine, Google Books,
-      // Hardcover, Podcast Index (key + secret) = 9 fields.
-      expect(find.byType(InlineTextField), findsNWidgets(9));
+      // Derived from the catalog, not a literal: the editor dispatches on the
+      // source, and a keyed source missing from that switch renders nothing at
+      // all, so a stale count would stay green while the card went blank.
+      const Set<DataSource> pairSources = <DataSource>{
+        DataSource.igdb,
+        DataSource.podcastIndex,
+        DataSource.douban,
+      };
+
+      expect(
+        find.byType(InlineTextField),
+        findsNWidgets(keyedSourceCount() + pairSources.length),
+      );
+    });
+
+    testWidgets('links every keyed source to its provider page',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(createWidget());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Get a key'), findsNWidgets(keyedSourceCount()));
     });
   });
 }

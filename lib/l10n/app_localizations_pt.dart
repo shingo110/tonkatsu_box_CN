@@ -851,6 +851,10 @@ class SPt extends S {
       'Para limites de uso melhores, recomendamos usar sua própria chave de API.';
 
   @override
+  String get credentialsKeyRequiredHint =>
+      'Obrigatório — esta fonte fica desativada até que uma chave seja definida.';
+
+  @override
   String get credentialsConnected => 'Conectado';
 
   @override
@@ -6041,7 +6045,7 @@ class SPt extends S {
       'Busca de podcasts e acompanhamento de episódios. Par chave/segredo gratuito em api.podcastindex.org.';
 
   @override
-  String get credentialsDoubanSection => 'API do Douban (Livros)';
+  String get credentialsDoubanSection => 'API do Douban (Livros e filmes)';
 
   @override
   String get credentialsEnterDoubanKey => 'Insira sua chave de API do Douban';
@@ -6059,7 +6063,7 @@ class SPt extends S {
 
   @override
   String get welcomeApiDoubanDesc =>
-      'O catálogo chinês do livro. Requer um par de chave e segredo para assinar cada pedido.';
+      'O catálogo chinês de livros, filmes e séries. Requer um par de chave e segredo para assinar cada pedido.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>

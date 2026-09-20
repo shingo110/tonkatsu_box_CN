@@ -26,7 +26,7 @@
 | R7 | **改动 DAO 或模型**：必须 `cd packages/core && dart run tool/generate_rpc.dart` 并提交生成物 | `generated_up_to_date_test` 必挂 |
 | R8 | **引用路径必须已被 git 跟踪**：写进提交文件前用 `git ls-files <path>` 核验 | 幽灵链接，克隆后即死 |
 
-## 三、加数据源 SOP（七步 + 两处连带 + 三处护栏）
+## 三、加数据源 SOP（七步 + 两处连带 + 七处护栏）
 
 新增一个数据源 = 增量七步，顺序可参考：
 
@@ -37,6 +37,9 @@
 5. `lib/core/api/<源>/` —— 三件套 + facade（types / http_client / search_api / `<源>_api.dart`）
 6. `lib/features/search/sources/search_sources.dart` —— import + 实例；**列表顺序 = 主源/备源优先级**
 7. 该源的筛选器（`lib/features/search/filters/<源>_*_filter.dart`，按需）
+8. **仅需密钥的源**（`keyRequirement != none`）另加两处 UI，**全靠手写、漏了不报编译错**：
+   - `lib/features/settings/content/credentials_content.dart` —— 一节（`_buildSourceHeader(source: …)` 自动给出"获取密钥"链接 + 输入框 + 提示）
+   - `lib/features/welcome/widgets/welcome_step_sources.dart` —— `_KeyEditor.build` 的 **switch 加一支**（漏 → 向导卡片整块空白，无输入框无链接无提示）与 `_KeyBadge._resolve` 的 **mandatory 分支加判定**（漏 → 落到 IGDB 的 `hasCredentials`，误报"密钥已保存"）
 
 **Web 端另加**：`packages/core/lib/api/proxy_targets.dart` 一行；带密钥的还在 `server/lib/src/proxy_handler.dart` 的 `ApiProxy._authorize` 加分支。
 
@@ -51,6 +54,8 @@
 - `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码（anime 2→3）
 - `test/features/search/sources/search_sources_test.dart` —— 注册表 id 顺序表
 - `test/features/search/sources/source_output_media_type_test.dart` —— 输出媒体类型断言
+- `test/shared/constants/source_catalog_test.dart` —— "哪些源要密钥"的集合写死（**加需密钥源必炸**）
+- `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导输入框数与"获取密钥"链接数，按目录派生（**加需密钥源必炸**；漏源同样炸）
 - RPC 一致性（见 R7，无幸免）
 
 ## 四、Windows 环境坑（全部伪装成"项目坏了"）
@@ -202,6 +207,30 @@
 - **验证手法**：离线两条（真 socket 集成 + 跨层往返）随 CI 走；要真上游复核时跑
   `probe/selfhost_proxy_live.py` —— 起真二进制、绑 127.0.0.1 随机端口、按浏览器形状发请求，并把代
   理响应与直连响应做 sha256 比对。**活体脚本不进 CI**（要外网、会碰限流）。
+
+### 七之十、密钥界面契约（2026-09-20，D11 修瑕疵时确立）
+
+**两个界面**都能配密钥，且都必须与 `kDataSourceCatalog` 保持一致：
+
+| 界面 | 文件 | "要密钥"的判据 |
+|---|---|---|
+| 设置页 | `lib/features/settings/content/credentials_content.dart` | 手写节，逐节给 `source:` |
+| 首次向导 | `lib/features/welcome/widgets/welcome_step_sources.dart` | 目录驱动（`info.keyRequirement`） |
+
+- **"获取密钥"链接取自目录**：`SourceInfo.url` 的语义就是 *"Get a key link target"*。设置页走
+  `_keyUrlFor(source)`，向导走 `info.url` ⇒ **两端同源，不可能漂移**。`SourceInfo.keyRequirement == none`
+  的源不渲染链接。
+- **提示文案按 `keyRequirement` 分流**：`credentialsOwnKeyHint`（"建议用自己的密钥"）**只对"有内置密钥"
+  或"可选"的源成立**；`mandatory` 且无内置（豆瓣 / Hardcover，以及无内置密钥时的 TheTVDB）一律用
+  `credentialsKeyRequiredHint`。写反了会明确误导用户。
+- **豆瓣密钥无官方申请入口**（官方 API 已停发，社区用 App 内置密钥对），其 `url` 指站根
+  `https://www.douban.com/`（非 `book.douban.com` —— 该源已覆盖图书 / 电影 / 剧集三类）。
+- **免密钥源不出现在这两个界面**（`keyRequirement: none`）—— tvmaze / anilist / bangumi / mangabaka /
+  mangadex / kitsu / vndb / neodb / weread / openLibrary / fantlab / musicBrainz 共 **12 个**。它们只在
+  **搜索页的源开关**（`source_chips_row.dart`）与向导的"无需密钥"徽章里露面。**别再问"XX 的密钥配置
+  在哪"—— 先看 `keyRequirement`。**
+- **品牌图标**：新接入的国内源目前都吃 Material 兜底图标（豆瓣 `Icons.local_library`）；`AppAssets` 里
+  有 igdb / tmdb / tvdb / anilist / comicvine 等的彩色 png，但**无豆瓣 / NeoDB / Bangumi / WeRead**。
 
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 

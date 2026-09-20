@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../shared/constants/platform_features.dart';
 import '../../../l10n/app_localizations.dart';
@@ -15,6 +16,7 @@ import '../../../core/api/screenscraper_api.dart';
 import '../../../core/selfhost/server_credentials.dart';
 import '../../../main.dart' show AppRestartScope;
 import '../../../shared/constants/api_defaults.dart';
+import '../../../shared/constants/source_catalog.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/inline_text_field.dart';
 import '../widgets/settings_group.dart';
@@ -192,7 +194,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _buildSourceHeader(
           iconAsset: AppAssets.iconIgdbColor,
           description: S.of(context).welcomeApiIgdbDesc,
-          sourceName: DataSource.igdb.label,
+          source: DataSource.igdb,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
@@ -323,7 +325,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _buildSourceHeader(
           iconAsset: AppAssets.iconTmdbColor,
           description: S.of(context).welcomeApiTmdbDesc,
-          sourceName: DataSource.tmdb.label,
+          source: DataSource.tmdb,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
@@ -390,7 +392,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _buildSourceHeader(
           iconAsset: AppAssets.iconTvdbColor,
           description: S.of(context).welcomeApiTvdbDesc,
-          sourceName: DataSource.tvdb.brandName,
+          source: DataSource.tvdb,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
@@ -419,7 +421,10 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
                   }
                 },
               ),
-              if (settings.isTvdbKeyBuiltIn) _buildOwnKeyHint(),
+              if (settings.isTvdbKeyBuiltIn)
+                _buildOwnKeyHint()
+              else
+                _buildRequiredKeyHint(),
               const SizedBox(height: AppSpacing.sm),
               _buildCredentialStatus(
                 compact: compact,
@@ -457,7 +462,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _buildSourceHeader(
           iconAsset: AppAssets.iconComicVineColor,
           description: S.of(context).welcomeApiComicVineDesc,
-          sourceName: DataSource.comicVine.label,
+          source: DataSource.comicVine,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
@@ -537,8 +542,8 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
       children: <Widget>[
         _buildSourceHeader(
           description: l.welcomeApiDoubanDesc,
-          sourceName: DataSource.douban.label,
-          icon: Icons.menu_book,
+          source: DataSource.douban,
+          icon: Icons.local_library,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
@@ -576,7 +581,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
                   _saveDoubanKeys();
                 },
               ),
-              _buildOwnKeyHint(),
+              _buildRequiredKeyHint(),
               const SizedBox(height: AppSpacing.sm),
               _buildCredentialStatus(
                 compact: compact,
@@ -640,7 +645,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _buildSourceHeader(
           iconAsset: AppAssets.iconPodcastIndexColor,
           description: l.welcomeApiPodcastIndexDesc,
-          sourceName: DataSource.podcastIndex.label,
+          source: DataSource.podcastIndex,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
@@ -740,7 +745,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _buildSourceHeader(
           iconAsset: AppAssets.iconGoogleBooksColor,
           description: S.of(context).welcomeApiGoogleBooksDesc,
-          sourceName: DataSource.googleBooks.label,
+          source: DataSource.googleBooks,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
@@ -820,7 +825,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _buildSourceHeader(
           iconAsset: AppAssets.iconHardcoverColor,
           description: S.of(context).welcomeApiHardcoverDesc,
-          sourceName: DataSource.hardcover.label,
+          source: DataSource.hardcover,
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
@@ -845,7 +850,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
                       .setHardcoverApiKey(value.trim());
                 },
               ),
-              _buildOwnKeyHint(),
+              _buildRequiredKeyHint(),
               const SizedBox(height: AppSpacing.sm),
               _buildCredentialStatus(
                 compact: compact,
@@ -892,44 +897,76 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
 
   Widget _buildSourceHeader({
     required String description,
-    required String sourceName,
+    DataSource? source,
+    String? sourceName,
     String? iconAsset,
     IconData? icon,
   }) {
+    final String? keyUrl = source == null ? null : _keyUrlFor(source);
     return Padding(
       padding: const EdgeInsets.only(
         left: AppSpacing.md,
         right: AppSpacing.md,
         top: AppSpacing.sm,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          if (iconAsset != null)
-            Image.asset(
-              iconAsset,
-              width: 24,
-              height: 24,
-              filterQuality: FilterQuality.medium,
-            )
-          else
-            Icon(
-              icon ?? Icons.api,
-              size: 24,
-              color: AppColors.textSecondary,
-            ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              '$description ($sourceName)',
-              style: AppTypography.h3.copyWith(fontSize: 13),
-            ),
+          Row(
+            children: <Widget>[
+              if (iconAsset != null)
+                Image.asset(
+                  iconAsset,
+                  width: 24,
+                  height: 24,
+                  filterQuality: FilterQuality.medium,
+                )
+              else
+                Icon(
+                  icon ?? Icons.api,
+                  size: 24,
+                  color: AppColors.textSecondary,
+                ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  '$description (${source?.brandName ?? sourceName})',
+                  style: AppTypography.h3.copyWith(fontSize: 13),
+                ),
+              ),
+            ],
           ),
+          if (keyUrl != null) ...<Widget>[
+            const SizedBox(height: 4),
+            _SourceKeyLink(url: keyUrl),
+          ],
         ],
       ),
     );
   }
 
+  /// The provider's own page for obtaining a key, read from the shared catalog
+  /// so this screen cannot drift from it. Keyless sources, and the artwork and
+  /// scraper sources the catalog does not list, have nothing to link to.
+  String? _keyUrlFor(DataSource source) {
+    for (final SourceInfo info in kDataSourceCatalog) {
+      if (info.source != source) continue;
+      return info.keyRequirement == SourceKeyRequirement.none ? null : info.url;
+    }
+    return null;
+  }
+
   Widget _buildOwnKeyHint() {
+    return _buildHint(S.of(context).credentialsOwnKeyHint);
+  }
+
+  /// Sources without a built-in key are not optional, so they must not be told
+  /// that supplying one merely improves rate limits.
+  Widget _buildRequiredKeyHint() {
+    return _buildHint(S.of(context).credentialsKeyRequiredHint);
+  }
+
+  Widget _buildHint(String text) {
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
       child: Row(
@@ -943,7 +980,7 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
-              S.of(context).credentialsOwnKeyHint,
+              text,
               style: AppTypography.caption.copyWith(
                 color: AppColors.textTertiary,
               ),
@@ -1456,5 +1493,42 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _ssQuotaLoading = false;
       });
     }
+  }
+}
+
+/// "Get a key ↗" link to the provider's page for obtaining a key. Mirrors the
+/// welcome wizard's link so both entry points offer the same next step.
+class _SourceKeyLink extends StatelessWidget {
+  const _SourceKeyLink({required this.url});
+
+  final String url;
+
+  @override
+  Widget build(BuildContext context) {
+    final S l = S.of(context);
+    return InkWell(
+      onTap: () => launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      ),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(Icons.open_in_new, size: 13, color: AppColors.brand),
+            const SizedBox(width: 6),
+            Text(
+              l.welcomeSourcesGetKey,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.brand,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

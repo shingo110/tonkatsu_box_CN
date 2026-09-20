@@ -253,6 +253,43 @@
 **为什么不把活体脚本放进 CI**：它要外网、会碰上游限流（Bangumi / NeoDB 都是免费公共服务）。所以
 留存的两条护栏都是**离线**的，真上游复核按需手动跑。
 
+### D11 · 密钥界面瑕疵修复（2026-09-20，起源：少爷真机反馈"NeoDB 配置入口在哪"）
+
+少爷在真机上找 NeoDB 的密钥配置，发现密钥界面只有豆瓣一节。查证结果：**NeoDB 免密钥，本就不该在那**
+（见下），但顺着这条线查出密钥界面一批真瑕疵，一并修掉。
+
+**免密钥源的判定链（答疑留档）**：`SourceInfo.keyRequirement` 默认 `SourceKeyRequirement.none` ⇒
+界面对该源不生成输入框。而 `credentials_content.dart` 是**手写枚举**、不 import `source_catalog.dart`，
+所以"界面上有没有这一节"由人手决定。NeoDB / Bangumi / WeRead 等 11 个源均为 `none`，故只在**源开关**
+（`source_chips_row.dart`）与首次向导的"无需密钥"徽章（`welcomeSourcesNoKeyNeeded`）里露面。
+
+**修掉的瑕疵（5 组）**：
+
+1. **向导漏豆瓣分支 ⇒ 卡片整块空白**（功能 bug）：`welcome_step_sources.dart` 的 `_KeyEditor.build`
+   有 igdb / tmdb / tvdb / comicVine / googleBooks / hardcover / podcastIndex 七支，**独缺
+   `DataSource.douban`**，落 `default` 返回 `SizedBox.shrink()` —— 首次向导里豆瓣既无输入框也无申请
+   链接，且一声不吭。
+2. **向导状态徽章误判**（逻辑 bug）：`_KeyBadge._resolve` 的 `mandatory` 分支只特判 tvdb / hardcover，
+   豆瓣落到 `settings.hasCredentials`（**IGDB 的凭证 flag**）⇒ 只配了 IGDB 的用户会看到豆瓣显示
+   "密钥已保存"。
+3. **设置页无"获取密钥"入口**（一致性）：向导每节都挂了 `_GetKeyLink(url: info.url)`，设置页一处在都
+   没有 —— 而 `SourceInfo.url` 的注释明写自己正是 *"Get a key link target"*，等于声明了却半悬空。
+   现让 `_buildSourceHeader` 收 `DataSource`，经 `_keyUrlFor()` 从目录取 url 渲染同一链接，两端不再
+   可能漂移；豆瓣 url 同时从 `book.douban.com` 收到站根（它已覆盖三类媒体）。
+4. **豆瓣节文案落后**（6 语言）：源在 D8 已扩到 图书 + 电影 + 剧集，界面仍写「豆瓣 API（书籍）」/
+   *"The Chinese book catalogue"*；图标 `Icons.menu_book` 同理。标题、描述、图标全改。
+5. **mandatory 源被喂了"可选"提示**：`_buildOwnKeyHint()` 的语义是"你已有内置密钥，用自己的更好"，
+   却对 **hardcover**（无内置、必需）无条件显示；**TVDB** 在无内置密钥时干脆一条提示都不显示。新增
+   `credentialsKeyRequiredHint`（6 语言）+ `_buildRequiredKeyHint()`，按 `keyRequirement` 分流。
+
+**护栏补强（本轮最值钱的一环）**：`welcome_step_sources_test.dart` 原断言"向导恰好 9 个输入框"——
+**它自己漏了豆瓣**，所以豆瓣静默消失时它照样绿。已改为**按 `kDataSourceCatalog` 派生**（需密钥源数
++ 双字段源数），漏源即炸；并新增 `credentials_content_key_links_test.dart` 钉住"每节都有申请链接"
+（= 需密钥源数）与豆瓣节标题。
+
+**未做（待定夺）**：豆瓣密钥无官方申请入口（官方 API 已停发），其 url 暂指站根；新接入的国内源
+（豆瓣 / NeoDB / Bangumi / WeRead）**均无品牌图标**，只能吃 Material 兜底图标，待补资源。
+
 ## 📋 候选（下一步从这里挑）
 
 > 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > Bangumi 漫画 ✅ > 优酷/爱奇艺**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
@@ -347,3 +384,4 @@
 7. **同一条消息里对同一个文件不要发两次编辑** —— 实测最多只有一次生效，其余静默丢失且不报错。改完同一文件的多处，务必拆成多次调用并逐处 grep 复核。
 8. `lib/core/api/episode_source/tv_episode_source.dart` —— **影视源必须给 `tvEpisodeSourceResolverProvider` 加一支**（它是 `_ => tmdb` 兜底）。漏了不报任何错，但 `TvShowCacheWarmer` 与 `_refreshedTvShow` 会拿新源的 id 去 TMDB 查，**可能把不相干的剧写进缓存**。
 9. **影视的 `CollectionItem.nativeId` 恒为 null**（该 getter 只对 book / audio 生效）—— 刷新与 `.xcoll` 导入一律用 `externalId`。
+10. `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导的**输入框数**与**"获取密钥"链接数**，**按 `kDataSourceCatalog` 派生**（需密钥源数，双字段源另加）。加**需密钥**源必炸；反过来，某源若漏在向导 `_KeyEditor` 的 switch 里，这条也会炸 —— D9 时代它硬编码数字，所以漏了豆瓣照样绿（D11 根治）。

@@ -168,6 +168,8 @@ class _KeyEditorState extends ConsumerState<_KeyEditor> {
   String _hardcoverKey = '';
   String _podcastIndexKey = '';
   String _podcastIndexSecret = '';
+  String _doubanKey = '';
+  String _doubanSecret = '';
 
   // The signature needs both halves, so only persist once both are present.
   void _savePodcastIndex() {
@@ -177,6 +179,14 @@ class _KeyEditorState extends ConsumerState<_KeyEditor> {
     ref
         .read(settingsNotifierProvider.notifier)
         .setPodcastIndexKeys(key, secret);
+  }
+
+  // Douban signs every request with the pair, so a half-typed one will not do.
+  void _saveDouban() {
+    final String key = _doubanKey.trim();
+    final String secret = _doubanSecret.trim();
+    if (key.isEmpty || secret.isEmpty) return;
+    ref.read(settingsNotifierProvider.notifier).setDoubanKeys(key, secret);
   }
 
   // IGDB needs both halves together, so only persist once both are present.
@@ -433,6 +443,44 @@ class _KeyEditorState extends ConsumerState<_KeyEditor> {
             ),
           ],
         );
+      case DataSource.douban:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            InlineTextField(
+              label: l.credentialsApiKey,
+              value: _doubanKey,
+              placeholder: l.credentialsEnterDoubanKey,
+              obscureText: true,
+              compact: compact,
+              onChanged: (String v) {
+                setState(() => _doubanKey = v);
+                _saveDouban();
+              },
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            InlineTextField(
+              label: l.credentialsApiSecret,
+              value: _doubanSecret,
+              placeholder: l.credentialsEnterDoubanSecret,
+              obscureText: true,
+              compact: compact,
+              onChanged: (String v) {
+                setState(() => _doubanSecret = v);
+                _saveDouban();
+              },
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            _GetKeyLink(url: widget.info.url),
+            const SizedBox(height: 6),
+            Text(
+              l.credentialsKeyRequiredHint,
+              style: AppTypography.bodySmall.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
+          ],
+        );
       default:
         return const SizedBox.shrink();
     }
@@ -483,6 +531,12 @@ class _KeyBadge extends StatelessWidget {
         }
         if (info.source == DataSource.hardcover) {
           return settings.hasHardcoverKey
+              ? (l.welcomeSourcesKeySaved, AppColors.success)
+              : (l.welcomeApiRequired, AppColors.brand);
+        }
+        if (info.source == DataSource.douban) {
+          // Douban ships no built-in key, so it must not read IGDB's flag.
+          return settings.hasDoubanKeys
               ? (l.welcomeSourcesKeySaved, AppColors.success)
               : (l.welcomeApiRequired, AppColors.brand);
         }
