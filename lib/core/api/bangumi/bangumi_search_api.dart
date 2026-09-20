@@ -1,4 +1,3 @@
-import 'package:core/models/anime.dart';
 import 'package:dio/dio.dart';
 
 import 'bangumi_http_client.dart';
@@ -13,7 +12,9 @@ class BangumiSearchApi {
 
   /// Search and browse share one endpoint: with an empty keyword the filter
   /// alone drives the result set, which is how the browse tab works.
-  Future<(List<Anime>, bool hasMore, int totalPages)> searchSubjects({
+  Future<(List<T>, bool hasMore, int totalPages)> searchSubjects<T>({
+    required T Function(Map<String, dynamic>) parse,
+    int subjectType = kBangumiAnimeSubjectType,
     String? query,
     List<String>? tags,
     List<String>? metaTags,
@@ -26,7 +27,7 @@ class BangumiSearchApi {
   }) async {
     final int offset = (page - 1) * perPage;
     final Map<String, dynamic> filter = <String, dynamic>{
-      'type': <int>[kBangumiAnimeSubjectType],
+      'type': <int>[subjectType],
       if (tags != null && tags.isNotEmpty) 'tag': tags,
       if (metaTags != null && metaTags.isNotEmpty) 'meta_tags': metaTags,
       if (airDate != null && airDate.isNotEmpty) 'air_date': airDate,
@@ -48,7 +49,7 @@ class BangumiSearchApi {
       );
       final Map<String, dynamic> data =
           (resp.data as Map<String, dynamic>?) ?? <String, dynamic>{};
-      final List<Anime> items = _parseSubjects(data['data']);
+      final List<T> items = _parseSubjects<T>(data['data'], parse);
 
       final int total = (data['total'] as num?)?.toInt() ?? items.length;
       final bool hasMore = offset + items.length < total;
@@ -62,12 +63,15 @@ class BangumiSearchApi {
 
   /// Full subject by id. Search rows already carry nearly every field, so this
   /// serves the refresh path and the wider detail payload.
-  Future<Anime?> getSubject(int id) async {
+  Future<T?> getSubject<T>(
+    int id,
+    T Function(Map<String, dynamic>) parse,
+  ) async {
     try {
       final Response<dynamic> resp = await _client.get('v0/subjects/$id');
       final Object? data = resp.data;
       if (data is! Map<String, dynamic>) return null;
-      return _tryParse(data);
+      return parse(data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 404) return null;
       throw _client.handleDioException(e, 'Failed to load the Bangumi subject');
@@ -75,22 +79,20 @@ class BangumiSearchApi {
   }
 
   /// One malformed row is dropped instead of failing the whole page.
-  static List<Anime> _parseSubjects(Object? rows) {
-    if (rows is! List<dynamic>) return <Anime>[];
-    final List<Anime> out = <Anime>[];
+  static List<T> _parseSubjects<T>(
+    Object? rows,
+    T Function(Map<String, dynamic>) parse,
+  ) {
+    if (rows is! List<dynamic>) return <T>[];
+    final List<T> out = <T>[];
     for (final Object? row in rows) {
       if (row is! Map<String, dynamic>) continue;
-      final Anime? anime = _tryParse(row);
-      if (anime != null) out.add(anime);
+      try {
+        out.add(parse(row));
+      } on Object {
+        continue;
+      }
     }
     return out;
-  }
-
-  static Anime? _tryParse(Map<String, dynamic> json) {
-    try {
-      return Anime.fromBangumi(json);
-    } on Object {
-      return null;
-    }
   }
 }

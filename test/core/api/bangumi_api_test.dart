@@ -1,5 +1,6 @@
 import 'package:core/models/anime.dart';
 import 'package:core/models/data_source.dart';
+import 'package:core/models/manga.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -233,6 +234,108 @@ void main() {
             allOf(contains('API: Bangumi'), contains('Status: 403')),
           ),
         ),
+      );
+    });
+  });
+
+  Map<String, dynamic> mangaRow(int id) => <String, dynamic>{
+        'id': id,
+        'name': 'original $id',
+        'name_cn': '中文 $id',
+        'date': '2020-01-01',
+        'platform': '漫画',
+        'eps': 12,
+        'volumes': 3,
+        'meta_tags': <dynamic>['漫画', '连载中'],
+        'rating': <String, dynamic>{'score': 7.5},
+        'images': <String, dynamic>{'large': 'cover.jpg'},
+      };
+
+  group('browseManga', () {
+    test('pins the book subject type and stays sfw', () async {
+      stubPost(page(<dynamic>[]));
+
+      await api.browseManga();
+
+      final Map<String, dynamic> filter =
+          (captureSearch()[2] as Map<String, dynamic>)['filter']
+              as Map<String, dynamic>;
+      expect(filter['type'], <int>[1]);
+      expect(filter['nsfw'], isFalse);
+    });
+
+    test('always sends the manga meta tag, even with no filter picked',
+        () async {
+      stubPost(page(<dynamic>[]));
+
+      await api.browseManga();
+
+      final Map<String, dynamic> filter =
+          (captureSearch()[2] as Map<String, dynamic>)['filter']
+              as Map<String, dynamic>;
+      // Without it a `type: [1]` search answers novels and picture books.
+      expect(filter['meta_tags'], <String>['漫画']);
+    });
+
+    test('appends the caller meta tags behind the manga tag', () async {
+      stubPost(page(<dynamic>[]));
+
+      await api.browseManga(metaTags: <String>['日本', '连载中']);
+
+      final Map<String, dynamic> filter =
+          (captureSearch()[2] as Map<String, dynamic>)['filter']
+              as Map<String, dynamic>;
+      // Bangumi ANDs the list, so order does not change the result set; the
+      // pin is first because it is not the caller's to drop.
+      expect(filter['meta_tags'], <String>['漫画', '日本', '连载中']);
+    });
+
+    test('forwards the rank bound', () async {
+      stubPost(page(<dynamic>[]));
+
+      await api.browseManga(rank: <String>['>=1', '<=500']);
+
+      final Map<String, dynamic> filter =
+          (captureSearch()[2] as Map<String, dynamic>)['filter']
+              as Map<String, dynamic>;
+      expect(filter['rank'], <String>['>=1', '<=500']);
+    });
+
+    test('parses rows into Manga of the bangumi source', () async {
+      stubPost(page(<dynamic>[mangaRow(3510), mangaRow(3511)], total: 40));
+
+      final (List<Manga> items, bool hasMore, int totalPages) =
+          await api.browseManga(query: '海贼王');
+
+      expect(items, hasLength(2));
+      expect(items.first.title, '中文 3510');
+      expect(items.first.source, DataSource.bangumi);
+      expect(items.first.format, 'MANGA');
+      expect(items.first.status, 'RELEASING');
+      expect(hasMore, isTrue);
+      expect(totalPages, 2);
+    });
+
+    test('drops a malformed row without failing the page', () async {
+      stubPost(page(<dynamic>[
+        <String, dynamic>{'name': 'no id'},
+        mangaRow(3510),
+      ]));
+
+      final (List<Manga> items, bool _, int _) = await api.browseManga();
+
+      expect(items, hasLength(1));
+      expect(items.single.id, 3510);
+    });
+
+    test('derives the offset from the page number', () async {
+      stubPost(page(<dynamic>[]));
+
+      await api.browseManga(page: 3, perPage: 25);
+
+      expect(
+        captureSearch()[1],
+        <String, dynamic>{'limit': 25, 'offset': 50},
       );
     });
   });

@@ -660,6 +660,11 @@ class CollectionActions {
         case MediaType.manga:
           final Manga? manga;
           switch (item.source) {
+            // Without this arm the default below spends a Bangumi id on AniList.
+            case DataSource.bangumi:
+              manga = await ref
+                  .read(bangumiApiProvider)
+                  .getMangaById(item.externalId);
             case DataSource.mangabaka:
               manga =
                   await ref.read(mangaBakaApiProvider).getById(item.externalId);

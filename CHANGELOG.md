@@ -12,6 +12,46 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — Bangumi manga source
+
+The manga tab of the catalogue the anime source already opened. The manga line
+had been parked since reconnaissance: every Chinese comics platform measured
+either signed, login-walled or unreachable. Bangumi needed no new source at all
+— its book subject type covers comics, and one meta tag separates them from the
+novels and picture books filed alongside.
+
+- `BangumiMangaSource` (`lib/features/search/sources/bangumi_manga_source.dart`):
+  id `bangumi_manga`, registered right after the anime source, sharing
+  `DataSource.bangumi` — no new enum value and no new credential.
+- `BangumiSearchApi.searchSubjects<T>` and `getSubject<T>` take a parser and a
+  subject type, so the same client answers anime and manga; the anime source
+  passes `Anime.fromBangumi` and type 2, the manga source `Manga.fromBangumi`
+  and type 1.
+- `BangumiApi.browseManga` pins 漫画 in front of the caller's meta tags, since a
+  `type: [1]` search alone returns novels and picture books.
+- `Manga.fromBangumi` (`packages/core/lib/models/manga.dart`) reads `eps` as
+  chapters and `volumes` as volumes, mapping Bangumi's 0 to null because 0 means
+  "not counted"; derives `status` from the 连载中 / 已完结 meta tags, the only
+  place Bangumi states it; and takes the author from the 作者 infobox key.
+- `packages/core/lib/utils/bangumi_json.dart` holds the parsing both mappings
+  share; `Anime.fromBangumi` now delegates to it instead of keeping the only
+  copy, the way `neodb_json.dart` and `douban_json.dart` already work.
+- `BangumiMangaMetaTagFilter` offers the book vocabulary (origin, serialisation,
+  audience, adaptation source), which is a different axis set from the anime
+  tab's.
+- `collection_actions.dart` gains a Bangumi arm in its manga refresh switch and
+  `import_service.dart` in `_fetchOneManga`; both would otherwise spend a
+  Bangumi id on AniList through their `default`. The same file's
+  `_fetchOneAnime` had been missing its Bangumi arm entirely — fixed here.
+
+Gates: analyze clean, 5691 app / 2380 core / 99 server tests pass, RPC output
+byte-identical, 6 locales still at 1752 keys each.
+
+Verified live in four calls: a 「海贼王」 search with the tag answered 12 comics
+(航海王 3510 first) against 174 rows without it; 「进击的巨人」 parsed as MANGA
+with its chapter and volume counts; a 连载中 filter narrowed the same query; and
+`/v0/subjects/3510` mapped to 航海王 / ONE PIECE with author 尾田栄一郎.
+
 ## [cn] Added — Douban movie and TV sources
 
 The same signed catalogue as the book source, extended to films and series. The

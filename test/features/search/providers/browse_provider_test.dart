@@ -36,8 +36,8 @@ void main() {
     test('defaults to every source of the type being active', () {
       const BrowseState state = BrowseState(mediaType: MediaType.manga);
 
-      expect(state.sources, hasLength(4));
-      expect(state.activeSources, hasLength(4));
+      expect(state.sources, hasLength(5));
+      expect(state.activeSources, hasLength(5));
       expect(state.disabledSourceIds, isEmpty);
       expect(state.hasFilters, isFalse);
       expect(state.hasActiveQuery, isFalse);
@@ -55,7 +55,7 @@ void main() {
         state.activeSources.map((SearchSource s) => s.id),
         isNot(contains('mangadex')),
       );
-      expect(state.activeSources, hasLength(3));
+      expect(state.activeSources, hasLength(4));
     });
 
     group('own filters narrow the query to their owner', () {
@@ -83,7 +83,7 @@ void main() {
         );
 
         expect(state.ownFilterOwners, isEmpty);
-        expect(state.activeSources, hasLength(4));
+        expect(state.activeSources, hasLength(5));
         expect(state.hasFilters, isFalse);
       });
     });
@@ -101,7 +101,8 @@ void main() {
           state.activeSources.map((SearchSource s) => s.id).toSet(),
           <String>{'manga', 'mangadex'},
         );
-        expect(state.unsupportedSourceIds, <String>{'mangabaka', 'kitsu_manga'});
+        expect(state.unsupportedSourceIds,
+            <String>{'bangumi_manga', 'mangabaka', 'kitsu_manga'});
         expect(state.hasFilters, isTrue);
       });
 
@@ -368,7 +369,8 @@ void main() {
           'manga': <Object>['a'],
           'mangadex': <Object>['d'],
         },
-        disabledSourceIds: const <String>{'mangabaka', 'kitsu_manga'},
+        disabledSourceIds:
+            const <String>{'bangumi_manga', 'mangabaka', 'kitsu_manga'},
       );
       notifier.state = notifier.state.copyWith(
         loadedSignatures: <String, String>{

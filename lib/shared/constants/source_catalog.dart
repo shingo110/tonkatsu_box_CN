@@ -57,7 +57,7 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
   ),
   SourceInfo(
     source: DataSource.bangumi,
-    mediaTypes: <MediaType>[MediaType.anime],
+    mediaTypes: <MediaType>[MediaType.anime, MediaType.manga],
     url: 'https://bgm.tv/',
   ),
   SourceInfo(

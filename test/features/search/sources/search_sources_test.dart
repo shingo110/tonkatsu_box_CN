@@ -34,6 +34,7 @@ void main() {
         'anilist_anime',
         'manga',
         'bangumi_anime',
+        'bangumi_manga',
         'mangabaka',
         'mangadex',
         'kitsu_anime',

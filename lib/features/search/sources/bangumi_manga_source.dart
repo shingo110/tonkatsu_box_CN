@@ -1,12 +1,12 @@
-import 'package:core/models/anime.dart';
 import 'package:core/models/data_source.dart';
+import 'package:core/models/manga.dart';
 import 'package:core/models/media_type.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api/bangumi_api.dart';
 import '../../../l10n/app_localizations.dart';
-import '../filters/bangumi_meta_tag_filter.dart';
+import '../filters/bangumi_manga_meta_tag_filter.dart';
 import '../filters/bangumi_rank_filter.dart';
 import '../filters/min_rating_filter.dart';
 import '../filters/year_filter.dart';
@@ -16,30 +16,31 @@ import '../utils/filter_value_utils.dart';
 
 const int _bangumiPageSize = 20;
 
-/// Bangumi (bgm.tv) anime search. The only anime source here whose titles
-/// default to Chinese, and the only one carrying Chinese community tags.
-class BangumiAnimeSource extends SearchSource {
+/// Bangumi (bgm.tv) manga search — the anime tab's counterpart on the book
+/// subject type, and the only manga source here whose titles default to
+/// Chinese. Keyless, like the anime tab.
+class BangumiMangaSource extends SearchSource {
   @override
-  String get id => 'bangumi_anime';
+  String get id => 'bangumi_manga';
 
   @override
-  MediaType get outputMediaType => MediaType.anime;
+  MediaType get outputMediaType => MediaType.manga;
 
   @override
   DataSource get dataSource => DataSource.bangumi;
 
   @override
-  String label(S l) => l.mediaTypeAnime;
+  String label(S l) => l.mediaTypeManga;
 
   @override
-  IconData get icon => Icons.live_tv_outlined;
+  IconData get icon => Icons.auto_stories_outlined;
 
   @override
   bool get supportsBrowse => true;
 
   @override
   List<SearchFilter> get filters => <SearchFilter>[
-        BangumiMetaTagFilter(),
+        BangumiMangaMetaTagFilter(),
         YearFilter(),
         MinRatingFilter(),
         BangumiRankFilter(),
@@ -56,7 +57,7 @@ class BangumiAnimeSource extends SearchSource {
   bool get supportsSortDuringSearch => true;
 
   @override
-  String searchHint(S l) => l.searchHintAnime;
+  String searchHint(S l) => l.searchHintManga;
 
   @override
   Future<BrowseResult> fetch(
@@ -71,8 +72,8 @@ class BangumiAnimeSource extends SearchSource {
     final Object? rating = filterValues['minRating'];
     final Object? rank = filterValues['maxRank'];
 
-    final (List<Anime> anime, bool hasMore, int totalPages) =
-        await api.browseAnime(
+    final (List<Manga> manga, bool hasMore, int totalPages) =
+        await api.browseManga(
       query: query,
       metaTags: readFilterStringList(filterValues['metaTags']),
       airDate: bangumiAirDateFor(filterValues['year']),
@@ -84,8 +85,8 @@ class BangumiAnimeSource extends SearchSource {
     );
 
     return BrowseResult(
-      items: anime,
-      mediaType: MediaType.anime,
+      items: manga,
+      mediaType: MediaType.manga,
       hasMore: hasMore,
       totalPages: totalPages,
       currentPage: page,

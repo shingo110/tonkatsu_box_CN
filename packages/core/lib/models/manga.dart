@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'data_source.dart';
 import '../utils/anime_manga_title_language.dart';
+import '../utils/bangumi_json.dart';
 import '../utils/kitsu_status.dart';
 import '../utils/stable_id.dart';
 
@@ -355,6 +356,40 @@ class Manga {
       volumes: (attrs['volumeCount'] as num?)?.toInt(),
       format: _kitsuFormat(attrs['subtype'] as String?),
       externalUrl: 'https://kitsu.io/manga/$path',
+      updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    );
+  }
+
+  /// Bangumi book subject. The manga source narrows the search to the 漫画
+  /// meta tag, so a row reaching here is a comic and [format] is always MANGA.
+  ///
+  /// Bangumi states a run's length as `eps` (chapters) and `volumes`, and
+  /// answers 0 rather than omitting the key, so 0 must read as unknown.
+  /// Serialisation exists only as a meta tag (连载中 / 已完结), which is what
+  /// keeps [status] from being empty where AniList would have said RELEASING.
+  factory Manga.fromBangumi(Map<String, dynamic> json) {
+    final int id = bangumiSubjectId(json);
+    final String? date = bangumiSubjectDate(json);
+
+    return Manga(
+      id: id,
+      source: DataSource.bangumi,
+      title: bangumiSubjectTitle(json) ?? 'Unknown',
+      titleNative: bangumiSubjectOriginalTitle(json),
+      description: bangumiSubjectSummary(json),
+      coverUrl: bangumiCoverUrl(json),
+      coverUrlMedium: bangumiCoverUrlMedium(json),
+      averageScore: bangumiAverageScore(json),
+      status: bangumiMangaStatus(date, json['meta_tags']),
+      startYear: bangumiDatePart(date, 0),
+      startMonth: bangumiDatePart(date, 1),
+      startDay: bangumiDatePart(date, 2),
+      chapters: bangumiCount(json['eps']),
+      volumes: bangumiCount(json['volumes']),
+      format: bangumiMangaFormat(_nonEmpty(json['platform'])),
+      tags: bangumiTagNames(json['tags']),
+      authors: bangumiMangaAuthors(bangumiInfobox(json['infobox'])),
+      externalUrl: 'https://bgm.tv/subject/$id',
       updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     );
   }

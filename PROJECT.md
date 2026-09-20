@@ -150,7 +150,7 @@ SearchSource（抽象端口）
 | 电影 / 剧集 | 豆瓣 Frodo | ✅ 已并入 | 元数据最全；**需自备 API Key / Secret**；**搜索端点是电影与剧集的混合池，`type` 参数无效**，分流按行的 `target_type`；详情分道（电影 `/movie/{id}`、剧集 `/tv/{id}`，剧集送 `/movie/` 回 996）；`card_subtitle` 搜索行与详情记录**两种形状**；`rating.value` 已是 0–10 |
 | 电影 / 剧集 | 豆瓣免签接口 | 📋 待实现 | `movie.douban.com/j/subject_suggest`，需 Referer；无限流但字段少 |
 | 电影 / 剧集 | 优酷 / 爱奇艺 | 📋 待实现 | 搜索接口免密钥；字段偏少 |
-| 漫画 | —— | 🔍 待调研 | B 站漫画（code 99）、快看（404）已实测失败 |
+| 漫画 | Bangumi 书籍类型 | ✅ 已并入 | 复用动画源的 `DataSource.bangumi`（**一个枚举承载多个媒体类型**）；`type=1` **必须叠加 `meta_tags: ['漫画']`**（不带则混入小说与画集，实测 174 条 vs 12 条）；`meta_tags` 是 **AND** 语义；`platform` 恒为「漫画」⇒ `format` 恒 `MANGA`；`eps` / `volumes` 的 **0 表示未统计**须转 null；**`status` 只能从「连载中」/「已完结」标签推导**（Bangumi 无该字段） |
 
 已实测**不可用**（勿再尝试）：猫眼（302）· B 站主站（412）· 腾讯视频搜索（仅 HTML）· 芒果 TV（401）· RSSHub 公共实例（403 Cloudflare）· 动漫之家（不可达）。
 
@@ -165,8 +165,8 @@ SearchSource（抽象端口）
 | **M4** 图书线补强 · 微信读书 | 微信读书搜索源（`Book.fromWeReadItem`、0–1000 评分换算、按标题重搜回填） | ✅ 2026-09-20 |
 | **M4b** 图书线补强 · 豆瓣 ISBN 直查 | 豆瓣图书源（`douban`）：HMAC-SHA1 签名客户端、双后端单源（关键词 / by-ISBN）、`Book.fromDoubanItem`、凭据自填、6 语言 l10n | ✅ 2026-09-20 |
 | **M4c** 影视线补强 · 豆瓣电影 / 剧集 | 豆瓣影视源（`douban_movie` / `douban_tv`）：混合池按 `target_type` 分流、`Movie` / `TvShow.fromDoubanItem`、`DoubanEpisodeSource` 防串源 | ✅ 2026-09-20 |
-| **M5** 影视 / 图书线余项 | 优酷 / 爱奇艺 | 📋 下一步候选 |
-| **M6** 漫画线 | 待确定可行路径后立项 | 🔍 |
+| **M5** 影视线余项 | 优酷 / 爱奇艺 | 📋 下一步候选 |
+| **M6** 漫画线 | Bangumi 书籍类型（`bangumi_manga`）：`type=1` + 「漫画」meta 标签、`Manga.fromBangumi`、`bangumi_json.dart` 共用解析、搜索客户端泛型化、`bangumi_filter_utils.dart` 共用筛选转换 | ✅ 2026-09-20 |
 | **M7** 发布 | Windows / Android / Web 打包与分发 | 📋 |
 
 ## 8. 关键决策记录
@@ -184,6 +184,8 @@ SearchSource（抽象端口）
 - **ADR-11 · 豆瓣取双后端单源，凭据由用户自填（2026-09-20）。** 同一个源分出两条后端：查询词形如 ISBN 走 `/api/v2/book/isbn/{isbn}`，其余走 `/api/v2/search/book`。这不只是功能取舍 —— 单后端会让每次关键词搜索都白发一发到一台「十连打即封」的主机，双后端同时是省额度之选。凭据沿用本仓已有四例（RetroAchievements / ComicVine / Hardcover / Google Books）的「仅读 prefs、源码不内置」范式，不新造存储设施。签名实现落在 `packages/core`（而非 `lib`），因为自托管服务端要用它给代理请求签名。
 
 - **ADR-12 · 豆瓣影视与图书共用一个 `DataSource`，但拆成三个搜索源（2026-09-20）。** 媒体类型由源决定、凭据由 `DataSource` 决定，所以 `douban_movie` / `douban_tv` 与图书源共享枚举值，凭据页与向导文案零新增键；三者各有 `outputMediaType`，注册顺序独立 —— 与 NeoDB 的三源同构。另一条实测教训值得单记：`/api/v2/search/movie` 的 `type` 参数**无效**（`type=movie` / 不带 / `type=tv` 三种取值返回同一份混排页），**分流只能按行的 `target_type` 自己做**；而「`type=tv` 那次看起来生效了」是因为所查关键词本身只有剧集 —— 这种「用自证样本验证过滤」的错觉值得警惕。
+
+- **ADR-13 · 加媒体类型可以复用既有 `DataSource`，不必新增目录服务（2026-09-20）。** 漫画源与动画源共用 `DataSource.bangumi` —— 枚举代表「目录服务」而非「媒体类型」，一个服务可以供多个类型，正如 NeoDB 一个枚举供图书 / 电影 / 剧集三源。这条判断直接决定改动面：**复用枚举时，`test/shared/widgets/source_badge_test.dart` 的 `DataSource.values.length` 与 `source_catalog_test` 的「需密钥源集合」都不会被撞**（D7 撞前者、D8 撞后者的情形不再出现），省下的不只是两处测试，还有一处 `source_catalog` 的密钥归属。另一条同源教训：**共享解析必须抽出去而不是复制** —— `bangumi_json.dart` 承接了动画源原有的私有 helper（`Anime.fromBangumi` 改为委托），`bangumi_filter_utils.dart` 承接了三个筛选转换；本仓已有 `neodb_json.dart` / `douban_json.dart` 两个先例，第三次仍坚持这样做，是因为两份「同一套规则」的副本迟早会在某次修 bug 里只改一边。
 
 ## 9. 什么算做完了
 

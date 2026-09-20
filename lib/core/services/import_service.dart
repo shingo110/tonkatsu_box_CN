@@ -39,6 +39,7 @@ import '../../data/repositories/collection_repository.dart';
 import '../../shared/constants/platform_features.dart';
 import 'package:core/models/platform.dart' as model;
 import '../api/anilist_api.dart';
+import '../api/bangumi_api.dart';
 import '../api/comicvine_api.dart';
 import '../api/fantlab_api.dart';
 import '../api/google_books_api.dart';
@@ -73,6 +74,7 @@ final Provider<ImportService> importServiceProvider =
     tmdbApi: ref.watch(tmdbApiProvider),
     vndbApi: ref.watch(vndbApiProvider),
     aniListApi: ref.watch(aniListApiProvider),
+    bangumiApi: ref.watch(bangumiApiProvider),
     tvMazeApi: ref.watch(tvMazeApiProvider),
     tvdbApi: ref.watch(tvdbApiProvider),
     kitsuApi: ref.watch(kitsuApiProvider),
@@ -146,6 +148,7 @@ class ImportService {
     TmdbApi? tmdbApi,
     VndbApi? vndbApi,
     AniListApi? aniListApi,
+    BangumiApi? bangumiApi,
     TvMazeApi? tvMazeApi,
     KitsuApi? kitsuApi,
     MangaBakaApi? mangaBakaApi,
@@ -169,6 +172,7 @@ class ImportService {
         _tmdbApi = tmdbApi,
         _vndbApi = vndbApi,
         _aniListApi = aniListApi,
+        _bangumiApi = bangumiApi,
         _tvMazeApi = tvMazeApi,
         _tvdbApi = tvdbApi,
         _kitsuApi = kitsuApi,
@@ -194,6 +198,7 @@ class ImportService {
   final TmdbApi? _tmdbApi;
   final VndbApi? _vndbApi;
   final AniListApi? _aniListApi;
+  final BangumiApi? _bangumiApi;
   final TvMazeApi? _tvMazeApi;
   final TvdbApi? _tvdbApi;
   final KitsuApi? _kitsuApi;
@@ -1260,6 +1265,8 @@ class ImportService {
   Future<Manga?> _fetchOneManga(_MediaRef ref) async {
     try {
       switch (ref.source) {
+        case DataSource.bangumi:
+          return await _bangumiApi?.getMangaById(ref.externalId);
         case DataSource.mangabaka:
           return await _mangaBakaApi?.getById(ref.externalId);
         case DataSource.kitsu:
@@ -1281,10 +1288,16 @@ class ImportService {
 
   Future<Anime?> _fetchOneAnime(_MediaRef ref) async {
     try {
-      if (ref.source == DataSource.kitsu) {
-        return await _kitsuApi?.getAnimeById(ref.externalId);
+      switch (ref.source) {
+        // The anime path had no Bangumi arm, so a Bangumi id used to be spent
+        // on AniList here; the collection refresh already handled it.
+        case DataSource.bangumi:
+          return await _bangumiApi?.getAnimeById(ref.externalId);
+        case DataSource.kitsu:
+          return await _kitsuApi?.getAnimeById(ref.externalId);
+        default:
+          return await _aniListApi?.getAnimeById(ref.externalId);
       }
-      return await _aniListApi?.getAnimeById(ref.externalId);
     } on Exception catch (e) {
       _log.warning('Failed to fetch anime ${ref.externalId} '
           'from ${ref.source.name}: $e');

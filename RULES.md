@@ -158,6 +158,23 @@
 - 源 id `douban_movie` / `douban_tv`，均 `supportsBrowse=false`、无筛选器、单排序项，**注册在 keyless 的 NeoDB 影视源之后**。二者与图书源共享 `DataSource.douban` ⇒ 凭据页与向导文案**零新增键**。
 - 活体验证（7 发内）：「流浪地球2」→ `id=35267208` / year 2023 / rating 8.3；`/movie/35267208` → 73 字段 / `durations=["173分钟"]` / `genres=[科幻, 冒险, 灾难]` / 完整 `intro`；「狂飙」→ `/tv/35465232` / 39 集。
 
+### 七之八、Bangumi 漫画接入要点（2026-09-20，`bangumi_manga`）
+
+**漫画线不必另找数据源。** 调研（T5）曾判定国内漫画候选全灭，但 Bangumi 本身就是漫画 / 轻小说类目最全的免费源：它的**书籍类型（`type=1`）**覆盖漫画、轻小说与画集，用 **`meta_tags` 里的「漫画」** 即可切出漫画。实测「海贼王」：不带该标签 174 条（混入小说、画集，`tags` 为空），带上 12 条全是漫画。
+
+- **一个枚举可承载多个媒体类型**：`DataSource.bangumi` 已被动画源占用，漫画源**复用**它，故 `source_badge_test` 的 `DataSource.values.length` **不变**（仍 23）。这不同于加一个新目录服务 —— 那种情况才需要动枚举与 `SourceCatalog` 的密钥集合断言。
+- **`meta_tags` 是 AND 语义**（`bangumi_meta_tag_filter.dart` 的注释已记），故 `['漫画', '日本']` 是「漫画 且 日本」。客户端在 `BangumiApi.browseManga` 里**始终把「漫画」前置**，用户的额外选择追加在其后；顺序不影响结果集。
+- **`platform` 恒为「漫画」** ⇒ `format` 恒为 `MANGA`；`bangumiMangaFormat` 只认这一个值，其余返 null（能走到这里的行本就不该不是漫画）。
+- **`eps` 与 `total_episodes` 恒等**（实测 12 条全等），取 `eps` 即话数；**两者与 `volumes` 的 0 表示未填写**，必须转 null，否则会把「未统计」当「0 话」。
+- **`status` 只能从 `meta_tags` 推导**：Bangumi 没有连载状态字段，但 meta 标签里有「连载中」/「已完结」。映射到 AniList 词汇 `RELEASING` / `FINISHED`；未来日期仍走 `NOT_YET_RELEASED`（优先于标签）。
+- **`authors` 取 infobox 的「作者」**（漫画），而动画源取「动画制作 / 製作 / 制作」；两者的回退链不同，故 `bangumi_json.dart` 提供 `bangumiMangaAuthors` 与 `bangumiAnimeStudios` 两个函数。
+- **评分与动画同规矩**：`rating.score` 是 0–10，乘 10 存入 0–100 的 `averageScore`。
+- **解析 helper 已抽到 `packages/core/lib/utils/bangumi_json.dart`**（`bangumi_json` 系列），`Anime.fromBangumi` 已改为委托（与 `neodb_json.dart`、`douban_json.dart` 同范式）。新增 Bangumi 系媒体类型时**不要再各写一份**。
+- **搜索客户端已泛型化**：`BangumiSearchApi.searchSubjects<T>({required parse, subjectType})` 与 `getSubject<T>(id, parse)`，动画传 `Anime.fromBangumi`、漫画传 `Manga.fromBangumi`；`subjectType` 默认动画（2），书籍为 1。
+- **连带必改（漏了会静默串源，均不报编译错）**：`collection_actions.dart` 的 **`MediaType.manga` switch**（其 `default` 兜底到 AniList —— 不加 Bangumi 支会把 Bangumi id 送去 AniList 查）与 `import_service.dart` 的 `_fetchOneManga`。
+- **顺带修的既有缺陷**：`import_service.dart` 的 `_fetchOneAnime` 此前**只有 Kitsu 与 AniList 两支**，Bangumi 动画的 `.xcoll` 导入会把 id 送去 AniList。同轮补上，与 `collection_actions` 那边的刷新路径对齐。
+- **护栏（新撞一处）**：`test/features/search/providers/browse_provider_test.dart` 硬编码漫画类型的**可浏览源数**（4 → 5）与 `unsupportedSourceIds`（漫画源没有共享的 `status` 筛选器，故加入其中）；其中 `seedLoaded` 助手的 `disabledSourceIds` 也必须补上新源，否则该源会被触发加载、"asks nobody" 不再成立。另外 `search_sources_test` 的 id 顺序表与 `source_output_media_type_test` 各补一条。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。

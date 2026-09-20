@@ -201,9 +201,37 @@
 
 **一处已知限制**：豆瓣搜索行没有 `intro`（`abstract` 恒为空串）⇒ **电影**收藏后简介为空，需手动刷新才补全；剧集有 `TvShowCacheWarmer` 在收藏时补。
 
+### D9 · Bangumi 漫画接入（2026-09-20，第七个国内源 · 漫画线立项并落地）
+
+> **结论：漫画线根本不必另找数据源。** T5 曾判定「国内漫画候选全灭」（B 站漫画 code 99、快看 404、动漫之家不可达）—— 但 **Bangumi 自己就是漫画 / 轻小说类目最全的免费源**。它的**书籍类型（`type=1`）**覆盖漫画、轻小说与画集，用 **`meta_tags` 里的「漫画」** 即可切出漫画，无需任何新目录服务。
+
+**关键实证（2 发对照，`probe/next_line_probe.py` + 存档 `probe/bangumi_manga_meta.json`）**：
+
+- 关键词「海贼王」+ `type=1` + `meta_tags: ['漫画']` → **12 条，全为真漫画**（首条 `3510 航海王 / ONE PIECE`）。
+- **同一关键词不带 meta_tags** → **174 条**，混入小说与画集，且 `tags` 为空 ⇒ **「漫画」标签是必须的，不是可选的**。
+- 字段与动画**同构**（`id` / `name` / `name_cn` / `date` / `images` / `rating` / `infobox` / `tags` / `eps` / `volumes` / `meta_tags`），故解析可共用一套 helper。
+- `platform` 恒为「漫画」；`eps == total_episodes`（实测 12 条全等）；`volumes` / `eps` 的 **0 表示未填写**。
+- **`status` 只能靠 meta 标签推导**：Bangumi 无连载状态字段，但标签里有「连载中」/「已完结」⇒ 映射到 `RELEASING` / `FINISHED`。
+
+**在线活体验证（5 发全 200，刻意压在 10 发以内）**：
+
+- 「海贼王」→ **12 条，`format` 全为 `MANGA`**；首条 `3510 航海王 / ONE PIECE / 1997 / score 88 / RELEASING / authors=[尾田栄一郎]`。
+- 叠加「连载中」→ **3 条，`status` 全为 `RELEASING`**（映射成立）。
+- 「进击的巨人」→ 9 条，`8491 / 74 分 / FINISHED / 139 话 / 34 卷`（**章节与卷数解析正确**）。
+- `/v0/subjects/3510` → `航海王 / ONE PIECE / 1997-12-24 / 88 / MANGA / RELEASING / 尾田栄一郎` + 完整简介与封面。
+- **动画线回归**：「进击的巨人」动画搜索正常（`进击的巨人 / 進撃の巨人`）。
+
+**落地物**：`bangumi_manga_source.dart`（id `bangumi_manga`）· **`Manga.fromBangumi`** · **`packages/core/lib/utils/bangumi_json.dart`**（动画 / 漫画共用，`Anime.fromBangumi` 已改委托，删掉其私有 helper）· `BangumiSearchApi.searchSubjects<T>` / `getSubject<T>` **泛型化**（`Anime` / `Manga` 共用一条请求路径）· `BangumiApi.browseManga`（把「漫画」前置进 `meta_tags`）· `BangumiMangaMetaTagFilter`（漫画自己的 meta 词表）· **`lib/features/search/utils/bangumi_filter_utils.dart`**（`airDate` / `score` / `sort` 三个转换与动画共用）。
+
+**一处既有缺陷顺手修掉**：`import_service.dart` 的 `_fetchOneAnime` 此前**只有 Kitsu 与 AniList 两支**，Bangumi 动画经 `.xcoll` 导入时会把 id 送去 AniList 查（`collection_actions.dart` 的刷新路径早有 Bangumi 支，导入路径漏了）。本轮回齐。
+
+**新增护栏**：`test/features/search/providers/browse_provider_test.dart` 的漫画可浏览源数 **4 → 5**，`unsupportedSourceIds` 加入 `bangumi_manga`（漫画源没有共享的 `status` 筛选器），且 `seedLoaded` 助手的 `disabledSourceIds` 必须一并补 —— 否则该源会被触发加载，「asks nobody」不再成立。
+
+**一处已知限制**：连载中作品的顶层 `volumes` 常为 0（真实卷数只写在 infobox 的版本区，是自然语言），故`章节 / 卷数`对这类作品留空。**不去解析 infobox 的自然语言**，宁可留空也不编数据。
+
 ## 📋 候选（下一步从这里挑）
 
-> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > 优酷/爱奇艺 > 漫画**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
+> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > Bangumi 漫画 ✅ > 优酷/爱奇艺**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
 
 ### T1 · 豆瓣 403 退避（✅ 2026-09-20 完成 → D6）
 
@@ -265,11 +293,13 @@
 - 均已实测搜索接口可用、免密钥，但字段偏少（无演员/简介级别元数据）—— 适合做「列表 + 海报 + 链接」，不适合做详情主源。
 - 验收：关键词搜索返回中文标题与海报；详情缺失字段时无异常、字段留空。
 
-### T5. 漫画线调研
+### T5. 漫画线调研（✅ 2026-09-20 完成 → D9）
 
-- 已实测失败：B 站漫画（code 99）· 快看（404）· 动漫之家（不可达）。
-- 候选路径：NeoDB 覆盖漫画条目；或爬自有公开 API 的中文漫画库（如 `ggzy` 系开源代理，需先验合规与稳定性）。
-- 验收：找到免密钥可直连 5 秒内响应的候选再立项。
+> **结论**：不必另找源。**Bangumi 的书籍类型（`type=1`）叠加 `meta_tags: ['漫画']`** 即是最佳免费漫画源 —— 免密钥、已接入、中文标题、解析与动画同构。已落地（见 **D9**）。
+
+- 已实测失败（外部漫画平台）：B 站漫画（code 99）· 快看（404）· 动漫之家（不可达）· copymanga（302）。
+- 未采用：NeoDB 的漫画类目（其影视线已验证客户端可扩，但中文标题不如 Bangumi 直接）。
+- 验收已达成：免密钥、可直连、秒级响应、实测 12 条全为真漫画。
 
 ---
 
@@ -280,12 +310,12 @@
 | B1 | Windows 桌面运行 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 → `flutter run -d windows` 不可用 | 无法桌面预览；写码/分析/测试不受影响 |
 | B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` / `neodb.social` / `weread.qq.com` / `frodo.douban.com`，**均未做真实自托管 + 浏览器链路验证**（豆瓣的服务端签名逻辑已有单测钉死） | 发布 Web 前必须补 |
 | B3 | 上游同步 | fork 基线 0.44.0；上游以周为节奏发版 | 每次同步人造裁决冲突清单见 PROJECT.md §3 |
-| B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB / **豆瓣**）；漫画未定 | 漫画线（T5）已知候选全灭，待找免密钥可直连的库 |
+| B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB / **豆瓣**）；漫画 ✅（**Bangumi 书籍类型**） | **已闭环** —— 四类媒体均有免密钥中文源 |
 
 ## 护栏速查（改代码前看一眼，防炸）
 
 1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 **23**），加枚举即炸。
-2. `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码，加源即炸（**仅可浏览类型**；图书走 `textQueryOnly`，无此断言）。
+2. `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码，加源即炸（**仅可浏览类型**；图书走 `textQueryOnly`，无此断言）。漫画现 **5** 个（AniList / Bangumi / MangaBaka / MangaDex / Kitsu）；该文件的 `unsupportedSourceIds` 与 `seedLoaded` 的 `disabledSourceIds` 也各随源数变动。
 3. `test/features/search/sources/search_sources_test.dart` —— 注册表 id 顺序表，加源须补序。
 4. `test/shared/constants/source_catalog_test.dart` —— **「哪些源要密钥」的集合写死**（断言 `keyRequirement != none` 的源**恰好等于**那组枚举）。加任何**需密钥**的源即炸；D7 才把它编入护栏。
 5. RPC：改 DAO/模型 → `dart run tool/generate_rpc.dart` → 提交生成物，否则 `dart test` 必挂，无幸免。
