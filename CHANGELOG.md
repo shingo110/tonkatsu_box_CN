@@ -12,6 +12,43 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — self-host proxy verification
+
+The web build reaches every external API through the self-host server's
+`/proxy/<slug>/...`. That path had only ever been exercised handler by handler,
+against a fake upstream, with no socket anywhere in the picture — the one gap
+in the Chinese-source work that had to close before the web build ships.
+
+- `server/test/proxy_serve_integration_test.dart` serves the real handler with
+  `shelf_io.serve` on loopback, drives it with a real `HttpClient`, and aims the
+  proxy's outbound leg at a fake upstream that is itself a real server, so both
+  hops cross sockets. It pins a keyless GET round trip (with the server's own
+  `User-Agent` observed upstream), intact POST bodies, repeated query
+  parameters, an unknown slug refused with nothing sent, a missing key as 503,
+  a caller's `Authorization` stripped, Douban signed server-side to the same
+  vector the client signer is pinned to, a key uploaded over the socket taking
+  effect at once, and an unknown upstream still answering 404 — not the app
+  shell — when a `web-root` is configured.
+- `test/core/api/proxy_round_trip_test.dart` holds the client rewrite and the
+  server rebuild against each other for every `ProxyTarget`: host and slug both
+  resolve back, and rewrite-then-rebuild is the identity, including a repeated
+  query, a percent-encoded value, and a bare host, which is where AniList posts.
+- `packages/core/lib/api/proxy_targets.dart` is now covered rather than assumed:
+  the allowlist is a bijection, resolves hosts case-insensitively, and rejects
+  anything off it from both directions.
+
+Verified live with `probe/selfhost_proxy_live.py`: the real binary booted against
+a fresh data directory (schema v64) and answered 7/7 — `/health`; a Bangumi
+subject fetched through the proxy whose bytes are sha256-identical to a direct
+call; a Bangumi search POST; a NeoDB catalog search, also identical to direct;
+Douban answering 503 with no key configured; and an off-allowlist host refused
+locally. A second instance carrying `--web-root build/web` then served the built
+client, fell back to the shell for a client-side route, and still answered 404
+for an unknown upstream.
+
+Gates: analyze clean, 5699 app / 2380 core / 108 server tests pass, RPC output
+byte-identical.
+
 ## [cn] Added — Bangumi manga source
 
 The manga tab of the catalogue the anime source already opened. The manga line

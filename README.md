@@ -190,6 +190,10 @@ docker compose up -d --build
 > Web 版没有账号与密码体系，**只应暴露在可信局域网内**。
 >
 > 由于浏览器无法直连外部 API（跨域、User-Agent 被剥离、密钥不能下发到标签页），Web 端的所有外部请求都会经由服务端的 `/proxy/<slug>/…` 转发。可转发的目标在 [`packages/core/lib/api/proxy_targets.dart`](packages/core/lib/api/proxy_targets.dart) 中白名单化 —— 它是一张允许清单，不是开放中继。
+>
+> 这条链路已被证明可用：真实自托管实测 7/7，Bangumi / NeoDB 的代理响应与直连**逐字节相同**；豆瓣
+> 无密钥返 503、非白名单目标返 404 均在服务端拦下。复现步骤见 [`TASK.md`](TASK.md) 的 D10。
+
 
 ## 数据安全
 
@@ -209,8 +213,9 @@ docker compose up -d --build
 ```bash
 flutter analyze --fatal-infos --fatal-warnings
 flutter test
-dart test --directory packages/core
-dart test --directory server
+# 子包要进入自己的目录跑：`dart test --directory <pkg>` 在根目录解析不到 test 包
+(cd packages/core && dart test)
+(cd server && dart test)
 ```
 
 若改动了 DAO 或其返回的模型，还须重新生成 RPC 桩并提交生成物：
@@ -218,6 +223,12 @@ dart test --directory server
 ```bash
 cd packages/core && dart run tool/generate_rpc.dart
 ```
+
+改到 `/proxy`、`proxy_targets.dart` 或 Web 端改写逻辑时，另有两条**离线**护栏（已并入上面两关，
+这里点明）：`server/test/proxy_serve_integration_test.dart`（真 socket 全链路）与
+`test/core/api/proxy_round_trip_test.dart`（客户端改写 ↔ 服务端还原）。需要真上游复核时，起一次真实
+自托管按 `/proxy/<slug>/…` 打真接口即可（步骤见 [`TASK.md`](TASK.md) D10）。**这类活体检查不要塞进
+CI**：要外网、会碰上游限流。
 
 ## 项目文档
 

@@ -168,6 +168,7 @@ SearchSource（抽象端口）
 | **M5** 影视线余项 | 优酷 / 爱奇艺 | 📋 下一步候选 |
 | **M6** 漫画线 | Bangumi 书籍类型（`bangumi_manga`）：`type=1` + 「漫画」meta 标签、`Manga.fromBangumi`、`bangumi_json.dart` 共用解析、搜索客户端泛型化、`bangumi_filter_utils.dart` 共用筛选转换 | ✅ 2026-09-20 |
 | **M7** 发布 | Windows / Android / Web 打包与分发 | 📋 |
+| **M8** 自托管 Web 链路验证 | `/proxy` 全链路：真 socket 集成测试 + 客户端改写 / 服务端还原往返契约 + 真实自托管活体复核（响应体与直连逐字节比对） | ✅ 2026-09-20 |
 
 ## 8. 关键决策记录
 
@@ -186,6 +187,8 @@ SearchSource（抽象端口）
 - **ADR-12 · 豆瓣影视与图书共用一个 `DataSource`，但拆成三个搜索源（2026-09-20）。** 媒体类型由源决定、凭据由 `DataSource` 决定，所以 `douban_movie` / `douban_tv` 与图书源共享枚举值，凭据页与向导文案零新增键；三者各有 `outputMediaType`，注册顺序独立 —— 与 NeoDB 的三源同构。另一条实测教训值得单记：`/api/v2/search/movie` 的 `type` 参数**无效**（`type=movie` / 不带 / `type=tv` 三种取值返回同一份混排页），**分流只能按行的 `target_type` 自己做**；而「`type=tv` 那次看起来生效了」是因为所查关键词本身只有剧集 —— 这种「用自证样本验证过滤」的错觉值得警惕。
 
 - **ADR-13 · 加媒体类型可以复用既有 `DataSource`，不必新增目录服务（2026-09-20）。** 漫画源与动画源共用 `DataSource.bangumi` —— 枚举代表「目录服务」而非「媒体类型」，一个服务可以供多个类型，正如 NeoDB 一个枚举供图书 / 电影 / 剧集三源。这条判断直接决定改动面：**复用枚举时，`test/shared/widgets/source_badge_test.dart` 的 `DataSource.values.length` 与 `source_catalog_test` 的「需密钥源集合」都不会被撞**（D7 撞前者、D8 撞后者的情形不再出现），省下的不只是两处测试，还有一处 `source_catalog` 的密钥归属。另一条同源教训：**共享解析必须抽出去而不是复制** —— `bangumi_json.dart` 承接了动画源原有的私有 helper（`Anime.fromBangumi` 改为委托），`bangumi_filter_utils.dart` 承接了三个筛选转换；本仓已有 `neodb_json.dart` / `douban_json.dart` 两个先例，第三次仍坚持这样做，是因为两份「同一套规则」的副本迟早会在某次修 bug 里只改一边。
+
+- **ADR-14 · `/proxy` 的验证要离线可重复，真上游复核单独脚本化（2026-09-20）。** Web 端的代理链路此前只有「逐 handler + 假上游」的单测 —— 没有 socket，也就没有验证过真实的自托管形态。补法是三层而不是一层：① 真 `shelf_io.serve` + 真 `HttpClient` + 真上游服务器，把两条腿都放回socket 上，随 CI 跑；② 把「客户端改写 → 服务端还原」作为跨层不变式对全部 `ProxyTarget` 钉死，纯 Dart、零网络；③ 需要真上游时用 `probe/selfhost_proxy_live.py` 起真二进制，并把代理响应与直连响应做 sha256 比对。**① ② 必须离线**（否则每次 CI 都去打 Bangumi / NeoDB 的免费公共接口，迟早被封），**③ 必须留在 CI 之外**。这条判断与 ADR-5 一脉相承：免费接口的额度是公共资源，本地能测的一律本地测。
 
 ## 9. 什么算做完了
 

@@ -175,6 +175,31 @@
 - **顺带修的既有缺陷**：`import_service.dart` 的 `_fetchOneAnime` 此前**只有 Kitsu 与 AniList 两支**，Bangumi 动画的 `.xcoll` 导入会把 id 送去 AniList。同轮补上，与 `collection_actions` 那边的刷新路径对齐。
 - **护栏（新撞一处）**：`test/features/search/providers/browse_provider_test.dart` 硬编码漫画类型的**可浏览源数**（4 → 5）与 `unsupportedSourceIds`（漫画源没有共享的 `status` 筛选器，故加入其中）；其中 `seedLoaded` 助手的 `disabledSourceIds` 也必须补上新源，否则该源会被触发加载、"asks nobody" 不再成立。另外 `search_sources_test` 的 id 顺序表与 `source_output_media_type_test` 各补一条。
 
+### 七之九、自托管 /proxy 验证要点（2026-09-20，B2 闭环）
+
+**Web 端没有直连**：浏览器的跨域、UA 剥离、密钥不下发三条限制，决定了 Web 构建下所有外部请求都要
+经服务端 `/proxy/<slug>/…`。这条链路现在有三道防线，改代理相关代码前先读这一节。
+
+- **白名单是允许清单，不是开放中继**：`packages/core/lib/api/proxy_targets.dart` 的 `ProxyTarget`
+  是唯一真相 —— `proxyTargetForHost`（客户端改写用）与 `proxyTargetForSlug`（服务端路由用）遍历同
+  一枚举。**加源时 Web 端只需确认该 host 已在枚举里**：缺了不报任何错，浏览器会静默直连然后被 CORS
+  拦掉，症状是「桌面能用、Web 空白」。
+- **客户端改写与服务端还原是一对逆运算**：客户端把 `https://<host><path>?<query>` 改写成
+  `<selfhost>/proxy/<slug><path>?<query>`；服务端取 `pathSegments[1]` 当 slug、`skip(2)` 当上游路
+  径。两者由 `test/core/api/proxy_round_trip_test.dart` 对**全部** `ProxyTarget` 钉死，含裸主机
+  （AniList 的 POST 目标上游路径为空）与百分号编码。
+- **代理永远自带 `User-Agent`**（`kProxyUserAgent`）且**只转发 `content-type` / `accept`**：调用方
+  自带的 `Authorization` 一律被剥离，凭据由服务端注入；豆瓣还要改穿 Frodo 自己的 UA。
+- **服务端限流与客户端断路器是两套**：`proxy_handler.dart` 的 `_minRequestGap` 按主机在**服务端**
+  串行（MusicBrainz 1.1s、豆瓣 0.8s）—— 一次封禁覆盖本服务器背后的所有标签页，客户端断路器看不到
+  别的浏览器的流量。新增有封禁史的主机时**两处都要配**。
+- **`/proxy` 必须绕开 Web 静态回退**：`app_handler.dart` 的 `_withWebFallback` 把 `/health`、
+  `/rpc`、`/proxy/`、`/images/` 判为 API 路径直连 router。漏了这条，未知上游会拿到 index.html +
+  200（读起来像成功，把错误埋掉）。`proxy_serve_integration_test.dart` 有专门一例盯着它。
+- **验证手法**：离线两条（真 socket 集成 + 跨层往返）随 CI 走；要真上游复核时跑
+  `probe/selfhost_proxy_live.py` —— 起真二进制、绑 127.0.0.1 随机端口、按浏览器形状发请求，并把代
+  理响应与直连响应做 sha256 比对。**活体脚本不进 CI**（要外网、会碰限流）。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。

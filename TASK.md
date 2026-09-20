@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入 · M3 NeoDB 电影 / 剧集接入 · M4 微信读书图书接入 · D6 豆瓣 403 退避 · D7 豆瓣 ISBN 直查接入
+- **已完成**：D1–D10 全部收口 —— M0 开工就绪度核验，Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 七个国内源，以及自托管 `/proxy` 全链路验证（B2 闭环）
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面构建可用性（缺 VS C++ 工作负载）
 
@@ -229,6 +229,30 @@
 
 **一处已知限制**：连载中作品的顶层 `volumes` 常为 0（真实卷数只写在 infobox 的版本区，是自然语言），故`章节 / 卷数`对这类作品留空。**不去解析 infobox 的自然语言**，宁可留空也不编数据。
 
+### D10 · B2 闭环：自托管 /proxy 全链路验证（2026-09-20）
+
+把「Web 端所有外部请求都经服务端 `/proxy/<slug>/…`」这条链路，从「只有逐 handler 单测 + 假上游」
+补到「真实自托管跑通」。分三层落地：
+
+- **真实 socket 的集成测试**（`server/test/proxy_serve_integration_test.dart`，9 例）：真
+  `shelf_io.serve` 监听 loopback、真 `HttpClient` 发起，代理的出站腿经真 socket 打到本地假上游
+  （它自己也是一台真 HTTP 服务器）。覆盖：键免费 GET 双向透传且上游观测到浏览器无法自设的
+  `User-Agent`、POST 体逐字节完整、重复 query 全保留、未知 slug 404 且**零外发**、缺密钥 503、调用
+  方自带 `Authorization` 被剥离、豆瓣服务端签名与客户端同一向量、密钥经 socket 上传即时生效，以及
+  **配了 `--web-root` 时未知上游仍返 404 而不是被静态回退成应用外壳**。
+- **跨层改写往返契约**（`test/core/api/proxy_round_trip_test.dart`，8 例）：对**全部** `ProxyTarget`
+  断言 host ↔ slug 双向可逆，并把「客户端改写 `/proxy/<slug><path>` → 服务端 `segments.skip(2)` 还
+  原」钉成纯 Dart 不变式 —— 覆盖重复 query、百分号编码，以及 AniList 那种裸主机（上游路径为空）。
+- **真实自托管活体验证**（`probe/selfhost_proxy_live.py`，7/7）：起真二进制
+  （`dart run server/bin/server.dart`，全新 data-dir 建库至 v64），按浏览器形状（不带 UA）请求：
+  `/health` 200；`/proxy/bangumi/v0/subjects/3510` 200 且响应体 sha256 与直连**完全相同**；Bangumi
+  搜索 POST 200；`/proxy/neodb/api/catalog/search` 200 且与直连一致；豆瓣无密钥 503；未知上游 404。
+  若 `build/web` 存在，同一条脚本再起一台带 `--web-root` 的实例，验证 `/` 返回真实 Web 包、客户端
+  路由回退到外壳、而 `/proxy/<坏 slug>` 仍是 404。
+
+**为什么不把活体脚本放进 CI**：它要外网、会碰上游限流（Bangumi / NeoDB 都是免费公共服务）。所以
+留存的两条护栏都是**离线**的，真上游复核按需手动跑。
+
 ## 📋 候选（下一步从这里挑）
 
 > 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > Bangumi 漫画 ✅ > 优酷/爱奇艺**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
@@ -308,7 +332,7 @@
 | # | 事项 | 现状 | 影响 |
 |:-:|------|------|------|
 | B1 | Windows 桌面运行 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 → `flutter run -d windows` 不可用 | 无法桌面预览；写码/分析/测试不受影响 |
-| B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` / `neodb.social` / `weread.qq.com` / `frodo.douban.com`，**均未做真实自托管 + 浏览器链路验证**（豆瓣的服务端签名逻辑已有单测钉死） | 发布 Web 前必须补 |
+| B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` / `neodb.social` / `weread.qq.com` / `frodo.douban.com`，✅ **2026-09-20 闭环（→ D10）**。真实自托管实测 7/7：Bangumi GET / POST、NeoDB 搜索经代理返回与直连**逐字节相同**；豆瓣无密钥 503、非白名单目标 404 均在服务端拦下。护栏两条：`server/test/proxy_serve_integration_test.dart`、`test/core/api/proxy_round_trip_test.dart` | ✅ 已闭环 |
 | B3 | 上游同步 | fork 基线 0.44.0；上游以周为节奏发版 | 每次同步人造裁决冲突清单见 PROJECT.md §3 |
 | B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB / **豆瓣**）；漫画 ✅（**Bangumi 书籍类型**） | **已闭环** —— 四类媒体均有免密钥中文源 |
 
