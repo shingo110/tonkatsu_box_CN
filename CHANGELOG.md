@@ -12,6 +12,34 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — host 403 backoff ahead of the Douban work
+
+Douban serves a burst of ten calls and then 403s for three to five minutes,
+which a FIFO gap alone cannot prevent: a list import walks straight into the
+ban. This puts a breaker in front of the gap.
+
+- `HostBackoffPolicy` (`maxBurst`, `cooldown`) and `kHostBackoffPolicy` in
+  `lib/core/api/host_rate_limiter.dart`: `maxBurst` back-to-back starts pass,
+  the next one raises `HostCooldownException` without touching the network, and
+  the pause lifts by itself when `cooldown` elapses. `cooldown` doubles as the
+  idle period that ends a burst, so calls spaced wider than it never accumulate.
+- `HostRateLimiter` counts starts and refuses while cooling down. `_tail` is
+  drained through `then(onError:)`, so a refusal cannot leave later callers
+  chaining off a failed future and rethrowing the wrong error.
+- `HostRateLimitInterceptor.onError` opens the breaker on 402 / 403 / 429 — the
+  host's own signal — so the pause starts at the refusal rather than at the next
+  ceiling. A 500 leaves the breaker closed.
+- Host lookup now falls back from a host to its parent domains and caches the
+  limiter under the matched key, so `frodo.douban.com`, `book.douban.com` and
+  `movie.douban.com` spend one budget between them: Douban counts a client's
+  requests, not a subdomain's.
+- `kHostMinRequestGap` gains `douban.com` at 800ms, and `extractApiError` maps
+  `HostCooldownException` to a message naming the host and the wait still owed.
+- Existing sources keep their own generic wording — their `handleDioException`
+  wraps the `DioException` before the UI sees it — so the cooldown reason lands
+  in the error-details panel instead. A new source adopts it by reading
+  `e.error`, which the Douban client will do.
+
 ## [cn] Added — WeRead book source
 
 The Chinese e-book store, and the first source here holding web novels and

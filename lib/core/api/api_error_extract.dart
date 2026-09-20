@@ -3,6 +3,7 @@ import 'comicvine_api.dart';
 import 'fantlab_api.dart';
 import 'google_books_api.dart';
 import 'hardcover_api.dart';
+import 'host_rate_limiter.dart';
 import 'igdb_api.dart';
 import 'kodi_api.dart';
 import 'mangabaka_api.dart';
@@ -53,6 +54,13 @@ ApiError extractApiError(Exception e) {
       (message: message, detail: null),
     SimklApiException(:final String message, :final String? detail) =>
       (message: message, detail: detail),
+    // Raised by our own limiter rather than by a source, so it is the one error
+    // here with no per-API wrapper to be unwrapped from.
+    HostCooldownException(:final String host, :final int remainingSeconds) => (
+        message:
+            'Rate limit exceeded for $host. Try again in ${remainingSeconds}s',
+        detail: null,
+      ),
     _ => (message: e.toString(), detail: null),
   };
 }

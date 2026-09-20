@@ -119,6 +119,18 @@
 - **无 UA 要求**（Chrome / 应用 / 空 UA 实测均 200）。但注意：**用 curl 经沙箱代理探测时曾连续返回 0 字节**，一度误判为「UA 被拒」；清掉 `HTTP_PROXY` 等变量直连后同一请求正常返回 6303 字节。**探测网络接口务必先清代理**（同 P1 的规矩），否则会把代理噪声当成服务端行为。
 - **`.xcoll` 降级导入无法解析微信读书条目**：`CollectionItem.toExport()` 只导出 `media_type / external_id / native_id / source`，**不含标题**，而重搜必须有标题。故该分支显式 `return null` 并注明原因；正常导入走内嵌媒体数据，不受影响。
 
+### 七之五、宿主限流与 403 退避（2026-09-20）
+
+`lib/core/api/host_rate_limiter.dart` 有**两道闸**，都由 `HostRateLimitInterceptor` 执行（`createApiDio` 自动挂载；**必须在 proxy rewrite 之前**，否则认到的是自托管服务器而非真实上游主机）。
+
+- **闸一 · 最小间隔**（`kHostMinRequestGap`）：按主机 FIFO 串行，两次请求的**发起**时刻至少隔开给定间隔。**响应不等**，只错开发起。
+- **闸二 · 断路器**（`kHostBackoffPolicy`）：`HostBackoffPolicy(maxBurst, cooldown)` 就是「连打 N 次 → 冷却 M 分钟」。同一波（相邻两次间隔小于 `cooldown`）放行 `maxBurst` 次，第 `maxBurst + 1` 次**直接抛 `HostCooldownException`、不发网**；冷却到期自动恢复。`cooldown` 兼作「多长的间隔算换了一波」，所以零星散布的调用永远攒不到上限。
+- **两个触发源**：① 次数到顶（主动预防）；② 收到 **402 / 403 / 429** 响应（被动，自被拒那刻立即开闸）。二者共用同一只 `cooldown`。
+- **同域共享**：查表先精确匹配，再逐级剥掉最左标签往父域找（`frodo.douban.com` → `douban.com`），且**限流器按命中的表键缓存** ⇒ `frodo` / `book` / `movie` 三个子域**共用一份预算**。理由：豆瓣按客户端计数，一个子域一把队列等于把允许量乘以子域个数。
+- **豆瓣取值**：`maxBurst: 9`、`cooldown: 5min`、间隔 `800ms`。实测十连打即 403、冷却 3–5 分钟，故**比实测少放一次**再开闸，让封禁永远挣不到。
+- **`acquire()` 抛错不得污染队列**：`_tail` 必须用 `then(onError:)` 吞掉被拒的那一对 future，否则后续调用会链在已作废的 future 上，抛的是**上一个**异常而不是自己的判断。
+- **文案的现实折衷（务必知悉）**：冷却文案挂在 `DioException.error` 上。但**各源的 `handleDioException` 会把 DioException 包成自家异常并套通用措辞**（全仓 112 处 `on DioException catch`），故对**既有源**而言用户看到的仍是该源的通用文案，精确原因（主机 + 剩余秒数）落在「详情」面板的 `Cause:` 行（`buildApiErrorDetail` 自动收 `exception.error.toString()`）。`extractApiError` 已为 `HostCooldownException` 注册分支，供未被包装的路径与**新写的源**取用 —— **接豆瓣源时，其 `handleDioException` 应优先判 `e.error is HostCooldownException` 并采用其文案**。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。
@@ -129,6 +141,6 @@ Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国
 2. `flutter test` · `dart test`（packages/core）· `dart test`（server）**全绿**
 3. RPC 生成物 `git diff --exit-code -- packages/core/lib/rpc/generated` 为空
 4. **在线活体验证**通过（临时插真实 API；不允许"测试都过了"当完工）
-5. 护栏、ARB 键数（6×1744 全齐）、`TASK.md` 状态同步
+5. 护栏、ARB 键数（6×1745 全齐）、`TASK.md` 状态同步
 
 按此清单跑完，再回头补文档与记忆。

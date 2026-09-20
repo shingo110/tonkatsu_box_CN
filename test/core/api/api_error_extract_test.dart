@@ -5,6 +5,7 @@ import 'package:tonkatsu_box/core/api/comicvine_api.dart';
 import 'package:tonkatsu_box/core/api/fantlab_api.dart';
 import 'package:tonkatsu_box/core/api/google_books_api.dart';
 import 'package:tonkatsu_box/core/api/hardcover_api.dart';
+import 'package:tonkatsu_box/core/api/host_rate_limiter.dart';
 import 'package:tonkatsu_box/core/api/igdb_api.dart';
 import 'package:tonkatsu_box/core/api/kodi_api.dart';
 import 'package:tonkatsu_box/core/api/ra_api.dart';
@@ -48,6 +49,16 @@ void main() {
     test('maps ScreenScraper message without a detail', () {
       final ApiError r = extractApiError(ScreenScraperApiException('ss'));
       expect(r.message, 'ss');
+      expect(r.detail, isNull);
+    });
+
+    test('states the wait a host cooldown still owes', () {
+      final ApiError r = extractApiError(
+        const HostCooldownException('douban.com', Duration(seconds: 240)),
+      );
+
+      expect(r.message, contains('douban.com'));
+      expect(r.message, contains('240s'));
       expect(r.detail, isNull);
     });
 

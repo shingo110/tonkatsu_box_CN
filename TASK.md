@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入 · M3 NeoDB 电影 / 剧集接入 · M4 微信读书图书接入
+- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入 · M3 NeoDB 电影 / 剧集接入 · M4 微信读书图书接入 · D6 豆瓣 403 退避
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面构建可用性（缺 VS C++ 工作负载）
 
@@ -129,17 +129,38 @@
 
 **探测阶段推翻的一条自造结论**：一度以为「微信读书要求浏览器 UA」（空 UA 返回 0 字节）。复测发现是**探测时走了沙箱代理**导致的偶发空体 —— 直连后 Chrome UA / 应用 UA / 空 UA **三者都返回 6303 字节**。**教训：探测网络接口必须按 P1 的规矩先清 `HTTP_PROXY` 等变量**，否则会把代理噪声当成服务端行为。
 
+### D6 · 豆瓣 403 退避（2026-09-20，为接豆瓣筑的护城河）
+
+豆瓣实测「十连打即 403、冷却 3–5 分钟」，而原有 `host_rate_limiter.dart` 只做间隔、不认封禁 —— 一跑 ISBN 列表就会撞墙。本轮补上「连打 N 次 → 冷却 M 分钟」的断路器。
+
+**改动面**（单文件为主）：`lib/core/api/host_rate_limiter.dart` —— 新增 `HostBackoffPolicy(maxBurst, cooldown)` 与 `kHostBackoffPolicy` 表、`HostCooldownException`；`HostRateLimiter` 加 burst 计数与冷却拒绝；查表改为「精确 → 逐级父域」并**按命中表键缓存**（同域子站共用一份预算）；`HostRateLimitInterceptor` 加 `onError`，402/403/429 触发 `recordRefusal`。另：`kHostMinRequestGap` 补 `douban.com: 800ms`；`extractApiError` 注册该异常类型。
+
+**验收记录**：
+
+- [x] `flutter analyze --fatal-infos --fatal-warnings`：No issues found
+- [x] `test/core/api/host_rate_limiter_test.dart`：**18 通过**（原 5 + 新 13）
+- [x] `test/core/api/api_error_extract_test.dart`：**5 通过**（+1）
+- [x] 10 连击后第 11 次抛 `HostCooldownException` —— 验收原文逐条对应
+- [x] 冷却期间**不发网**：拦截器在 `onRequest` 直接 `handler.reject`，无 adapter 参与
+- [x] 冷却结束**自动恢复**：`cooldown` 到期后 `acquire()` 正常返回
+- [x] 被拒的调用**不污染 FIFO 队列**：连续两次被拒，第二次仍按自己的判断拒绝，而非继承上一个异常
+- [x] **域级共享**：`frodo` / `book` / `movie` 三个子域返回同一实例、同一预算
+- [x] 被动开闸：403 响应使下一次请求被冷却；500 不触发
+- [ ] **未做**：真实豆瓣接口的活体验证（须先有豆瓣源；且活体验证本身会消耗封禁额度，宜随 ISBN 源一并做）
+
+**已知折衷（已记入 RULES §七之五）**：冷却文案挂在 `DioException.error` 上，但各源的 `handleDioException` 会把 DioException 包成自家异常并套通用措辞（全仓 112 处 `on DioException catch`），故**既有源**的用户主文案仍是通用措辞，精确原因落在「详情」面板的 `Cause:` 行。**新写的豆瓣源须在自己的 `handleDioException` 里优先判 `e.error is HostCooldownException` 并采用其文案。**
+
+---
+
 ## 📋 候选（下一步从这里挑）
 
-> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 优酷/爱奇艺 > 豆瓣**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故排在最后。
+> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 优酷/爱奇艺 > 豆瓣**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故排在最后。**403 退避这一前置已于 D6 落地**，豆瓣线只剩签名与源本身。
 
-### T1 · 豆瓣 403 退避（可推迟，见 T2）
+### T1 · 豆瓣 403 退避（✅ 2026-09-20 完成 → D6）
 
 > **2026-09-19 更新**：NeoDB 已是豆瓣数据的免密钥代理（见 T2），本任务不再是任何工作的前置，仅在需要豆瓣**独有数据**（短评、想看人数、精确剧集排期）时才值得做。
 
-- 现状：`lib/core/api/host_rate_limiter.dart` 只做「按主机 FIFO + 最小间隔」，**不处理 403 封禁**；表内仅 `musicbrainz.org`、`coverartarchive.org` 两项。
-- 要做的：为豆瓣主机加「连打 N 次 → 冷却 M 分钟」的退避策略；接在「FIFO 间隔」之后，402/429/403 触发冷却；冷却期内请求直接失败并给出用户可读提示。
-- 验收：模拟 10 连击后第 11 次被冷却；冷却期间请求不发出网；冷却结束自动恢复。带单测。
+已于 D6 落地：断路器（连打 N 次 → 冷却 M 分钟）+ 402/403/429 被动开闸 + 域级共享预算，豆瓣取值 `maxBurst: 9` / `cooldown: 5min` / `gap: 800ms`。**后续 T3 的豆瓣 ISBN 可直接开工** —— 新源只需在自己的 `handleDioException` 里优先采纳 `HostCooldownException` 的文案。
 
 ### T2 · NeoDB 扩电影 / 剧集（✅ 2026-09-20 完成 → M3）
 
