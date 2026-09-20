@@ -196,8 +196,20 @@
 - 第三方 `isbn.work` 需 appkey（`probe/isbnwork.json` 记 `code 1 appkey无效`）⇒ 违背 ADR-3 免密钥原则，**弃用**。
 
 - [x] 微信读书：`weread.qq.com/web/search/global`（免密钥，仅搜索）→ D5
-- [ ] 豆瓣 ISBN：**实证已完成，待实现源**（前置 T1 已就位）。尚待决策两事：① **签名密钥与 apiKey 以明文进开源客户端**（形式上与现有 TMDB / IGDB 等源同构，但豆瓣这对凭据是借用方 App 的，须明示）；② **源形态** —— ISBN 专用源，还是「关键词搜索 + ISBN 自动识别」双后端。
+- [ ] 豆瓣 ISBN：**实证已完成、前置 T1 已就位、设计已定**（见下），待实现源。
 - 验收：ISBN 精确命中返回对应中文图书；关键词搜索中文书名无乱码；在线验证。
+
+**设计定案（2026-09-20 拍板）**：
+
+1. **凭据由用户自填，源码不内置。** 照搬本仓既有范式，**不新造存储设施**：`SettingsKeys`（`settings_provider.dart`）加键 → `ApiKeys.fromPrefs` 读 `SharedPreferences` → `settings/content/credentials_content.dart` 加一节（带「测试」动作，Podcast Index / ScreenScraper 已有此范式）→ 6 语言 l10n。**"仅读 prefs、无内置"的先例本仓已有四例**：RetroAchievements · ComicVine · Hardcover · Google Books。
+2. **双后端单源**：关键词走 `/api/v2/search/book`；输入形如 ISBN（10 / 13 位数字，去连字符）时改走 `/api/v2/book/isbn/{isbn}`。**这不只是功能取舍 —— 单后端会让每次关键词搜索都白发一发到易封主机**，故双后端同时是省额度之选。
+
+**实现清单（下一阶段）**：
+
+- `lib/core/api/douban/{douban_types,douban_signature,douban_http_client,douban_search_api}.dart` + `douban_api.dart` —— **HMAC-SHA1 签名是新增件**，参照 `probe/sign.py`（`_sig = base64(HMAC-SHA1(secret, "GET&" + urlencode(path, safe='') + "&" + ts))`）。
+- `douban_book_source.dart`（id `douban`）+ `Book.fromDoubanItem`（`press` 取出版社、数组字段取首元素、`rating.value` 直接用）。
+- 注册面 7 处 · Web `proxy_targets` + `_authorize` · 三处护栏 · 连带必改 5 处 · 凭据设置 4 处 + l10n。
+- 限流两道闸已于 D6 就位（`kHostBackoffPolicy` 的 `douban.com: maxBurst 9 / cooldown 5min`；`kHostMinRequestGap` 的 `douban.com: 800ms`）；新源的 `handleDioException` 须优先判 `e.error is HostCooldownException`。
 
 ### T4. 影视线：优酷 / 爱奇艺
 
