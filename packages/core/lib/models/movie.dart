@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../utils/douban_json.dart';
 import '../utils/neodb_json.dart';
 import '../utils/stable_id.dart';
 import '../utils/tvdb_json.dart';
@@ -123,6 +124,28 @@ class Movie {
       externalUrl: neodbItemUrl(json),
       cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       source: DataSource.neodb,
+    );
+  }
+
+  /// Douban record — a mixed `/api/v2/search/movie` row already filtered down
+  /// to `target_type == 'movie'`, or a full `/api/v2/movie/{id}` response.
+  factory Movie.fromDoubanItem(Map<String, dynamic> json) {
+    final List<String> genres = doubanItemGenres(json);
+
+    return Movie(
+      tmdbId: doubanItemId(json),
+      title: doubanItemTitle(json) ?? 'Unknown',
+      originalTitle: doubanItemOriginalTitle(json),
+      posterUrl: doubanItemCoverUrl(json),
+      overview: doubanItemOverview(json),
+      genres: genres.isEmpty ? null : genres,
+      releaseYear: doubanItemYear(json),
+      // Douban rates out of ten already — do not double it.
+      rating: doubanItemRating(json),
+      runtime: doubanRuntimeMinutes(json),
+      externalUrl: doubanItemUrl(json),
+      cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      source: DataSource.douban,
     );
   }
 

@@ -8,6 +8,16 @@ const String kDoubanSearchBookPath = '/api/v2/search/book';
 /// `/api/v2/book/{id}` and `/api/v2/book/isbn/{isbn}` share this prefix.
 const String kDoubanBookPath = '/api/v2/book';
 
+/// The one search endpoint for films and series. Its `type` parameter is
+/// ignored, so rows are split on `target_type` instead.
+const String kDoubanSearchMoviePath = '/api/v2/search/movie';
+
+/// `/api/v2/movie/{id}` — a film. A series id answers 996 here, not a record.
+const String kDoubanMoviePath = '/api/v2/movie';
+
+/// `/api/v2/tv/{id}` — a series.
+const String kDoubanTvPath = '/api/v2/tv';
+
 /// Rows the search endpoint answers per call.
 const int kDoubanSearchCount = 20;
 

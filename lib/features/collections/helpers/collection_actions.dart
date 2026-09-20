@@ -791,6 +791,11 @@ Future<Movie?> _refreshedMovie(WidgetRef ref, CollectionItem item) async {
   if (item.source == DataSource.tvdb) {
     return ref.read(tvdbApiProvider).getMovie(item.externalId);
   }
+  if (item.source == DataSource.douban) {
+    // A Douban subject id is the numeric external id itself, so nothing has to
+    // be reverse-engineered out of a stored URL — unlike NeoDB above.
+    return ref.read(doubanApiProvider).getMovie(item.externalId.toString());
+  }
   return ref.read(tmdbApiProvider).getMovie(item.externalId);
 }
 

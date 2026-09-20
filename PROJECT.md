@@ -147,7 +147,7 @@ SearchSource（抽象端口）
 | 动画 / 游戏 / 播客 | NeoDB 其它类目 | 📋 待实现 | 同一客户端与 `category` 参数即可扩展，缺的是模型映射与筛选器 |
 | 图书（中文电子书 / 网文） | 微信读书 | ✅ 已并入 | 免密钥；**没有 by-id 详情端点**（`web/book/info` 对未登录客户端报 `-2010 用户不存在`）→ 只做搜索，搜索行即完整记录；`newRating` 是 **0–1000** 刻度（930→9.3）须除以 100；`totalCount` / `hasMore` **不可信**，只有 `maxIdx` 偏移可用 |
 | 图书 | 豆瓣 | ✅ 已并入 | 元数据最全；**需自备 API Key / Secret**（源码不内置）；**UA 须与客户端配对**，否则 403；搜索响应顶层键是 `items` 且记录包在 `target` 下，作者 / 年份 / 出版社压成 `card_subtitle`；`rating.value` 已是 0–10；出版社在 `press`；不回显 ISBN ⇒ `native_id` 存查询所用 ISBN |
-| 电影 / 剧集 | 豆瓣 Frodo | 📋 待实现 | HMAC-SHA1 签名；**连打约 10 次即 403、冷却 3–5 分钟** —— 403 退避**已于 D6 落地**（`kHostBackoffPolicy`，豆瓣 `maxBurst: 9` / `cooldown: 5min`）；签名 path 必须与最终 path 一致 |
+| 电影 / 剧集 | 豆瓣 Frodo | ✅ 已并入 | 元数据最全；**需自备 API Key / Secret**；**搜索端点是电影与剧集的混合池，`type` 参数无效**，分流按行的 `target_type`；详情分道（电影 `/movie/{id}`、剧集 `/tv/{id}`，剧集送 `/movie/` 回 996）；`card_subtitle` 搜索行与详情记录**两种形状**；`rating.value` 已是 0–10 |
 | 电影 / 剧集 | 豆瓣免签接口 | 📋 待实现 | `movie.douban.com/j/subject_suggest`，需 Referer；无限流但字段少 |
 | 电影 / 剧集 | 优酷 / 爱奇艺 | 📋 待实现 | 搜索接口免密钥；字段偏少 |
 | 漫画 | —— | 🔍 待调研 | B 站漫画（code 99）、快看（404）已实测失败 |
@@ -164,7 +164,8 @@ SearchSource（抽象端口）
 | **M3** 影视线 | NeoDB 扩电影 / 剧集（`Movie` / `TvShow` 映射、共享 `neodb_json` 工具、以「季」为粒度、`category=movie\|tv`） | ✅ 2026-09-20 |
 | **M4** 图书线补强 · 微信读书 | 微信读书搜索源（`Book.fromWeReadItem`、0–1000 评分换算、按标题重搜回填） | ✅ 2026-09-20 |
 | **M4b** 图书线补强 · 豆瓣 ISBN 直查 | 豆瓣图书源（`douban`）：HMAC-SHA1 签名客户端、双后端单源（关键词 / by-ISBN）、`Book.fromDoubanItem`、凭据自填、6 语言 l10n | ✅ 2026-09-20 |
-| **M5** 影视 / 图书线余项 | 豆瓣影视直查（403 退避已随 D6 就位）、优酷 / 爱奇艺 | 📋 下一步候选 |
+| **M4c** 影视线补强 · 豆瓣电影 / 剧集 | 豆瓣影视源（`douban_movie` / `douban_tv`）：混合池按 `target_type` 分流、`Movie` / `TvShow.fromDoubanItem`、`DoubanEpisodeSource` 防串源 | ✅ 2026-09-20 |
+| **M5** 影视 / 图书线余项 | 优酷 / 爱奇艺 | 📋 下一步候选 |
 | **M6** 漫画线 | 待确定可行路径后立项 | 🔍 |
 | **M7** 发布 | Windows / Android / Web 打包与分发 | 📋 |
 
@@ -181,6 +182,8 @@ SearchSource（抽象端口）
 - **ADR-9 · 微信读书只做搜索源，不做详情源（2026-09-20）。** 它的 `web/book/info` 对未登录客户端一律回 `errCode -2010`，官方没有公开的按 id 取书接口。所幸搜索行本身已是完整记录（标题 / 作者 / 封面 / 简介 / 出版社 / 推荐值 / 评价数），刷新与详情用「按标题重搜 + 精确匹配 `bookId`」补偿 —— 用一个可接受的降级换掉一个拿不到的接口，比放弃整个源划算。
 - **ADR-10 · 断路器优于加宽间隔；同域子站必须共享一份预算（2026-09-20）。** 豆瓣「十连打即 403」是**次数**问题而非速率问题，所以把 `kHostMinRequestGap` 的间隔调得再宽也只是延后撞墙 —— 加了 `kHostBackoffPolicy` 后，主动（次数到顶）与被动（402 / 403 / 429）两个触发源共用一只冷却。另一个关键取舍是**查表按父域兜底并共享限流器**：封禁按「客户端」计而非按「子域」计，给 `frodo` / `book` / `movie` 各发一份预算等于把允许量乘以 3 —— 这种"看似隔离、实则放大"的配置是限流设施最容易犯的错。
 - **ADR-11 · 豆瓣取双后端单源，凭据由用户自填（2026-09-20）。** 同一个源分出两条后端：查询词形如 ISBN 走 `/api/v2/book/isbn/{isbn}`，其余走 `/api/v2/search/book`。这不只是功能取舍 —— 单后端会让每次关键词搜索都白发一发到一台「十连打即封」的主机，双后端同时是省额度之选。凭据沿用本仓已有四例（RetroAchievements / ComicVine / Hardcover / Google Books）的「仅读 prefs、源码不内置」范式，不新造存储设施。签名实现落在 `packages/core`（而非 `lib`），因为自托管服务端要用它给代理请求签名。
+
+- **ADR-12 · 豆瓣影视与图书共用一个 `DataSource`，但拆成三个搜索源（2026-09-20）。** 媒体类型由源决定、凭据由 `DataSource` 决定，所以 `douban_movie` / `douban_tv` 与图书源共享枚举值，凭据页与向导文案零新增键；三者各有 `outputMediaType`，注册顺序独立 —— 与 NeoDB 的三源同构。另一条实测教训值得单记：`/api/v2/search/movie` 的 `type` 参数**无效**（`type=movie` / 不带 / `type=tv` 三种取值返回同一份混排页），**分流只能按行的 `target_type` 自己做**；而「`type=tv` 那次看起来生效了」是因为所查关键词本身只有剧集 —— 这种「用自证样本验证过滤」的错觉值得警惕。
 
 ## 9. 什么算做完了
 

@@ -144,6 +144,20 @@
 - **`handleDioException` 优先判 `e.error is HostCooldownException`** 并采用其文案（见七之五的「文案现实折衷」）—— 本源的断路器拒绝发生在发网之前，只有这条文案能告诉用户还要等多久。
 - 免签两路已确认死路，勿再试：`book.douban.com/isbn/{isbn}` 跳 301 到 HTML；`movie.douban.com/j/subject_suggest` 对 ISBN 返空数组。
 
+### 七之七、豆瓣影视接入要点（2026-09-20，`douban_movie` / `douban_tv`）
+
+- **`/api/v2/search/movie` 是电影与剧集的混合池，`type` 参数无效。** 实测同一查询分别带 `type=movie`、不带 `type`、带 `type=tv`，三次响应**逐字节相同**且都是混排（`total` 都是 27）。**分流只能自己做**：每行有 `target_type`（`movie` / `tv`）与 `type_name`（`电影` / `电视剧`）。**只看 `type=tv` 那次「生效」会得出错误结论** —— 「狂飙」本身就是剧集，默认结果自然全是剧集。
+- **分页要按混合池推进**：`total` 是混排总数（「三体」27 条里电影只有几条），过滤后每页条数不定。`hasMore` 用 **host 实际返回的行数**（`items.length`）算，**不能用过滤后的条数** —— 否则会提前判尾页。这与微信读书「别用行数判尾页」是同一类坑的另一面。
+- **详情路径分道**：电影 `/api/v2/movie/{id}`、剧集 `/api/v2/tv/{id}`；**剧集 id 送 `/movie/` 会回 996**。响应 73 字段，`subtype` / `type` 标 `movie` / `tv`。
+- **`card_subtitle` 两种形状**：搜索行 `"中国大陆 / 科幻 冒险 灾难 / 郭帆 / 吴京 刘德华"`（国家 / 类型 / 导演 / 演员），**详情记录多一个前导年份** `"2023 / 中国大陆 / 科幻 冒险 灾难 / …"`。取类型要**按形状判槽位**（首段是四位年份则取第 3 段，否则第 2 段）—— 一律取第 2 段会把「中国大陆」当类型。（图书的 `card_subtitle` 语义又不同：`作者 / 年 / 出版社`。）
+- **`original_title` 实测为空**，英文名只在 `aka` 数组里。取第一个**不含汉字**的别名 —— 只查 `[A-Za-z]` 会误取 `"流浪地球2(3D版)"`（中文别名里夹着 `3D`）。
+- **`rating.value` 已是 0–10**，直接用（与图书同）。`durations` 是数组（`["173分钟"]`）取首元素抽数字；`episodes_count` 只有剧集有（电影为 0）；`first_air_time` 虽在字段表里但**实测为 null**，年份一律取 `year`。
+- **搜索行没有 `intro`**（`abstract` 恒为空串）⇒ 搜索结果无简介，影视详情页也不做 lazy-load，所以**豆瓣影视收藏后简介为空**。剧集靠 `TvShowCacheWarmer` 在收藏时补（见下条），**电影没有这一步**，需手动刷新。
+- **`tvEpisodeSourceResolverProvider` 是 `_ => tmdb` 兜底 —— 加影视源必须同时给它一支。** 否则 `TvShowCacheWarmer` 与 `_refreshedTvShow` 会拿豆瓣 id 去 TMDB 查，**可能把不相干的剧写进缓存**（静默串源，不报任何错）。已加 `DoubanEpisodeSource`：只 `getShow` 干活（借 warmer 补全记录与简介），`getSeasons` / `getSeasonEpisodes` 返回空 —— 豆瓣**没有季切分、也没有集列表**，宁可空也不编。
+- **刷新与 `.xcoll` 导入用 `externalId`**：豆瓣 subject id 本身就是十进制数字，`Movie.tmdbId` / `TvShow.tmdbId` 直接存它，**不需要 NeoDB 那套 URL 反解**。注意 `CollectionItem.nativeId` 只对 book / audio 生效，影视一律走 `externalId`。
+- 源 id `douban_movie` / `douban_tv`，均 `supportsBrowse=false`、无筛选器、单排序项，**注册在 keyless 的 NeoDB 影视源之后**。二者与图书源共享 `DataSource.douban` ⇒ 凭据页与向导文案**零新增键**。
+- 活体验证（7 发内）：「流浪地球2」→ `id=35267208` / year 2023 / rating 8.3；`/movie/35267208` → 73 字段 / `durations=["173分钟"]` / `genres=[科幻, 冒险, 灾难]` / 完整 `intro`；「狂飙」→ `/tv/35465232` / 39 集。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。

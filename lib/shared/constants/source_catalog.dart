@@ -96,7 +96,11 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
   ),
   SourceInfo(
     source: DataSource.douban,
-    mediaTypes: <MediaType>[MediaType.book],
+    mediaTypes: <MediaType>[
+      MediaType.book,
+      MediaType.movie,
+      MediaType.tvShow,
+    ],
     url: 'https://book.douban.com/',
     // Every request is signed, so a key and secret pair is not optional.
     keyRequirement: SourceKeyRequirement.mandatory,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'data_source.dart';
+import '../utils/douban_json.dart';
 import '../utils/html_text.dart';
 import '../utils/neodb_json.dart';
 import '../utils/stable_id.dart';
@@ -156,6 +157,29 @@ class TvShow {
       externalUrl: neodbItemUrl(json),
       cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       source: DataSource.neodb,
+    );
+  }
+
+  /// Douban record. Douban files a series as one subject with no season split,
+  /// so `episodes_count` is the whole run; the detail call must use
+  /// `/tv/{id}` — `/movie/{id}` answers 996 for a series.
+  factory TvShow.fromDoubanItem(Map<String, dynamic> json) {
+    final List<String> genres = doubanItemGenres(json);
+
+    return TvShow(
+      tmdbId: doubanItemId(json),
+      title: doubanItemTitle(json) ?? 'Unknown',
+      originalTitle: doubanItemOriginalTitle(json),
+      posterUrl: doubanItemCoverUrl(json),
+      overview: doubanItemOverview(json),
+      genres: genres.isEmpty ? null : genres,
+      firstAirYear: doubanItemYear(json),
+      totalEpisodes: doubanEpisodeCount(json),
+      // Douban rates out of ten already — do not double it.
+      rating: doubanItemRating(json),
+      externalUrl: doubanItemUrl(json),
+      cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      source: DataSource.douban,
     );
   }
 

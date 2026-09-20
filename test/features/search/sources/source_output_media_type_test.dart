@@ -4,6 +4,8 @@ import 'package:tonkatsu_box/features/search/sources/anilist_anime_source.dart';
 import 'package:tonkatsu_box/features/search/sources/anilist_manga_source.dart';
 import 'package:tonkatsu_box/features/search/sources/bangumi_anime_source.dart';
 import 'package:tonkatsu_box/features/search/sources/douban_book_source.dart';
+import 'package:tonkatsu_box/features/search/sources/douban_movie_source.dart';
+import 'package:tonkatsu_box/features/search/sources/douban_tv_source.dart';
 import 'package:tonkatsu_box/features/search/sources/fantlab_source.dart';
 import 'package:tonkatsu_box/features/search/sources/igdb_games_source.dart';
 import 'package:tonkatsu_box/features/search/sources/neodb_book_source.dart';
@@ -74,8 +76,16 @@ void main() {
       expect(NeoDBMovieSource().outputMediaType, MediaType.movie);
     });
 
+    test('DoubanMovieSource → MediaType.movie', () {
+      expect(DoubanMovieSource().outputMediaType, MediaType.movie);
+    });
+
     test('NeoDBTvSource → MediaType.tvShow', () {
       expect(NeoDBTvSource().outputMediaType, MediaType.tvShow);
+    });
+
+    test('DoubanTvSource → MediaType.tvShow', () {
+      expect(DoubanTvSource().outputMediaType, MediaType.tvShow);
     });
   });
 }

@@ -12,6 +12,56 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — Douban movie and TV sources
+
+The same signed catalogue as the book source, extended to films and series. The
+search endpoint turns out to be one mixed pool: `type=movie`, no `type` and
+`type=tv` answer byte-identical pages, so the split has to happen on this side,
+on each row's `target_type`. A series resolves only through `/api/v2/tv/{id}` —
+`/movie/{id}` answers 996. Both sources share `DataSource.douban` with the book
+source, so the credentials page and the welcome step needed no new keys.
+
+- `DoubanMovieSource` and `DoubanTvSource` (`lib/features/search/sources/`):
+  ids `douban_movie` and `douban_tv`, no filters, search only, registered after
+  the keyless NeoDB sources.
+- `DoubanSearchApi.searchMovies` / `searchTvShows` / `getMovie` / `getTvShow`
+  (`lib/core/api/douban/douban_search_api.dart`): one request to
+  `/api/v2/search/movie`, filtered on `target_type`. `total` counts the mixed
+  pool, so paging advances over the rows the host sent rather than over the ones
+  that survived the filter — otherwise a page whose films were filtered out
+  would read as the last page.
+- `Movie.fromDoubanItem` / `TvShow.fromDoubanItem` with helpers in
+  `packages/core/lib/utils/douban_json.dart`. The two models read the same 73
+  fields, but `card_subtitle` is spelled differently by the two response shapes
+  — a search row leads with the country, a record with the year — so the genre
+  slot is picked by shape. `original_title` is empty on every record sampled, so
+  the first alias free of Han characters supplies the English name.
+- `DoubanEpisodeSource` (`lib/core/api/episode_source/douban_episode_source.dart`)
+  and its arm in `tvEpisodeSourceResolverProvider`. Without it the resolver
+  falls through to TMDB, which would spend a Douban id on an unrelated show and
+  write that record into the cache. Only `getShow` does work; Douban files a
+  series as one subject with no season split and no episode list, so seasons and
+  episodes answer empty rather than being invented.
+- Refresh and `.xcoll` import: `_refreshedMovie` (`collection_actions.dart`) and
+  `_fetchMovie` / `_fetchTvShow` (`import_service.dart`) read the Douban id
+  straight off `external_id`, which is the numeric subject id itself. TV refresh
+  needs no arm of its own — it goes through the resolver above.
+- `kDataSourceCatalog` lists movie and TV under Douban.
+
+Known limit: a search row carries no `intro` (its `abstract` is an empty
+string), so a *film* stays description-less until it is refreshed by hand. A
+series is filled in by `TvShowCacheWarmer` when it is added.
+
+Gates: analyze clean, 5661 app / 2360 core / 99 server tests pass, RPC output
+byte-identical, 6 locales still at 1752 keys each.
+
+Verified against the live API in seven calls: a 「流浪地球2」 search parsed
+`id=35267208`, year 2023 and rating 8.3 unmoved; `/movie/35267208` answered 73
+fields with `durations=["173分钟"]`, `genres=[科幻, 冒险, 灾难]` and a full
+`intro`; 「狂飙」 took `/tv/35465232` for 39 episodes. The `type` parameter was
+settled with three calls against 「三体」, which returned the same 27-hit mixed
+pool every time.
+
 ## [cn] Added — Douban book source
 
 The fullest Chinese book catalogue, reached through the signed Frodo API. It

@@ -8,6 +8,8 @@ import 'anilist_manga_source.dart';
 import 'bangumi_anime_source.dart';
 import 'comicvine_source.dart';
 import 'douban_book_source.dart';
+import 'douban_movie_source.dart';
+import 'douban_tv_source.dart';
 import 'fantlab_source.dart';
 import 'google_books_source.dart';
 import 'hardcover_source.dart';
@@ -64,7 +66,11 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     // they rank behind the browsable TMDB / TheTVDB sources instead of
     // displacing them as primary.
     NeoDBMovieSource(),
+    // Douban carries the deepest Chinese metadata for film and TV too, but it
+    // needs a key and bans a burst, so it follows the keyless NeoDB.
+    DoubanMovieSource(),
     NeoDBTvSource(),
+    DoubanTvSource(),
     // Books — NeoDB leads because it is the one answering in Chinese.
     NeoDBBookSource(),
     // Douban has the deepest Chinese metadata but needs a user-supplied

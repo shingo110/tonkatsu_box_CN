@@ -183,9 +183,27 @@
 
 ---
 
+### D8 · 豆瓣电影与剧集接入（2026-09-20，第五、六个国内源）
+
+豆瓣线的后半段。签名客户端、凭据存储、Web 端服务端签名、403 断路器全是 D6 / D7 现成的，本轮只加两个源与它们的解析。
+
+**要点**：`douban_movie` / `douban_tv` 共享 `DataSource.douban`（与图书源同枚举值 ⇒ 凭据页与向导文案零新增键），但各自 `outputMediaType`、各自注册顺序，排在 keyless 的 NeoDB 影视源之后。
+
+**本轮实证（七发，`probe/douban_movie_probe.py` + `douban_movie_type_probe.py`）**：
+
+- **`/api/v2/search/movie` 是电影与剧集的混合池，`type` 参数无效。** 同一查询分别带 `type=movie`、不带 `type`、带 `type=tv`，**三次响应逐字节相同**且都是混排（`total` 都是 27）。分流只能按每行的 `target_type`（`movie` / `tv`）自己做。
+- 搜索行 `target` 字段：`abstract` / `card_subtitle` / `cover_url` / `has_linewatch` / `id` / `rating` / `title` / `uri` / `year`（**有 `year`**，图书没有）。
+- **`card_subtitle` 两种形状**：搜索行 `"中国大陆 / 科幻 冒险 灾难 / 郭帆 / 吴京 刘德华"`，详情记录多一个前导年份 `"2023 / 中国大陆 / …"` ⇒ 取类型要按形状判槽位。
+- **详情路径分道**：电影 `/api/v2/movie/{id}`、剧集 `/api/v2/tv/{id}`（剧集送 `/movie/` 回 996）。响应 73 字段，`subtype` / `type` 标 `movie` / `tv`；剧集 `episodes_count: 39`；`first_air_time` **实测为 null**，年份取 `year`。
+- `rating.value` 已是 0–10（8.3 / 8.5），**不可倍乘**；`durations` 是数组取首元素。
+
+**落地物**：`lib/core/api/douban/douban_search_api.dart` 加 `searchMovies` / `searchTvShows`（共用一条请求、按 `target_type` 过滤）与 `getMovie` / `getTvShow`；`packages/core/lib/utils/douban_json.dart`（影视共用解析 helper）；`Movie.fromDoubanItem` / `TvShow.fromDoubanItem`；两个源文件；**`lib/core/api/episode_source/douban_episode_source.dart`** 与 resolver 的一支（**不加就会静默串到 TMDB**）。
+
+**一处已知限制**：豆瓣搜索行没有 `intro`（`abstract` 恒为空串）⇒ **电影**收藏后简介为空，需手动刷新才补全；剧集有 `TvShowCacheWarmer` 在收藏时补。
+
 ## 📋 候选（下一步从这里挑）
 
-> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 优酷/爱奇艺 > 漫画**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣**影视**线仍待接。
+> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > 优酷/爱奇艺 > 漫画**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
 
 ### T1 · 豆瓣 403 退避（✅ 2026-09-20 完成 → D6）
 
@@ -262,7 +280,7 @@
 | B1 | Windows 桌面运行 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 → `flutter run -d windows` 不可用 | 无法桌面预览；写码/分析/测试不受影响 |
 | B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` / `neodb.social` / `weread.qq.com` / `frodo.douban.com`，**均未做真实自托管 + 浏览器链路验证**（豆瓣的服务端签名逻辑已有单测钉死） | 发布 Web 前必须补 |
 | B3 | 上游同步 | fork 基线 0.44.0；上游以周为节奏发版 | 每次同步人造裁决冲突清单见 PROJECT.md §3 |
-| B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB）；漫画未定 | 漫画线（T5）已知候选全灭，待找免密钥可直连的库 |
+| B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB / **豆瓣**）；漫画未定 | 漫画线（T5）已知候选全灭，待找免密钥可直连的库 |
 
 ## 护栏速查（改代码前看一眼，防炸）
 
@@ -273,3 +291,5 @@
 5. RPC：改 DAO/模型 → `dart run tool/generate_rpc.dart` → 提交生成物，否则 `dart test` 必挂，无幸免。
 6. mocktail 断言命名参数：**不要用 `verify(...).captured` 按位取**（顺序无保证），在 `thenAnswer` 里按 `Symbol('x')` 取。
 7. **同一条消息里对同一个文件不要发两次编辑** —— 实测最多只有一次生效，其余静默丢失且不报错。改完同一文件的多处，务必拆成多次调用并逐处 grep 复核。
+8. `lib/core/api/episode_source/tv_episode_source.dart` —— **影视源必须给 `tvEpisodeSourceResolverProvider` 加一支**（它是 `_ => tmdb` 兜底）。漏了不报任何错，但 `TvShowCacheWarmer` 与 `_refreshedTvShow` 会拿新源的 id 去 TMDB 查，**可能把不相干的剧写进缓存**。
+9. **影视的 `CollectionItem.nativeId` 恒为 null**（该 getter 只对 book / audio 生效）—— 刷新与 `.xcoll` 导入一律用 `externalId`。

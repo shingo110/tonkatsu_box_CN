@@ -1157,6 +1157,10 @@ class ImportService {
         final String? uuid = ref.nativeId;
         return uuid == null ? null : await _neodbApi?.getMovieById(uuid);
       }
+      if (ref.source == DataSource.douban) {
+        // Douban's own numeric subject id survives the export as external_id.
+        return await _doubanApi?.getMovie(ref.externalId.toString());
+      }
       return await _tmdbApi?.getMovie(ref.externalId);
     } on Exception catch (e) {
       // One unavailable movie must not abort the batch.
@@ -1178,6 +1182,9 @@ class ImportService {
         // Same as movies: only an export that kept the uuid can be resolved.
         final String? uuid = ref.nativeId;
         return uuid == null ? null : await _neodbApi?.getTvShowById(uuid);
+      }
+      if (ref.source == DataSource.douban) {
+        return await _doubanApi?.getTvShow(ref.externalId.toString());
       }
       return await _tmdbApi?.getTvShow(ref.externalId);
     } on Exception catch (e) {

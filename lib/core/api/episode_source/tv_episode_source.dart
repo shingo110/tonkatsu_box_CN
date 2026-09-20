@@ -4,10 +4,12 @@ import 'package:core/models/tv_season.dart';
 import 'package:core/models/tv_show.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../douban_api.dart';
 import '../kitsu_api.dart';
 import '../tmdb_api.dart';
 import '../tvdb_api.dart';
 import '../tvmaze_api.dart';
+import 'douban_episode_source.dart';
 import 'kitsu_episode_source.dart';
 import 'tmdb_episode_source.dart';
 import 'tvdb_episode_source.dart';
@@ -35,10 +37,15 @@ final Provider<TvEpisodeSource Function(DataSource)>
   final KitsuEpisodeSource kitsu =
       KitsuEpisodeSource(ref.watch(kitsuApiProvider));
   final TvdbEpisodeSource tvdb = TvdbEpisodeSource(ref.watch(tvdbApiProvider));
+  final DoubanEpisodeSource douban =
+      DoubanEpisodeSource(ref.watch(doubanApiProvider));
   return (DataSource source) => switch (source) {
         DataSource.tvmaze => tvmaze,
         DataSource.kitsu => kitsu,
         DataSource.tvdb => tvdb,
+        // Without this arm Douban would fall through to TMDB below and spend a
+        // Douban id on an unrelated show.
+        DataSource.douban => douban,
         _ => tmdb,
       };
 });

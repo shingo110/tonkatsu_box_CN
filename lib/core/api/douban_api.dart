@@ -1,4 +1,6 @@
 import 'package:core/models/book.dart';
+import 'package:core/models/movie.dart';
+import 'package:core/models/tv_show.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -68,6 +70,41 @@ class DoubanApi {
   Future<Book?> getBookByIsbn(String isbn) => _canRequest
       ? _search.getBookByIsbn(isbn)
       : Future<Book?>.value();
+
+  /// One page of films, whether more follow, and the page count.
+  Future<(List<Movie>, bool, int)> searchMovies({
+    required String query,
+    int page = 1,
+  }) {
+    if (!_canRequest) {
+      return Future<(List<Movie>, bool, int)>.value(
+        (const <Movie>[], false, 0),
+      );
+    }
+    return _search.searchMovies(query: query, page: page);
+  }
+
+  /// One page of series. Douban keeps films and series in one search pool, so
+  /// the split happens on this side.
+  Future<(List<TvShow>, bool, int)> searchTvShows({
+    required String query,
+    int page = 1,
+  }) {
+    if (!_canRequest) {
+      return Future<(List<TvShow>, bool, int)>.value(
+        (const <TvShow>[], false, 0),
+      );
+    }
+    return _search.searchTvShows(query: query, page: page);
+  }
+
+  /// The full record behind a cached film row.
+  Future<Movie?> getMovie(String subjectId) =>
+      _canRequest ? _search.getMovie(subjectId) : Future<Movie?>.value();
+
+  /// The full record behind a cached series row.
+  Future<TvShow?> getTvShow(String subjectId) =>
+      _canRequest ? _search.getTvShow(subjectId) : Future<TvShow?>.value();
 
   /// True when the stored pair signs a request Frodo accepts.
   Future<bool> validateCredentials() async {
