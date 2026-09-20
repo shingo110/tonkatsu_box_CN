@@ -48,6 +48,7 @@ import '../api/kitsu_api.dart';
 import '../api/mangabaka_api.dart';
 import '../api/mangadex_api.dart';
 import '../api/musicbrainz_api.dart';
+import '../api/neodb_api.dart';
 import '../api/podcast_index_api.dart';
 import '../api/openlibrary_api.dart';
 import '../api/tmdb_api.dart';
@@ -81,6 +82,7 @@ final Provider<ImportService> importServiceProvider =
     comicVineApi: ref.watch(comicVineApiProvider),
     hardcoverApi: ref.watch(hardcoverApiProvider),
     fantlabApi: ref.watch(fantlabApiProvider),
+    neodbApi: ref.watch(neodbApiProvider),
     musicBrainzApi: ref.watch(musicBrainzApiProvider),
     podcastIndexApi: ref.watch(podcastIndexApiProvider),
     database: ref.watch(databaseServiceProvider),
@@ -151,6 +153,7 @@ class ImportService {
     ComicVineApi? comicVineApi,
     HardcoverApi? hardcoverApi,
     FantlabApi? fantlabApi,
+    NeoDBApi? neodbApi,
     MusicBrainzApi? musicBrainzApi,
     PodcastIndexApi? podcastIndexApi,
     CanvasRepository? canvasRepository,
@@ -173,6 +176,7 @@ class ImportService {
         _comicVineApi = comicVineApi,
         _hardcoverApi = hardcoverApi,
         _fantlabApi = fantlabApi,
+        _neodbApi = neodbApi,
         _musicBrainzApi = musicBrainzApi,
         _podcastIndexApi = podcastIndexApi,
         _database = database,
@@ -196,6 +200,7 @@ class ImportService {
   final ComicVineApi? _comicVineApi;
   final HardcoverApi? _hardcoverApi;
   final FantlabApi? _fantlabApi;
+  final NeoDBApi? _neodbApi;
   final MusicBrainzApi? _musicBrainzApi;
   final PodcastIndexApi? _podcastIndexApi;
   final DatabaseService _database;
@@ -1310,6 +1315,8 @@ class ImportService {
           return await _hardcoverApi?.getBook(nativeId);
         case DataSource.fantlab:
           return await _fantlabApi?.getWork(nativeId);
+        case DataSource.neodb:
+          return await _neodbApi?.getBookById(nativeId);
         default:
           return null;
       }

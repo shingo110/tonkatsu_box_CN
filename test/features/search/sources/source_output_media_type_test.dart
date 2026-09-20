@@ -5,6 +5,7 @@ import 'package:tonkatsu_box/features/search/sources/anilist_manga_source.dart';
 import 'package:tonkatsu_box/features/search/sources/bangumi_anime_source.dart';
 import 'package:tonkatsu_box/features/search/sources/fantlab_source.dart';
 import 'package:tonkatsu_box/features/search/sources/igdb_games_source.dart';
+import 'package:tonkatsu_box/features/search/sources/neodb_book_source.dart';
 import 'package:tonkatsu_box/features/search/sources/openlibrary_source.dart';
 import 'package:tonkatsu_box/features/search/sources/tmdb_anime_source.dart';
 import 'package:tonkatsu_box/features/search/sources/tmdb_movies_source.dart';
@@ -51,6 +52,10 @@ void main() {
 
     test('FantlabSource → MediaType.book', () {
       expect(FantlabSource().outputMediaType, MediaType.book);
+    });
+
+    test('NeoDBBookSource → MediaType.book', () {
+      expect(NeoDBBookSource().outputMediaType, MediaType.book);
     });
   });
 }

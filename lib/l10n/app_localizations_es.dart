@@ -3159,6 +3159,10 @@ class SEs extends S {
       'Catálogo comunitario de libros con series, géneros, estados de ánimo y valoraciones. Requiere un token personal gratuito.';
 
   @override
+  String get welcomeSourceDescNeoDB =>
+      'Catálogo comunitario en chino. Aquí cubre libros, con títulos, descripciones y etiquetas en chino.';
+
+  @override
   String get welcomeTourTitle => 'Conoce el menú';
 
   @override

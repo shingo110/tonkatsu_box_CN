@@ -56,6 +56,11 @@ enum DataSource {
   /// Feeds the `book` media type; graphic novels map to `BookKind.comic`.
   hardcover('Hardcover', 0xFF6366F1),
 
+  /// NeoDB (neodb.social) — federated Chinese-language catalog covering books,
+  /// movies, TV, music and games. Its external resources point at the matching
+  /// Douban entry, so it reaches Chinese metadata without a Douban key.
+  neodb('NeoDB', 0xFF4A9B8E),
+
   /// MusicBrainz — open keyless music database (albums as release-groups).
   /// Feeds the `audio` media type with `AudioKind.album` records.
   musicBrainz('MusicBrainz', 0xFFBA478F),

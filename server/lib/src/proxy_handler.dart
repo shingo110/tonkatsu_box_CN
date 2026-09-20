@@ -223,6 +223,7 @@ class ApiProxy {
       case ProxyTarget.mangabaka:
       case ProxyTarget.mangadex:
       case ProxyTarget.musicbrainz:
+      case ProxyTarget.neodb:
       case ProxyTarget.openlibrary:
       case ProxyTarget.steam:
       case ProxyTarget.tvmaze:

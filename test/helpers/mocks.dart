@@ -42,6 +42,7 @@ import 'package:tonkatsu_box/core/api/igdb_api.dart';
 import 'package:tonkatsu_box/core/api/kitsu_api.dart';
 import 'package:tonkatsu_box/core/api/kodi_api.dart';
 import 'package:tonkatsu_box/core/api/mangabaka_api.dart';
+import 'package:tonkatsu_box/core/api/neodb_api.dart';
 import 'package:tonkatsu_box/core/api/mangadex_api.dart';
 import 'package:tonkatsu_box/core/api/openlibrary_api.dart';
 import 'package:tonkatsu_box/core/api/ra_api.dart';
@@ -176,6 +177,8 @@ class MockRaApi extends Mock implements RaApi {}
 class MockFantlabApi extends Mock implements FantlabApi {}
 
 class MockBangumiApi extends Mock implements BangumiApi {}
+
+class MockNeoDBApi extends Mock implements NeoDBApi {}
 
 class MockMangaBakaApi extends Mock implements MangaBakaApi {}
 

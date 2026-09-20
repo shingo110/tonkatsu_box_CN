@@ -3149,6 +3149,10 @@ class SPt extends S {
       'Catálogo comunitário de livros com séries, gêneros, moods e avaliações. Requer um token pessoal gratuito.';
 
   @override
+  String get welcomeSourceDescNeoDB =>
+      'Catálogo comunitário em chinês. Aqui cobre livros, com títulos, descrições e tags em chinês.';
+
+  @override
   String get welcomeTourTitle => 'Conheça o menu';
 
   @override

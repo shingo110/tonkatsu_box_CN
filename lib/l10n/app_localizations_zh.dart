@@ -2915,6 +2915,9 @@ class SZh extends S {
   String get welcomeSourceDescHardcover => '社区图书目录：系列、类型、氛围和评分。需要免费的个人令牌。';
 
   @override
+  String get welcomeSourceDescNeoDB => '中文社区资料库，此处接入图书，含中文标题、简介与标签。';
+
+  @override
   String get welcomeTourTitle => '了解菜单';
 
   @override

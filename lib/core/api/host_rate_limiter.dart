@@ -9,6 +9,9 @@ const Map<String, Duration> kHostMinRequestGap = <String, Duration>{
   // Cover Art Archive tolerates images better than lookups, but a 40-cover
   // burst from a fresh grid still trips it — pace the background refills.
   'coverartarchive.org': Duration(milliseconds: 300),
+  // NeoDB is a volunteer-run instance and never refused us, but a single call
+  // already costs ~1s, so this only smooths bursts such as paging results.
+  'neodb.social': Duration(milliseconds: 250),
 };
 
 /// Serialises requests to one host: starts stay in FIFO order and at least

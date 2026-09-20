@@ -24,6 +24,7 @@ import '../../../core/api/comicvine_api.dart';
 import '../../../core/api/google_books_api.dart';
 import '../../../core/api/hardcover_api.dart';
 import '../../../core/api/fantlab_api.dart';
+import '../../../core/api/neodb_api.dart';
 import '../../../core/api/igdb_api.dart';
 import '../../../core/api/kitsu_api.dart';
 import '../../../core/api/mangabaka_api.dart';
@@ -745,6 +746,14 @@ class CollectionActions {
                     fresh: full,
                   );
             await db.bookDao.upsertBook(updated);
+          } else if (item.source == DataSource.neodb) {
+            final Book? full = await ref
+                .read(neodbApiProvider)
+                .getBookById(cached.nativeId);
+            if (full == null) return _RefreshOutcome.notFound();
+            // Search rows and item detail carry the same field set, unlike
+            // OpenLibrary, so nothing needs overlaying here.
+            await db.bookDao.upsertBook(full);
           } else {
             return _RefreshOutcome.unsupported();
           }

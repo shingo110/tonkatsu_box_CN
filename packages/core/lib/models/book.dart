@@ -412,6 +412,39 @@ class Book {
     );
   }
 
+  /// NeoDB item — shared verbatim by `/api/catalog/search` rows and a full
+  /// `/api/{category}/{uuid}` response, so no search / detail split is needed.
+  factory Book.fromNeoDBItem(Map<String, dynamic> json) {
+    final String uuid = _trimmed(json['uuid']);
+    final String? title = _neodbTitle(json);
+    final String? origTitle = _nonEmpty(json['orig_title']);
+    final String? isbn = _nonEmpty(json['isbn']);
+
+    return Book(
+      id: fnv1a64(uuid).toString(),
+      source: DataSource.neodb,
+      nativeId: uuid,
+      title: title ?? 'Unknown',
+      originalTitle: origTitle != null && origTitle != title ? origTitle : null,
+      authors: _neodbAuthors(json['author']),
+      description: _stripHtmlText(json['description'] ?? json['brief']),
+      coverUrl: _nonEmpty(json['cover_image_url']),
+      pageCount: _intOrNull(json['pages']),
+      publishYear: _positiveYear(json['pub_year']),
+      publishers: _neodbPublishers(json),
+      isbn10: isbn != null && isbn.length == 10 ? isbn : null,
+      isbn13: isbn != null && isbn.length == 13 ? isbn : null,
+      languages: _stringList(json['language']),
+      subjects: _cleanSubjects(_stringList(json['tags'])),
+      series: _nonEmpty(json['series']),
+      // NeoDB already rates out of 10 — every other book source here is
+      // out of 5, so this one must not be doubled.
+      rating: _neodbRating(json['rating']),
+      ratingCount: _intOrNull(json['rating_count']),
+      externalUrl: _neodbUrl(json),
+    );
+  }
+
   /// `TEXT` as headroom for a future non-numeric id, but always digits today —
   /// so [externalIdInt] feeds the INTEGER `external_id` without loss.
   final String id;
@@ -1101,5 +1134,75 @@ class Book {
       }
     }
     return (pages: pages, isbn: isbn, editionId: editionId);
+  }
+
+  /// `display_title` is the localized title, which for books already reads in
+  /// Chinese — but it is a transliteration for some neighbouring categories,
+  /// so the `localized_title` array's Chinese entry is asked first.
+  static String? _neodbTitle(Map<String, dynamic> json) {
+    final String? localized = _neodbLocalized(json['localized_title']);
+    if (localized != null) return localized;
+    return _nonEmpty(json['display_title']) ?? _nonEmpty(json['title']);
+  }
+
+  /// Chinese-preferring lookup over `[{lang, text}]`: NeoDB records the
+  /// language of each rendering rather than shipping one canonical form.
+  static String? _neodbLocalized(Object? raw) {
+    if (raw is! List<dynamic>) return null;
+    for (final String lang in _neodbChineseLanguageTags) {
+      for (final Object? entry in raw) {
+        if (entry is! Map<String, dynamic>) continue;
+        if (_trimmed(entry['lang']).toLowerCase() != lang) continue;
+        final String? text = _nonEmpty(entry['text']);
+        if (text != null) return text;
+      }
+    }
+    return null;
+  }
+
+  static const List<String> _neodbChineseLanguageTags = <String>[
+    'zh-cn',
+    'zh-hans',
+    'zh-hant',
+    'zh-tw',
+    'zh',
+  ];
+
+  /// Chinese editions list authors in both scripts (`["Cixin Liu", "Liu
+  /// Cixin", "刘慈欣"]`); the Chinese forms alone read correctly in a Chinese
+  /// catalogue, and editions offering none pass through untouched.
+  static List<String> _neodbAuthors(Object? raw) {
+    final List<String> all = _stringList(raw);
+    final List<String> chinese = all.where(_neodbHasChinese).toList();
+    return chinese.isEmpty ? all : chinese;
+  }
+
+  static final RegExp _neodbChinesePattern =
+      RegExp(r'[\u3400-\u4dbf\u4e00-\u9fff]');
+
+  static bool _neodbHasChinese(String value) =>
+      _neodbChinesePattern.hasMatch(value);
+
+  /// `publisher` is the list form; `pub_house` the single string NeoDB fills
+  /// for magazines and imports.
+  static List<String> _neodbPublishers(Map<String, dynamic> json) {
+    final List<String> list = _stringList(json['publisher']);
+    if (list.isNotEmpty) return list;
+    final String? house = _nonEmpty(json['pub_house']);
+    return house != null ? <String>[house] : const <String>[];
+  }
+
+  /// Already on the app's 1–10 scale; absent or zero means "unrated".
+  static double? _neodbRating(Object? raw) {
+    final double? value = (raw as num?)?.toDouble();
+    return (value != null && value > 0) ? value : null;
+  }
+
+  /// `id` arrives absolute while `url` is a site-relative path — take either.
+  static String? _neodbUrl(Map<String, dynamic> json) {
+    final String? absolute = _nonEmpty(json['id']);
+    if (absolute != null && absolute.startsWith('http')) return absolute;
+    final String? path = _nonEmpty(json['url']);
+    return path != null ? 'https://neodb.social$path' : null;
   }
 }

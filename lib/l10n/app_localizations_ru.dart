@@ -3173,6 +3173,10 @@ class SRu extends S {
       'Книжный каталог сообщества: серии, жанры, настроения и оценки. Нужен бесплатный персональный токен.';
 
   @override
+  String get welcomeSourceDescNeoDB =>
+      'Китайский каталог сообщества. Здесь — книги с китайскими названиями, описаниями и тегами.';
+
+  @override
   String get welcomeTourTitle => 'Знакомство с меню';
 
   @override

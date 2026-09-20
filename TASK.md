@@ -4,8 +4,8 @@
 
 ## 状态
 
-- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入
-- **进行中**：文档补齐（本轮）
+- **已完成**：M0 开工就绪度核验 · M1 Bangumi 全链路接入 · M2 NeoDB 图书接入
+- **进行中**：无
 - **进行中（阻塞）**：Windows 桌面构建可用性（缺 VS C++ 工作负载）
 
 ---
@@ -51,19 +51,55 @@
 
 ---
 
-## 🔄 进行中
-
-### D3 · 项目文档补齐（当前）
+### D3 · 项目文档补齐（2026-09-18）
 
 新增/重写：`README.md`（fork 中文门面）、`PROJECT.md`（全景）、`TASK.md`（本文件）、`RULES.md`（规约 + 坑点）、`CHANGELOG.md`（fork 条目）；修正 `docs/CONTRIBUTING.md` 与 `.claude/CLAUDE.md` 残留的 WSL 壳与过时计数。
 
 验收：全部文档引用路径经 `git ls-files` 核验存在；analyze 仍全绿；无上游内容被误删。
 
+### D4 · NeoDB 图书接入（2026-09-20，第二个国内源）
+
+图书数据源，联邦宇宙中文目录，免密钥。排在全部图书源之前，是图书类型的**主源**。
+
+**改动面**：
+
+- 模型：`DataSource.neodb` 枚举 + `Book.fromNeoDBItem` 解析器（`packages/core/lib/models/`）
+- 注册面：`data_source_ui.dart` · `source_catalog.dart` · `search_sources.dart`（**排在 OpenLibrary 之前** —— 注册顺序即主源/备源，中文用户应默认拿到中文结果）
+- API 三件套 + facade：`lib/core/api/neodb/{types,http_client,search_api}.dart` + `neodb_api.dart`
+- 源实现：`lib/features/search/sources/neodb_book_source.dart`（id `neodb`，无筛选器、单排序项）
+- Web + 限流：`proxy_targets.dart` 加 `neodb('neodb.social')`；`proxy_handler.dart` 免密钥分支；`kHostMinRequestGap` 加 250ms 礼貌间隔
+- 本地化：6 语言 ARB × 1 键（`welcomeSourceDescNeoDB`），各语言 1744 键齐平
+
+**连带必修（漏了会静默失效，不报错）**：
+
+- `lib/features/collections/helpers/collection_actions.dart` —— 图书刷新是 `if/else if` 链，不加分支就落到 `unsupported`
+- `lib/features/search/handlers/media_handlers.dart`（`_fetchFullBook`）—— 不加 case 则详情页无简介
+- `lib/core/services/import_service.dart`（`_fetchOneBook` + 构造注入 + provider watch）—— 不加则 `.xcoll` 导入丢条目
+- `lib/features/welcome/widgets/welcome_step_sources.dart` —— 不加则向导里描述为空串
+
+**验收记录**：
+
+- [x] `flutter analyze --fatal-infos --fatal-warnings`：No issues found
+- [x] `dart test`（packages/core）：2256 通过（基线 2224 + 32 解析器用例）
+- [x] `dart test`（server）：98 通过
+- [x] RPC 生成物 `git diff --exit-code`：字节一致
+- [x] **在线活体验证**：「三体」→ 6 条 / 6 页；首条 `authors=[刘慈欣]`（英文重复名已剥除）、`rating=8.6`（未乘 2）、`pages=302`（字符串转数字）、ISBN-13、出版社、中文标签、豆瓣外链全部落地；第 2 页 11 条；短查询（1 字）不发请求
+- [x] 既有护栏同步：`source_badge_test` 20→21 · `search_sources_test` id 表补 `neodb` · `source_output_media_type_test` 补一条
+- [x] `browse_provider_test` 无需改（图书走 `textQueryOnly`，无按源浏览计数断言）
+- [ ] **未做**：Web 端 `/proxy/neodb/**` 在线验证（同 Bangumi，需自托管环境）
+
+**本轮探测推翻的两条旧结论**（上一轮凭记忆写的，已被实测订正）：
+
+- ~~「NeoDB 需要自定义 User-Agent（Cloudflare 前置）」~~ → **错**。默认 UA、空 UA 均返回 200；与 Bangumi 的 403 完全是两回事。
+- ~~「rating 0–10，×10 映射到模型」~~ → **错**。`Book` 模型就是 0–10 刻度，NeoDB 的 8.6 **直接使用**；×2 只适用于 OpenLibrary / Google Books / Hardcover 那类 0–5 刻度源。
+
+**实测补充**：无 `query` → 422、空串 → 400，故**不支持空关键词浏览**（与 Bangumi 不同）；分页每页条数不规则（1/2/3 页分别 6/11/19 条），只能用 `pages` 字段判页；详情端点是 `/api/book/{uuid}`（按类目分流，非 `/api/catalog/item/`）。
+
 ---
 
 ## 📋 候选（下一步从这里挑）
 
-> 接入优先序共识：**Bangumi > NeoDB > 微信读书 > 优酷/爱奇艺 > 豆瓣**。豆瓣元数据最全但引入签名 + 403 两个新变量，建议在低风险源（NeoDB / 微信读书）验证过流程后最后碰。
+> 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 > 微信读书 > 优酷/爱奇艺 > 豆瓣**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故排在最后。
 
 ### T1 · 豆瓣 403 退避（可推迟，见 T2）
 
@@ -73,22 +109,20 @@
 - 要做的：为豆瓣主机加「连打 N 次 → 冷却 M 分钟」的退避策略；接在「FIFO 间隔」之后，402/429/403 触发冷却；冷却期内请求直接失败并给出用户可读提示。
 - 验收：模拟 10 连击后第 11 次被冷却；冷却期间请求不发出网；冷却结束自动恢复。带单测。
 
-### T2. NeoDB 图书 + 影视（**推荐下一个开工**，2026-09-19 已实测）
+### T2 · NeoDB 扩电影 / 剧集（**推荐下一个开工**）
 
-已二轮真接口探测（`probe/neodb_catalog_probe.py` / `neodb_localization_probe.py`），结论如下：
+图书类目已于 D4 落地，客户端、代理白名单、限流条目都是现成的，扩一个类目的边际成本只剩模型映射与筛选器。
 
-- **六大类目全通**：book / movie / tv / music / game / podcast 全部 200；UA 必填（Cloudflare 前置）。一个源覆盖六种媒体，边际收益远高于单一媒体源。
-- **它本质是豆瓣数据的免密钥代理**：`external_resources` 挂 `book.douban.com` / `movie.douban.com`，中文简介与 tags（「中国电影」「中国当代文学」）带豆瓣血统。→ **T1（豆瓣签名 + 403 退避）可整体推迟**。
-- **rating 0–10**，与 Bangumi 一致，×10 映射到模型。
-- **头号陷阱**：`localized_title` / `localized_description` 是 **`[{lang, text}]` 数组**，须挑 `zh-cn`（fallback `zh-hans → zh → zh-tw`）。且 `display_title` 对**影视/游戏是英文名**（`The Wandering Earth`），中文原名在 `orig_title` —— 不可直接拿 `display_title` 充标题。
-- **无限流**：25 连打全 200、0 非 200；延迟中位数 770ms → 加 200–300ms 礼貌节流即可，无需退避。
-- 详情 37–40 字段：剧集带 `episode_count` / `episode_uuids`（可做剧集列表）；全类目带 `tags` / `rating_count` / `rating_distribution`。
+**实测契约（2026-09-19 二轮探测 + D4 落地时复核）**：
 
-**实施建议（分批，勿一次做 6 个类目）**：
-
-1. 先做 **图书**（缺口最大，现有 OpenLibrary 是弱覆盖；本地化数组解析的新逻辑先在此跑通）
-2. 跑通后扩 **电影 / 剧集**（复用同一套客户端，仅模型与筛选器不同）
-3. music / game / podcast 视需求再上
+- **六大类目全通**：book / movie / tv / music / game / podcast；换 `category` 参数即可复用 `NeoDBSearchApi.searchItems`。
+- **它是豆瓣数据的免密钥代理**：`external_resources` 挂 `book.douban.com` / `movie.douban.com`，中文简介与 tags 带豆瓣血统。→ T1（豆瓣签名 + 403 退避）可整体推迟。
+- **不要求自定义 UA**（实测默认 UA / 空 UA 均 200），与 Bangumi 的 Cloudflare 403 相反。
+- **无限流**：25 连打 0 个非 200，延迟中位数 770ms → 已加 250ms 礼貌间隔即可，无需退避。
+- **头号陷阱**：`localized_title` / `localized_description` 是 **`[{lang, text}]` 数组**，须挑 `zh-cn`（fallback `zh-hans → zh-hant → zh-tw → zh`）。且 `display_title` 对**影视 / 游戏是英文名**（`The Wandering Earth` / `Black Myth: Wukong`），中文原名在 `orig_title` —— 不可直接拿 `display_title` 充标题。图书类目的 `display_title` 才是中文，别被它骗过。
+- **不支持空关键词浏览**：无 `query` → 422，空串 → 400。影视源也一样只能搜索。
+- **详情端点按类目分流**：`/api/{category}/{uuid}`，例如 `/api/book/{uuid}`、`/api/movie/{uuid}`。`/api/catalog/item/{uuid}` 是 404。
+- 剧集详情带 `episode_count` / `episode_uuids`，可做剧集列表。
 
 验收：标准七步 + 本地化数组解析单测（含 zh-cn 缺失时的 fallback）+ 在线活体验证（中文标题务必是真中文，不得是英文 `display_title`）。
 
@@ -117,14 +151,15 @@
 | # | 事项 | 现状 | 影响 |
 |:-:|------|------|------|
 | B1 | Windows 桌面运行 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 → `flutter run -d windows` 不可用 | 无法桌面预览；写码/分析/测试不受影响 |
-| B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv`，但未在真实自托管 + 浏览器链路验证 | 发布 Web 前必须补 |
+| B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` 与 `neodb.social`，均未做真实自托管 + 浏览器链路验证 | 发布 Web 前必须补 |
 | B3 | 上游同步 | fork 基线 0.44.0；上游以周为节奏发版 | 每次同步人造裁决冲突清单见 PROJECT.md §3 |
-| B4 | 中文数据源覆盖 | 动画 ✅；电影/剧集/图书候选排期中；漫画未定 | 尽快先取 T3/T4 之一缩小空白 |
+| B4 | 中文数据源覆盖 | 动画 ✅；图书 ✅；电影/剧集候选排期中；漫画未定 | 尽快先取 T2（NeoDB 影视）缩小空白 |
 
 ## 护栏速查（改代码前看一眼，防炸）
 
-1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码，加枚举即炸。
+1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 21），加枚举即炸。。
 2. `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码，加源即炸。
 3. `test/features/search/sources/search_sources_test.dart` —— 注册表 id 顺序表，加源须补序。
 4. RPC：改 DAO/模型 → `dart run tool/generate_rpc.dart` → 提交生成物，否则 `dart test` 必挂，无幸免。
 5. mocktail 断言命名参数：**不要用 `verify(...).captured` 按位取**（顺序无保证），在 `thenAnswer` 里按 `Symbol('x')` 取。
+6. **同一条消息里对同一个文件不要发两次编辑** —— 实测最多只有一次生效，其余静默丢失且不报错。改完同一文件的多处，务必拆成多次调用并逐处 grep 复核。

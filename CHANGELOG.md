@@ -12,6 +12,56 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — NeoDB book source
+
+The second domestic catalog, and the first Chinese-language book source: search
+books on the federated catalog [neodb.social](https://neodb.social/). Keyless.
+Titles, descriptions and tags arrive in Chinese, ISBN / page count / publisher /
+series are carried through, and `external_resources` links back to the matching
+Douban entry.
+
+Search only: the API answers 422 without a `query` and 400 for an empty one, so
+this source never browses and enforces a two-character minimum. Page counts vary
+because the API collapses editions of one work, so both `hasMore` and the total
+come from the `pages` field alone. NeoDB already rates out of 10 — unlike every
+other book provider here, its rating is used as-is.
+
+Registered ahead of OpenLibrary so Chinese users get Chinese results by default.
+
+  * packages/core/lib/models/data_source.dart (DataSource.neodb): New source.
+  * packages/core/lib/models/book.dart (Book.fromNeoDBItem): New factory mapping
+    localized titles, Chinese-preferring authors, string or numeric page counts
+    and ISBN-10 / ISBN-13 splits.
+  * lib/core/api/neodb/neodb_types.dart (NeoDBApiException, kNeoDBBookCategory):
+    New — error type and the catalog category, which doubles as the detail path
+    prefix.
+  * lib/core/api/neodb/neodb_http_client.dart (NeoDBHttpClient): New — Dio
+    transport. A User-Agent is sent for identification, but is not required.
+  * lib/core/api/neodb/neodb_search_api.dart (NeoDBSearchApi): New — catalog
+    search and per-category item detail.
+  * lib/core/api/neodb_api.dart (NeoDBApi, neodbApiProvider): New facade.
+  * lib/features/search/sources/neodb_book_source.dart (NeoDBBookSource): New
+    source id `neodb`, no filters and a single sort option.
+  * lib/features/search/sources/search_sources.dart (searchSources): Registered
+    first among the book sources, making it the primary one for its type.
+  * lib/shared/constants/source_catalog.dart (kDataSourceCatalog): NeoDB entry.
+  * lib/shared/constants/data_source_ui.dart (DataSourceUi.iconAsset): NeoDB arm.
+  * lib/features/collections/helpers/collection_actions.dart: Refresh a
+    collected NeoDB book instead of reporting the source unsupported.
+  * lib/features/search/handlers/media_handlers.dart (_fetchFullBook): NeoDB arm
+    so a detail sheet can load the full description.
+  * lib/core/services/import_service.dart (_fetchOneBook): NeoDB arm plus the
+    injected API, so `.xcoll` imports can re-resolve NeoDB books.
+  * lib/features/welcome/widgets/welcome_step_sources.dart (_description): NeoDB
+    arm, `welcomeSourceDescNeoDB`.
+  * packages/core/lib/api/proxy_targets.dart (ProxyTarget.neodb): `neodb.social`,
+    for the web build.
+  * server/lib/src/proxy_handler.dart (ApiProxy._authorize): NeoDB joins the
+    keyless group.
+  * lib/core/api/host_rate_limiter.dart (kHostMinRequestGap): 250 ms gap for
+    `neodb.social` — a volunteer-run instance, paced out of politeness.
+  * lib/l10n/app_*.arb ×6: welcomeSourceDescNeoDB.
+
 ## [cn] Added — Bangumi anime source
 
 A first domestic catalog: browse and search anime on the Chinese community catalog

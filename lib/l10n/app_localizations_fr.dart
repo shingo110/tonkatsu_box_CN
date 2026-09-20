@@ -3161,6 +3161,10 @@ class SFr extends S {
       'Catalogue communautaire de livres listant des cycles, genres, humeurs et notes. Nécessite un token personnel (gratuit).';
 
   @override
+  String get welcomeSourceDescNeoDB =>
+      'Catalogue communautaire chinois. Couvre ici les livres, avec titres, résumés et étiquettes en chinois.';
+
+  @override
   String get welcomeTourTitle => 'Apprenez à connaître le menu';
 
   @override

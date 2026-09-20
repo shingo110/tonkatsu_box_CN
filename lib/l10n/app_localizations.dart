@@ -5498,6 +5498,12 @@ abstract class S {
   /// **'Community book catalog with series, genres, moods and ratings. Requires a free personal token.'**
   String get welcomeSourceDescHardcover;
 
+  /// No description provided for @welcomeSourceDescNeoDB.
+  ///
+  /// In en, this message translates to:
+  /// **'A Chinese community catalog. Covers books here, with Chinese titles, descriptions and tags.'**
+  String get welcomeSourceDescNeoDB;
+
   /// No description provided for @welcomeTourTitle.
   ///
   /// In en, this message translates to:

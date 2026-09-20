@@ -90,9 +90,20 @@
 - **空关键词浏览必须把 `sort` 从 `match` 兜底为 `rank`**：`match` 无关键词时结果无意义。
 - **搜索接口的 `keyword` 与 `filter` 两路必须都传**：只传 `filter` 会 400。
 
+## 七之二、NeoDB 接入要点（第二个源，2026-09-19）
+
+- 入口 `neodb.social/api`，免密钥。**不要求自定义 User-Agent**（实测默认 UA / 空 UA 均 200）—— 与 Bangumi 的 Cloudflare 403 相反，别套用前者的经验。
+- 搜索 `GET /api/catalog/search?query=&category=book&page=`；详情 `GET /api/{category}/{uuid}`（**按类目分流**，`/api/catalog/item/{uuid}` 是 404）。
+- 代码位置：`lib/core/api/neodb/` 三件套 + `neodb_api.dart`（`neodbApiProvider`）+ `neodb_book_source.dart`（id `neodb`，无筛选器、单排序项）。
+- **不支持空关键词浏览**：无 `query` → 422，空串 → 400。因此 `supportsBrowse = false`，并要设最小查询长度（2）。
+- **分页只信 `pages` 字段**：接口会折叠同一作品的不同版本，每页条数不规则（实测第 1/2/3 页为 6/11/19 条），绝不能按条数推 `hasMore`。
+- 领域映射：`localized_title` 数组挑 `zh-cn` → `title`，`orig_title`→`originalTitle`，`author` **优先取中文写法**（`["Cixin Liu","Liu Cixin","刘慈欣"]` → `["刘慈欣"]`），`pages` 可能是**字符串**，`isbn` 按长度分 10/13，`publisher` 空时退回 `pub_house`，`tags`→`subjects`（截 15），`series`→丛书，外链取 `id`（绝对路径）。
+- **`rating` 已是 0–10，直接使用，不可乘 2**。×2 只适用于 OpenLibrary / Google Books / Hardcover 那类 0–5 刻度源；`Anime` 模型才是 0–100（Bangumi ×10）。**刻度搞错不会报错，只会显示离谱的分数**，务必看模型注释。
+- **加图书源的连带点比动画更多**：`collection_actions.dart`（刷新，`if/else` 链，漏了就 unsupported）、`media_handlers.dart`（`_fetchFullBook`，漏了详情页无简介）、`import_service.dart`（`_fetchOneBook` + 构造注入 + provider watch，漏了导入丢条目）、`welcome_step_sources.dart`（漏了向导描述为空）。这四处都不报编译错。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
-Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`），以便 grep 区分上游/分支。
+Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。
 
 ## 九、定义完成（必须全绿再收工）
 
@@ -100,6 +111,6 @@ Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国
 2. `flutter test` · `dart test`（packages/core）· `dart test`（server）**全绿**
 3. RPC 生成物 `git diff --exit-code -- packages/core/lib/rpc/generated` 为空
 4. **在线活体验证**通过（临时插真实 API；不允许"测试都过了"当完工）
-5. 护栏、ARB 键数（6×1743 全齐）、`TASK.md` 状态同步
+5. 护栏、ARB 键数（6×1744 全齐）、`TASK.md` 状态同步
 
 按此清单跑完，再回头补文档与记忆。

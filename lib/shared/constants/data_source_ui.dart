@@ -26,6 +26,7 @@ extension DataSourceUi on DataSource {
         DataSource.comicVine => AppAssets.iconComicVineColor,
         DataSource.googleBooks => AppAssets.iconGoogleBooksColor,
         DataSource.hardcover => AppAssets.iconHardcoverColor,
+        DataSource.neodb => null,
         DataSource.tvdb => AppAssets.iconTvdbColor,
         DataSource.musicBrainz => AppAssets.iconMusicBrainzColor,
         DataSource.podcastIndex => AppAssets.iconPodcastIndexColor,

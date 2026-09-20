@@ -20,6 +20,7 @@ import '../../../core/api/musicbrainz_api.dart';
 import '../../../core/api/podcast_index_api.dart';
 import '../../../core/api/hardcover_api.dart';
 import '../../../core/api/fantlab_api.dart';
+import '../../../core/api/neodb_api.dart';
 import '../../../core/api/openlibrary_api.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/services/image_cache_service.dart';
@@ -439,6 +440,8 @@ Future<Book?> _fetchFullBook(WidgetRef ref, Book book) async {
       return ref.read(googleBooksApiProvider).getVolume(book.nativeId);
     case DataSource.hardcover:
       return ref.read(hardcoverApiProvider).getBook(book.nativeId);
+    case DataSource.neodb:
+      return ref.read(neodbApiProvider).getBookById(book.nativeId);
     default:
       return null;
   }

@@ -3110,6 +3110,10 @@ class SEn extends S {
       'Community book catalog with series, genres, moods and ratings. Requires a free personal token.';
 
   @override
+  String get welcomeSourceDescNeoDB =>
+      'A Chinese community catalog. Covers books here, with Chinese titles, descriptions and tags.';
+
+  @override
   String get welcomeTourTitle => 'Get to know the menu';
 
   @override
