@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tonkatsu_box/core/services/api_key_initializer.dart';
+import 'package:tonkatsu_box/shared/constants/api_defaults.dart';
 
 void main() {
   group('ApiKeys', () {
@@ -170,6 +171,49 @@ void main() {
         });
       });
     });
+
+      group('Douban', () {
+        test('should fall back to the pair the build ships', () async {
+          // Frodo issues no new keys, so a fresh install has nothing to type;
+          // the app carries the public pair and signs with it.
+          SharedPreferences.setMockInitialValues(const <String, Object>{});
+          final SharedPreferences prefs =
+              await SharedPreferences.getInstance();
+
+          final ApiKeys keys = ApiKeys.fromPrefs(prefs);
+
+          expect(keys.doubanApiKey, equals(ApiDefaults.doubanApiKey));
+          expect(keys.doubanApiSecret, equals(ApiDefaults.doubanApiSecret));
+        });
+
+        test('should prefer a stored pair over the built-in one', () async {
+          SharedPreferences.setMockInitialValues(<String, Object>{
+            'douban_api_key': 'user_douban_key',
+            'douban_api_secret': 'user_douban_secret',
+          });
+          final SharedPreferences prefs =
+              await SharedPreferences.getInstance();
+
+          final ApiKeys keys = ApiKeys.fromPrefs(prefs);
+
+          expect(keys.doubanApiKey, equals('user_douban_key'));
+          expect(keys.doubanApiSecret, equals('user_douban_secret'));
+        });
+
+        test('should ignore half a stored pair', () async {
+          // One half cannot sign anything, so the built-in pair must win.
+          SharedPreferences.setMockInitialValues(<String, Object>{
+            'douban_api_key': 'user_douban_key',
+          });
+          final SharedPreferences prefs =
+              await SharedPreferences.getInstance();
+
+          final ApiKeys keys = ApiKeys.fromPrefs(prefs);
+
+          expect(keys.doubanApiKey, equals(ApiDefaults.doubanApiKey));
+          expect(keys.doubanApiSecret, equals(ApiDefaults.doubanApiSecret));
+        });
+      });
 
     group('constructor', () {
       test('should create with default null values', () {
