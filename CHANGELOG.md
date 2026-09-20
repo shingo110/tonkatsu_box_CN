@@ -12,6 +12,37 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Changed — Douban needs no key screen
+
+Frodo stopped issuing API keys, so the Douban fields asked for something no user
+could obtain. The pair the official client ships is public, so the build carries
+it and every Douban request signs with that instead of a user's.
+
+- `DoubanDefaults` (`lib/shared/constants/douban_defaults.dart`) resolves through
+  a conditional import, so a native build gets the public pair and the web build
+  gets an empty one: the literal cannot reach `main.dart.js`, and the selfhost
+  proxy keeps signing server-side (`server/lib/src/douban_defaults.dart`,
+  `ApiProxy._authorize` — an operator pair still wins over the shipped one).
+- `ApiDefaults.doubanApiKey` / `doubanApiSecret` / `hasDoubanKey`, and
+  `ApiKeys.fromPrefs` resolves the two halves together, since a stored key under
+  the built-in secret could not sign anything — the same shape as Podcast Index.
+- `SourceInfo.keyRequirement` for Douban returns to `none`, because with the
+  pair in the build there is nothing left to ask for. Both key surfaces stop
+  rendering it: `credentials_content.dart` lost `_buildDoubanSection` and its
+  four fields and two methods, and the wizard lost its `_KeyEditor` branch, its
+  two fields and its `_KeyBadge` case.
+- Six ARB keys dropped and `welcomeSourceDescDouban` rewritten in all six
+  languages to say the app ships the key.
+- `browse_provider._keylessSourceIds()` matched only TheTVDB and Podcast Index
+  by name, so Hardcover — mandatory, no built-in — stayed switched on without a
+  key and answered 401 on every search. It is covered now; Douban needs no entry
+  because its pair always ships.
+- Tests: `source_catalog_test` no longer expects Douban among the keyed sources
+  and pins `none` with a new case, `credentials_content_key_links_test` asserts
+  the section is gone, the wizard's pair-source set drops Douban, and two new
+  server cases pin that the shipped pair signs when nothing is configured and
+  that a configured pair still takes precedence.
+
 ## [cn] Fixed — key screen gaps
 
 Two surfaces let a provider's API key be set: the settings screen and the

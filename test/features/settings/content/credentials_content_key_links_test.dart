@@ -81,12 +81,14 @@ void main() {
     expect(find.text('Get a key'), findsNWidgets(keyedSources));
   });
 
-  testWidgets('the Douban section covers film and TV, not just books',
+  testWidgets('Douban has no key screen — the build ships its pair',
       (WidgetTester tester) async {
     await pumpContent(tester);
 
-    // The source grew to books + film + TV; the copy must not still say books.
-    // SettingsGroup upper-cases its title, hence the caps here.
-    expect(find.text('DOUBAN API (BOOKS & FILM)'), findsOneWidget);
+    // Frodo issues no new keys, so a field here would be a dead end. The
+    // pair ships in the build and the source signs with it;
+    // SettingsGroup upper-cases its title, hence the caps.
+    expect(find.text('DOUBAN API (BOOKS & FILM)'), findsNothing);
+    expect(find.text('DOUBAN API (BOOKS)'), findsNothing);
   });
 }

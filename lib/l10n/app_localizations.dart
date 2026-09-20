@@ -5519,7 +5519,7 @@ abstract class S {
   /// No description provided for @welcomeSourceDescDouban.
   ///
   /// In en, this message translates to:
-  /// **'The Chinese book catalogue, covering print and e-book editions alike. Requires a free key and secret pair.'**
+  /// **'The Chinese catalogue for books, films and series. Signs with a key the app ships, so there is nothing to set up.'**
   String get welcomeSourceDescDouban;
 
   /// No description provided for @welcomeTourTitle.
@@ -10561,42 +10561,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Podcast search and episode tracking. Uses a free key/secret pair from api.podcastindex.org.'**
   String get welcomeApiPodcastIndexDesc;
-
-  /// No description provided for @credentialsDoubanSection.
-  ///
-  /// In en, this message translates to:
-  /// **'Douban API (Books & Film)'**
-  String get credentialsDoubanSection;
-
-  /// No description provided for @credentialsEnterDoubanKey.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your Douban API key'**
-  String get credentialsEnterDoubanKey;
-
-  /// No description provided for @credentialsEnterDoubanSecret.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your Douban API secret'**
-  String get credentialsEnterDoubanSecret;
-
-  /// No description provided for @credentialsDoubanKeyValid.
-  ///
-  /// In en, this message translates to:
-  /// **'Douban keys are valid'**
-  String get credentialsDoubanKeyValid;
-
-  /// No description provided for @credentialsDoubanKeyInvalid.
-  ///
-  /// In en, this message translates to:
-  /// **'Douban rejected the keys. Check the pair and the system clock'**
-  String get credentialsDoubanKeyInvalid;
-
-  /// No description provided for @welcomeApiDoubanDesc.
-  ///
-  /// In en, this message translates to:
-  /// **'The Chinese catalogue for books, films and series. Needs a key and secret pair to sign every request.'**
-  String get welcomeApiDoubanDesc;
 
   /// No description provided for @welcomeSourceDescMusicBrainz.
   ///

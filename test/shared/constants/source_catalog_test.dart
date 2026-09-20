@@ -27,8 +27,8 @@ void main() {
       }
     });
 
-    test('only IGDB, TMDB, TheTVDB, ComicVine, Google Books, Hardcover, '
-        'Podcast Index and Douban prompt for a key', () {
+    test('only IGDB, TMDB, TheTVDB, ComicVine, Google Books, Hardcover and '
+        'Podcast Index prompt for a key', () {
       final Set<DataSource> needKey = kDataSourceCatalog
           .where((SourceInfo i) =>
               i.keyRequirement != SourceKeyRequirement.none)
@@ -45,9 +45,17 @@ void main() {
           DataSource.googleBooks,
           DataSource.hardcover,
           DataSource.podcastIndex,
-          DataSource.douban,
         },
       );
+    });
+
+    test('Douban asks the user for nothing', () {
+      // Frodo issues no new keys, so a key screen would be a dead end: the app
+      // carries the public pair and signs with it.
+      final SourceInfo douban = kDataSourceCatalog
+          .firstWhere((SourceInfo i) => i.source == DataSource.douban);
+
+      expect(douban.keyRequirement, SourceKeyRequirement.none);
     });
 
     test('excludes the non-searchable SteamGridDB and VGMaps', () {

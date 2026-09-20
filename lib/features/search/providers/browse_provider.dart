@@ -281,9 +281,16 @@ class BrowseNotifier extends Notifier<BrowseState> {
             podcastSecret != null &&
             podcastSecret.isNotEmpty) ||
         ApiDefaults.hasPodcastIndexKey;
+    final String? hardcoverKey =
+        _prefs.getString(SettingsKeys.hardcoverApiKey);
+    final bool hasHardcoverKey =
+        hardcoverKey != null && hardcoverKey.isNotEmpty;
+    // Douban is absent on purpose: the build ships its pair, so the source
+    // always has something to sign with.
     return <String>{
       for (final SearchSource source in searchSourcesFor(type))
         if ((source.dataSource == DataSource.tvdb && !hasTvdbKey) ||
+            (source.dataSource == DataSource.hardcover && !hasHardcoverKey) ||
             (source.dataSource == DataSource.podcastIndex &&
                 !hasPodcastIndexKeys))
           source.id,

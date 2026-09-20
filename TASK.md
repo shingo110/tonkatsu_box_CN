@@ -290,6 +290,33 @@
 **未做（待定夺）**：豆瓣密钥无官方申请入口（官方 API 已停发），其 url 暂指站根；新接入的国内源
 （豆瓣 / NeoDB / Bangumi / WeRead）**均无品牌图标**，只能吃 Material 兜底图标，待补资源。
 
+### D12 · 豆瓣改为内置公用密钥，配置界面下线（2026-09-20，起源：少爷定夺）
+
+D11 留下一条"未做"：豆瓣密钥**无官方申请入口**（Frodo 已停发），界面却仍要求用户填一对拿不到的密钥。
+少爷定夺：**既然没得配，就内置公用密钥，并从配置界面摘掉**。
+
+**内置的是什么**：Frodo 现存的可用密钥对，就是它自己客户端内置的那一对（公开、非我方机密，多个开源
+客户端都在用）。落地在 `lib/shared/constants/douban_defaults{,_io,_web}.dart` —— 走**条件导入**而非
+`kIsWeb`：Web 版返回空串，让密钥**从构造上**进不了 `main.dart.js`（还原签名交给自托管 `/proxy`）。
+
+- `ApiDefaults.doubanApiKey / doubanApiSecret`（getter，转调上述常量）+ `hasDoubanKey`；
+  `ApiKeys.fromPrefs` 按 **用户已存密钥 → 内置** 取值，且**两半一起解析**（半对无法签名），与
+  PodcastIndex 同型。
+- `SourceInfo.keyRequirement` 由 `mandatory` 改回默认 `none` ⇒ 设置页与向导**自动不再渲染该节**，
+  徽章从"必需"变成"无需密钥"，语义也正确了。
+- `credentials_content.dart` 删 `_buildDoubanSection` + 4 个字段 + 2 个方法（-108 行）；
+  `welcome_step_sources.dart` 删 `_KeyEditor` 的 `case DataSource.douban` + 2 字段 + `_saveDouban` +
+  `_KeyBadge` 的豆瓣分支（-54 行）。`welcomeSourceDescDouban` 改为"已内置密钥，无需配置"（6 语言）。
+- **服务端**：`server/lib/src/douban_defaults.dart` 持同一对，`_authorize` 的豆瓣分支改为
+  `credentials[...] ?? 内置`（**操作者配置优先**），自托管**零配置即可搜豆瓣**。刻意**不**种进
+  `ApiCredentials` —— `/proxy/keys` 会把那张表回显给浏览器，种进去等于把密钥发给每个访客。
+
+**顺手根治的同类瑕疵**：`browse_provider._keylessSourceIds()` 只认 tvdb / podcastIndex 两个**硬编码源名**，
+而 Hardcover 同为 `mandatory` 且无内置 ⇒ 缺密钥时 chip 仍默认开启、照发请求吃 401。已补 Hardcover；
+豆瓣则因现在恒有密钥无需入表（代码内留注释说明）。**判据**：`mandatory` 且**无内置**的源都必须在此表内。
+
+**四关**：analyze 干净 · **5703 应用**（+1）/ **2380 core** / **110 server**（+2）· RPC 字节一致。
+
 ## 📋 候选（下一步从这里挑）
 
 > 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > Bangumi 漫画 ✅ > 优酷/爱奇艺**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
@@ -378,10 +405,10 @@
 1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 **23**），加枚举即炸。
 2. `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码，加源即炸（**仅可浏览类型**；图书走 `textQueryOnly`，无此断言）。漫画现 **5** 个（AniList / Bangumi / MangaBaka / MangaDex / Kitsu）；该文件的 `unsupportedSourceIds` 与 `seedLoaded` 的 `disabledSourceIds` 也各随源数变动。
 3. `test/features/search/sources/search_sources_test.dart` —— 注册表 id 顺序表，加源须补序。
-4. `test/shared/constants/source_catalog_test.dart` —— **「哪些源要密钥」的集合写死**（断言 `keyRequirement != none` 的源**恰好等于**那组枚举）。加任何**需密钥**的源即炸；D7 才把它编入护栏。
+4. `test/shared/constants/source_catalog_test.dart` —— **「哪些源要密钥」的集合写死**（断言 `keyRequirement != none` 的源**恰好等于**那组枚举，现 **7** 个：igdb / tmdb / tvdb / comicVine / googleBooks / hardcover / podcastIndex）。加任何**需密钥**的源即炸；D7 才把它编入护栏。**豆瓣已于 D12 退出该集合**（改用内置公用密钥），同文件新增 `Douban asks the user for nothing` 反向钉住。
 5. RPC：改 DAO/模型 → `dart run tool/generate_rpc.dart` → 提交生成物，否则 `dart test` 必挂，无幸免。
 6. mocktail 断言命名参数：**不要用 `verify(...).captured` 按位取**（顺序无保证），在 `thenAnswer` 里按 `Symbol('x')` 取。
 7. **同一条消息里对同一个文件不要发两次编辑** —— 实测最多只有一次生效，其余静默丢失且不报错。改完同一文件的多处，务必拆成多次调用并逐处 grep 复核。
 8. `lib/core/api/episode_source/tv_episode_source.dart` —— **影视源必须给 `tvEpisodeSourceResolverProvider` 加一支**（它是 `_ => tmdb` 兜底）。漏了不报任何错，但 `TvShowCacheWarmer` 与 `_refreshedTvShow` 会拿新源的 id 去 TMDB 查，**可能把不相干的剧写进缓存**。
 9. **影视的 `CollectionItem.nativeId` 恒为 null**（该 getter 只对 book / audio 生效）—— 刷新与 `.xcoll` 导入一律用 `externalId`。
-10. `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导的**输入框数**与**"获取密钥"链接数**，**按 `kDataSourceCatalog` 派生**（需密钥源数，双字段源另加）。加**需密钥**源必炸；反过来，某源若漏在向导 `_KeyEditor` 的 switch 里，这条也会炸 —— D9 时代它硬编码数字，所以漏了豆瓣照样绿（D11 根治）。
+10. `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导的**输入框数**与**"获取密钥"链接数**，**按 `kDataSourceCatalog` 派生**（需密钥源数，双字段源另加）。加**需密钥**源必炸；反过来，某源若漏在向导 `_KeyEditor` 的 switch 里，这条也会炸 —— D9 时代它硬编码数字，所以漏了豆瓣照样绿（D11 根治）。双字段源集合现为 **igdb / podcastIndex** 两个（豆瓣 D12 退出）。

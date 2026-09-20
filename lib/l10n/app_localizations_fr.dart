@@ -3174,7 +3174,7 @@ class SFr extends S {
 
   @override
   String get welcomeSourceDescDouban =>
-      'Le catalogue chinois du livre, éditions papier et numériques comprises. Nécessite une paire clé/secret.';
+      'Le catalogue chinois des livres, films et séries. Signe avec une clé fournie par l\'application : rien à configurer.';
 
   @override
   String get welcomeTourTitle => 'Apprenez à connaître le menu';
@@ -6080,27 +6080,6 @@ class SFr extends S {
   @override
   String get welcomeApiPodcastIndexDesc =>
       'Recherche de podcasts et suivi des épisodes. Paire clé/secret gratuite sur api.podcastindex.org.';
-
-  @override
-  String get credentialsDoubanSection => 'API Douban (Livres et films)';
-
-  @override
-  String get credentialsEnterDoubanKey => 'Saisissez votre clé API Douban';
-
-  @override
-  String get credentialsEnterDoubanSecret =>
-      'Saisissez votre secret API Douban';
-
-  @override
-  String get credentialsDoubanKeyValid => 'Les clés Douban sont valides';
-
-  @override
-  String get credentialsDoubanKeyInvalid =>
-      'Douban a rejeté les clés. Vérifiez la paire et l\'horloge système';
-
-  @override
-  String get welcomeApiDoubanDesc =>
-      'Le catalogue chinois des livres, films et séries. Nécessite une paire clé/secret pour signer chaque requête.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>

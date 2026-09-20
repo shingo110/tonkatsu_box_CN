@@ -3172,7 +3172,7 @@ class SEs extends S {
 
   @override
   String get welcomeSourceDescDouban =>
-      'El catálogo chino de libros, con ediciones impresas y digitales. Requiere un par de clave y secreto.';
+      'El catálogo chino de libros, películas y series. Firma con una clave incluida en la app, así que no hay nada que configurar.';
 
   @override
   String get welcomeTourTitle => 'Conoce el menú';
@@ -6062,27 +6062,6 @@ class SEs extends S {
   @override
   String get welcomeApiPodcastIndexDesc =>
       'Búsqueda de pódcasts y seguimiento de episodios. Par clave/secreto gratuito de api.podcastindex.org.';
-
-  @override
-  String get credentialsDoubanSection => 'API de Douban (Libros y cine)';
-
-  @override
-  String get credentialsEnterDoubanKey => 'Introduce tu clave de API de Douban';
-
-  @override
-  String get credentialsEnterDoubanSecret =>
-      'Introduce tu secreto de API de Douban';
-
-  @override
-  String get credentialsDoubanKeyValid => 'Las claves de Douban son válidas';
-
-  @override
-  String get credentialsDoubanKeyInvalid =>
-      'Douban rechazó las claves. Comprueba el par y el reloj del sistema';
-
-  @override
-  String get welcomeApiDoubanDesc =>
-      'El catálogo chino de libros, películas y series. Necesita un par de clave y secreto para firmar cada petición.';
 
   @override
   String get welcomeSourceDescMusicBrainz =>

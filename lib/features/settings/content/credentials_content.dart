@@ -52,8 +52,6 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
   String _podcastIndexApiSecret = '';
   String _googleBooksApiKey = '';
   String _hardcoverApiKey = '';
-  String _doubanApiKey = '';
-  String _doubanApiSecret = '';
   String _ssSsid = '';
   String _ssSspassword = '';
   String _ssDevId = '';
@@ -70,7 +68,6 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
   StatusType? _podcastIndexValidated;
   StatusType? _googleBooksValidated;
   StatusType? _hardcoverValidated;
-  StatusType? _doubanValidated;
   bool _sgdbValidating = false;
   bool _tmdbValidating = false;
 
@@ -79,7 +76,6 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
   bool _podcastIndexValidating = false;
   bool _googleBooksValidating = false;
   bool _hardcoverValidating = false;
-  bool _doubanValidating = false;
 
   @override
   void initState() {
@@ -99,8 +95,6 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
     _podcastIndexApiSecret = settings.podcastIndexApiSecret ?? '';
     _googleBooksApiKey = settings.googleBooksApiKey ?? '';
     _hardcoverApiKey = settings.hardcoverApiKey ?? '';
-    _doubanApiKey = settings.doubanApiKey ?? '';
-    _doubanApiSecret = settings.doubanApiSecret ?? '';
     _ssSsid = settings.screenScraperSsid ?? '';
     _ssSspassword = settings.screenScraperSspassword ?? '';
     _ssDevId = settings.screenScraperDevId ?? '';
@@ -138,8 +132,6 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _buildGoogleBooksSection(settings, compact),
         const SizedBox(height: AppSpacing.md),
         _buildHardcoverSection(settings, compact),
-        const SizedBox(height: AppSpacing.md),
-        _buildDoubanSection(settings, compact),
         const SizedBox(height: AppSpacing.md),
         _buildPodcastIndexSection(settings, compact),
         const SizedBox(height: AppSpacing.md),
@@ -533,106 +525,6 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
   }
 
 
-
-  Widget _buildDoubanSection(SettingsState settings, bool compact) {
-    final S l = S.of(context);
-    final bool hasKeys = settings.hasDoubanKeys;
-    return SettingsGroup(
-      title: l.credentialsDoubanSection,
-      children: <Widget>[
-        _buildSourceHeader(
-          description: l.welcomeApiDoubanDesc,
-          source: DataSource.douban,
-          icon: Icons.local_library,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
-          ),
-          child: Column(
-            children: <Widget>[
-              InlineTextField(
-                label: l.credentialsApiKey,
-                value: _doubanApiKey,
-                placeholder: l.credentialsEnterDoubanKey,
-                obscureText: true,
-                compact: compact,
-                onChanged: (String value) {
-                  setState(() {
-                    _doubanApiKey = value;
-                    _doubanValidated = null;
-                  });
-                  _saveDoubanKeys();
-                },
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              InlineTextField(
-                label: l.credentialsApiSecret,
-                value: _doubanApiSecret,
-                placeholder: l.credentialsEnterDoubanSecret,
-                obscureText: true,
-                compact: compact,
-                onChanged: (String value) {
-                  setState(() {
-                    _doubanApiSecret = value;
-                    _doubanValidated = null;
-                  });
-                  _saveDoubanKeys();
-                },
-              ),
-              _buildRequiredKeyHint(),
-              const SizedBox(height: AppSpacing.sm),
-              _buildCredentialStatus(
-                compact: compact,
-                statusType: _keyStatusType(
-                  hasKey: hasKeys,
-                  isBuiltIn: false,
-                  validated: _doubanValidated,
-                ),
-                statusLabel: _keyStatusLabel(
-                  hasKey: hasKeys,
-                  isBuiltIn: false,
-                  validated: _doubanValidated,
-                ),
-                actionTooltip: l.test,
-                isLoading: _doubanValidating,
-                onAction: hasKeys ? _validateDoubanKeys : null,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  // A half-typed pair cannot sign anything, so only a complete pair or a
-  // full wipe is stored.
-  void _saveDoubanKeys() {
-    final String key = _doubanApiKey.trim();
-    final String secret = _doubanApiSecret.trim();
-    final bool complete = key.isNotEmpty && secret.isNotEmpty;
-    final bool cleared = key.isEmpty && secret.isEmpty;
-    if (!complete && !cleared) return;
-    ref.read(settingsNotifierProvider.notifier).setDoubanKeys(key, secret);
-  }
-
-  Future<void> _validateDoubanKeys() async {
-    setState(() => _doubanValidating = true);
-    final bool valid =
-        await ref.read(settingsNotifierProvider.notifier).validateDoubanKeys();
-    if (!mounted) return;
-    setState(() {
-      _doubanValidating = false;
-      _doubanValidated = valid ? StatusType.success : StatusType.error;
-    });
-    context.showSnack(
-      valid
-          ? S.of(context).credentialsDoubanKeyValid
-          : S.of(context).credentialsDoubanKeyInvalid,
-      type: valid ? SnackType.success : SnackType.error,
-    );
-  }
 
   Widget _buildPodcastIndexSection(SettingsState settings, bool compact) {
     final S l = S.of(context);

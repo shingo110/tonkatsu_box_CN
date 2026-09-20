@@ -8,6 +8,7 @@ import 'package:core/api/proxy_targets.dart';
 import 'package:shelf/shelf.dart';
 
 import 'api_credentials.dart';
+import 'douban_defaults.dart';
 import 'upstream_client.dart';
 import 'upstream_throttle.dart';
 
@@ -199,11 +200,13 @@ class ApiProxy {
       case ProxyTarget.douban:
         // Frodo signs the request path with a timestamp and refuses any
         // User-Agent but its own client's, so both are built here: the
-        // browser holds neither half of the pair.
+        // browser holds neither half of the pair. An operator's pair wins;
+        // otherwise the public one the app ships signs, so a selfhost
+        // install searches Douban without any setup.
         final String doubanKey =
-            _require(CredentialNames.doubanKey, target);
+            credentials[CredentialNames.doubanKey] ?? kDoubanDefaultKey;
         final String doubanSecret =
-            _require(CredentialNames.doubanSecret, target);
+            credentials[CredentialNames.doubanSecret] ?? kDoubanDefaultSecret;
         final int doubanTime = _now().millisecondsSinceEpoch ~/ 1000;
         query['apiKey'] = <String>[doubanKey];
         query['_ts'] = <String>['$doubanTime'];

@@ -221,12 +221,16 @@
   `_keyUrlFor(source)`，向导走 `info.url` ⇒ **两端同源，不可能漂移**。`SourceInfo.keyRequirement == none`
   的源不渲染链接。
 - **提示文案按 `keyRequirement` 分流**：`credentialsOwnKeyHint`（"建议用自己的密钥"）**只对"有内置密钥"
-  或"可选"的源成立**；`mandatory` 且无内置（豆瓣 / Hardcover，以及无内置密钥时的 TheTVDB）一律用
+  或"可选"的源成立**；`mandatory` 且无内置（Hardcover，以及无内置密钥时的 TheTVDB）一律用
   `credentialsKeyRequiredHint`。写反了会明确误导用户。
-- **豆瓣密钥无官方申请入口**（官方 API 已停发，社区用 App 内置密钥对），其 `url` 指站根
-  `https://www.douban.com/`（非 `book.douban.com` —— 该源已覆盖图书 / 电影 / 剧集三类）。
+- **豆瓣不向用户要密钥**（D12）：Frodo 已停发新密钥，故密钥对**内置在构建里**
+  （`lib/shared/constants/douban_defaults*.dart`，**条件导入** —— Web 版为空串，签名归自托管 `/proxy`；
+  服务端 `server/lib/src/douban_defaults.dart` 同源兜底，`credentials[...] ?? 内置`），
+  `keyRequirement` 回到 `none`，两个密钥界面都不再有该节。**别再给豆瓣加密钥界面。**
+  其 `url` 仍指站根 `https://www.douban.com/`（该源覆盖图书 / 电影 / 剧集三类）。
 - **免密钥源不出现在这两个界面**（`keyRequirement: none`）—— tvmaze / anilist / bangumi / mangabaka /
-  mangadex / kitsu / vndb / neodb / weread / openLibrary / fantlab / musicBrainz 共 **12 个**。它们只在
+  mangadex / kitsu / vndb / neodb / weread / openLibrary / fantlab / musicBrainz / **douban**(内置公用
+  密钥，见下) 共 **13 个**。它们只在
   **搜索页的源开关**（`source_chips_row.dart`）与向导的"无需密钥"徽章里露面。**别再问"XX 的密钥配置
   在哪"—— 先看 `keyRequirement`。**
 - **品牌图标**：新接入的国内源目前都吃 Material 兜底图标（豆瓣 `Icons.local_library`）；`AppAssets` 里

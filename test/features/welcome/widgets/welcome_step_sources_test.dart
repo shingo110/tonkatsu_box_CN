@@ -70,7 +70,6 @@ void main() {
       const Set<DataSource> pairSources = <DataSource>{
         DataSource.igdb,
         DataSource.podcastIndex,
-        DataSource.douban,
       };
 
       expect(

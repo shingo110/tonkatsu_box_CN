@@ -1,3 +1,4 @@
+import 'douban_defaults.dart';
 import 'platform_features.dart';
 
 /// Built-in API credentials injected at build time via `--dart-define`.
@@ -49,6 +50,15 @@ abstract final class ApiDefaults {
       screenScraperDevId.isNotEmpty && screenScraperDevPassword.isNotEmpty;
 
   static bool get hasSimklClientId => simklClientId.isNotEmpty;
+
+  /// Always set on a native build: Frodo issues no keys any more, so the
+  /// app carries the public pair. Empty on web, where the proxy signs.
+  static String get doubanApiKey => DoubanDefaults.apiKey;
+
+  static String get doubanApiSecret => DoubanDefaults.apiSecret;
+
+  static bool get hasDoubanKey =>
+      doubanApiKey.isNotEmpty && doubanApiSecret.isNotEmpty;
 
   // On web the pair lives on the server and the proxy signs requests; the
   // dart-defines never reach main.dart.js on purpose.

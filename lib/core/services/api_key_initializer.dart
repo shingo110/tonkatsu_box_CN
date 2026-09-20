@@ -77,10 +77,22 @@ class ApiKeys {
     final String? hardcoverApiKey =
         prefs.getString(SettingsKeys.hardcoverApiKey);
 
-    // Douban: the user's key and secret from prefs only, no built-in.
-    final String? doubanApiKey = prefs.getString(SettingsKeys.doubanApiKey);
-    final String? doubanApiSecret =
+    // Douban: user pair → built-in public pair, so a fresh install still
+    // searches. The halves resolve together — a stored key with the
+    // built-in secret could not sign anything.
+    final String? userDoubanKey = prefs.getString(SettingsKeys.doubanApiKey);
+    final String? userDoubanSecret =
         prefs.getString(SettingsKeys.doubanApiSecret);
+    final bool hasUserDoubanPair = userDoubanKey != null &&
+        userDoubanKey.isNotEmpty &&
+        userDoubanSecret != null &&
+        userDoubanSecret.isNotEmpty;
+    final String? doubanApiKey = hasUserDoubanPair
+        ? userDoubanKey
+        : (ApiDefaults.hasDoubanKey ? ApiDefaults.doubanApiKey : null);
+    final String? doubanApiSecret = hasUserDoubanPair
+        ? userDoubanSecret
+        : (ApiDefaults.hasDoubanKey ? ApiDefaults.doubanApiSecret : null);
 
     // Podcast Index: user pair → built-in (CI secrets) → null. Key and secret
     // resolve together — mixing a user key with the built-in secret can't work.

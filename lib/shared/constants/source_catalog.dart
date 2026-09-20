@@ -104,8 +104,8 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
     // One account covers all three media types, so the link is the site root
     // rather than the books subsection.
     url: 'https://www.douban.com/',
-    // Every request is signed, so a key and secret pair is not optional.
-    keyRequirement: SourceKeyRequirement.mandatory,
+    // Every request is signed, but with the public pair the build ships,
+    // so there is nothing for a user to enter — hence no key screen.
   ),
   SourceInfo(
     source: DataSource.openLibrary,

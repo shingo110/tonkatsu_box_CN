@@ -6,6 +6,7 @@ import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 import 'package:tonkatsu_server/src/api_credentials.dart';
 import 'package:tonkatsu_server/src/app_handler.dart';
+import 'package:tonkatsu_server/src/douban_defaults.dart';
 import 'package:tonkatsu_server/src/proxy_handler.dart';
 import 'package:tonkatsu_server/src/upstream_client.dart';
 
@@ -361,6 +362,44 @@ void main() {
         upstream.sent.single.headers[HttpHeaders.userAgentHeader],
         kDoubanUserAgent,
       );
+    });
+
+    test('should sign Douban with the shipped pair when none is configured',
+        () async {
+      // Frodo issues no new keys, so a selfhost install that configures
+      // nothing must still search Douban.
+      final Handler handler = handlerWith(
+        <String, String>{},
+        clock: () => DateTime.fromMillisecondsSinceEpoch(1700000000000),
+      );
+
+      await get(handler, '/proxy/douban/api/v2/book/isbn/9787536692930');
+
+      final Map<String, String> query =
+          upstream.sent.single.url.queryParameters;
+      expect(upstream.sent.single.url.host, 'frodo.douban.com');
+      expect(query['apiKey'], kDoubanDefaultKey);
+      // The same vector the configured case produces: the fallback signs the
+      // same bytes, so nothing downstream can tell the two apart.
+      expect(query['_sig'], 'g9+l253xM80riZQoEdnRsPFqgAs=');
+    });
+
+    test('should prefer a configured Douban pair over the shipped one',
+        () async {
+      final Handler handler = handlerWith(
+        <String, String>{
+          CredentialNames.doubanKey: 'operator-key',
+          CredentialNames.doubanSecret: 'operator-secret',
+        },
+        clock: () => DateTime.fromMillisecondsSinceEpoch(1700000000000),
+      );
+
+      await get(handler, '/proxy/douban/api/v2/book/isbn/9787536692930');
+
+      final Map<String, String> query =
+          upstream.sent.single.url.queryParameters;
+      expect(query['apiKey'], 'operator-key');
+      expect(query['_sig'], isNot('g9+l253xM80riZQoEdnRsPFqgAs='));
     });
 
     test('should replace the key in a TheTVDB login body', () async {
