@@ -12,6 +12,50 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — the music tab gains a Chinese album catalogue
+
+Audio was the last media type whose albums only ever came from abroad. Douban
+keeps albums under a subject type of their own, with a search endpoint of their
+own, so the catalogue a mainland network reaches was already there to be read
+rather than something that needed a new provider.
+
+- `DoubanMusicSource` (`lib/features/search/sources/douban_music_source.dart`),
+  id `douban_music`, reusing `DataSource.douban` for the same reason the anime
+  source does: one account and one key pair already cover the catalogue, so the
+  enum count, the icon branch, the key screen and the translation keys are all
+  untouched. It shares MusicBrainz's label because the two are one catalogue
+  seen from two providers.
+- `DoubanSearchApi.searchMusic` reuses `_searchSubjects<T>`, which now takes the
+  path it calls; `getMusicWithTracks` answers the record and its `songs` in the
+  one request Douban serves them from, because the host bans a burst.
+- `AudioItem.fromDouban` and `AudioTrack.fromDoubanSong` map the record. Douban
+  numbers tracks across the whole release, so `discNumber` is always 1. Its
+  `duration` field is zero on every row, so a length is only read where a
+  user-built compilation spells "3:46" at the end of a title — and the suffix is
+  stripped from the title either way. Rows without a `track_number` are section
+  headers ("全套曲目", "CD1", "总时间：70分钟"), not tracks, and are dropped.
+- `doubanMusicGenres` is deliberately not `doubanItemGenres`: a music search
+  row's `card_subtitle` is "artist / year", so the shared film helper would have
+  read the year as a genre.
+- `DoubanMusicSheet` takes the place of the MusicBrainz sheet for this source —
+  a Douban subject is one release, not a group with editions to choose between —
+  and `ItemDetailsSheet.album` now shows `overview`, which only Douban fills.
+- `collection_actions` refresh, `import_service._fetchAlbumRefs` and the
+  `AudioItem` enrich step each gain a Douban arm. All three fail silently
+  without one.
+
+Region rule refinement: `.audio` is the one media type that holds two
+catalogues. Only the album half gained a domestic provider, and the podcast half
+— Podcast Index, its only provider — has no domestic substitute at all, so
+`BrowseNotifier._isAloneInItsCatalogue` keeps it switched on. Turning it off
+would blank podcasts rather than point anyone at a domestic alternative.
+
+Measured live: 周杰伦 answers 20 rows with Chinese album names, artists, years
+and scores; the detail record adds genres, label (杰威尔音乐), medium (CD),
+release date and intro; its 10 tracks number 1–10 with clean titles.
+
+Gates: analyze clean; 5759 app / 2385 core / 110 server; RPC byte-identical.
+
 ## [cn] Added — MangaDex now keeps the Chinese name it was already returning
 
 The manga tab was the last one where a Chinese query still answered in romaji.

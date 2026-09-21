@@ -1,4 +1,6 @@
 import 'package:core/models/anime.dart';
+import 'package:core/models/audio_item.dart';
+import 'package:core/models/audio_track.dart';
 import 'package:core/models/book.dart';
 import 'package:core/models/movie.dart';
 import 'package:core/models/tv_show.dart';
@@ -111,6 +113,30 @@ class DoubanApi {
     }
     return _search.searchAnime(query: query, page: page);
   }
+
+  /// One page of albums.
+  Future<(List<AudioItem>, bool, int)> searchMusic({
+    required String query,
+    int page = 1,
+  }) {
+    if (!_canRequest) {
+      return Future<(List<AudioItem>, bool, int)>.value(
+        (const <AudioItem>[], false, 0),
+      );
+    }
+    return _search.searchMusic(query: query, page: page);
+  }
+
+  /// The full record behind a cached album row, with its track list — the two
+  /// arrive together, so refresh and enrich both read this one call.
+  Future<(AudioItem?, List<AudioTrack>)> getMusicWithTracks(
+    String subjectId,
+  ) =>
+      _canRequest
+          ? _search.getMusicWithTracks(subjectId)
+          : Future<(AudioItem?, List<AudioTrack>)>.value(
+              (null, const <AudioTrack>[]),
+            );
 
   /// The full record behind a cached film row.
   Future<Movie?> getMovie(String subjectId) =>

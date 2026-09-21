@@ -306,6 +306,33 @@
 本轮做到的是「**不挂代理也拿得到中文漫画元数据**」，**不是**「漫画线有了境内源」——
 后者至今无解（B 站漫画 code 99 · 快看 404 · 动漫之家不可达 · copymanga 302）。
 
+### 七之十三、豆瓣音乐源与 `.audio` 的两本目录（2026-09-21，D18）
+
+- **豆瓣的音乐是独立条目类型**（不像动画混在影视池里）：搜索 `/api/v2/search/music`、
+  详情 `/api/v2/music/{id}`。**详情是唯一带 `songs` 的形状**，一次请求把专辑与曲目一起拿回来
+  —— 豆瓣封禁突发，**绝不能拆成两次请求**。
+- **`songs.track_number` 为 `null` 的行是分隔行**（实测："全套曲目" / "CD1" / "早期音乐" /
+  "总时间：70分钟"），**不是曲目**，必须过滤（`doubanMusicSongs`）。真曲目编号**跨碟全局连续**
+  （实测 1..138 无重复）⇒ `discNumber` 恒取 1，position 不会撞 `(source, audioId, disc, position)`。
+- **`duration` 字段恒为 0**，别拿来当 `lengthMs`；只有**用户整理的合集**把时长写在标题尾部
+  （`…《万福，光耀海星 》        2:15`），`doubanTrackTitleAndLength` 抽走它**并从标题删掉**。
+  官方专辑（如周杰伦）标题干净、无任何时长 ⇒ 一律 `null`，不得编造。
+- **搜索行的 `card_subtitle` 是「歌手 / 年份」**（影视池是「国家 / 题材 / 导演 / 演员」）⇒
+  **音乐不能复用 `doubanItemGenres`**（它会把年份读成题材，实测得到 `['2016']`），
+  必须用 `doubanMusicGenres`，只认 `genres` 数组。
+- **`.audio` 是唯一一个装着两本目录的媒体类型**（`AudioKind.album` / `podcast`）。D15 的区域规则
+  粒度是**媒体类型**，所以豆瓣音乐一进来，「有境内源 ⇒ 关境外源」会**把 PodcastIndex 一起关掉**
+  —— 而它是播客唯一的源、且没有任何境内替代 ⇒ 会直接让播客空白。
+  `BrowseNotifier._isAloneInItsCatalogue` 让它豁免。**以后往 `.audio` 加源前先想这一条**。
+- 复用 `DataSource.douban` ⇒ 零枚举值 / 零图标分支 / 零密钥界面 / **零新 l10n 键**（音频线表
+  = `searchSourceMusic`、提示 = `searchHintMusic`、面板标题 = `musicSheetTracks`）；
+  缓存身份含 `media_type`，与图书 / 影视 / 动画不撞车。
+- **连带必改 5 处**（全不报编译错）：`collection_actions` 刷新臂 · `import_service._fetchAlbumRefs`
+  · `media_handlers` 的 `sheetBuilder` 与 `enrich`（两处）· `source_catalog` 的 `mediaTypes`
+  · `search_sources` 注册（会炸 `search_sources_test` 的 id 顺序表）。
+- **豆瓣一条 subject 就是一张专辑**，没有 MusicBrainz 那种版本选择 ⇒ 走 `DoubanMusicSheet`
+  （仿 `PodcastIndexSheet`），不进 `MusicBrainzAlbumSheet`（它按 `nativeId` 当 MBID 查 release，会静默失败）。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。

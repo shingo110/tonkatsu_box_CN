@@ -1,5 +1,7 @@
 import 'package:core/api/douban_constants.dart';
 import 'package:core/models/anime.dart';
+import 'package:core/models/audio_item.dart';
+import 'package:core/models/audio_track.dart';
 import 'package:core/models/book.dart';
 import 'package:core/models/movie.dart';
 import 'package:core/models/tv_show.dart';
@@ -117,6 +119,60 @@ class DoubanSearchApi {
     );
   }
 
+  /// One page of albums. Unlike the film pool this endpoint is its own and
+  /// every row it answers is an album, so the target-type filter is a
+  /// formality that also guards against a stray row of another kind.
+  Future<(List<AudioItem>, bool, int)> searchMusic({
+    required String query,
+    int page = 1,
+    int perPage = kDoubanSearchCount,
+  }) {
+    return _searchSubjects<AudioItem>(
+      path: kDoubanSearchMusicPath,
+      query: query,
+      page: page,
+      perPage: perPage,
+      targetType: 'music',
+      parse: AudioItem.fromDouban,
+    );
+  }
+
+  /// The full album record and its track list. One request answers both — the
+  /// music endpoint is the only shape that carries `songs` — and Douban bans a
+  /// burst, so the two are never fetched separately.
+  Future<(AudioItem?, List<AudioTrack>)> getMusicWithTracks(
+    String subjectId,
+  ) async {
+    try {
+      final Response<dynamic> response =
+          await _client.get('$kDoubanMusicPath/$subjectId');
+      return _parseMusic(response.data);
+    } on DioException catch (e) {
+      throw _client.handleDioException(e, 'Failed to load the Douban album');
+    }
+  }
+
+  /// A music record's two halves. A missing subject answers with an error
+  /// object rather than a 404, so the `title`/`id` check stands in for one.
+  static (AudioItem?, List<AudioTrack>) _parseMusic(Object? data) {
+    if (data is! Map<String, dynamic>) return (null, const <AudioTrack>[]);
+    if (data['title'] == null && data['id'] == null) {
+      return (null, const <AudioTrack>[]);
+    }
+    try {
+      final AudioItem album = AudioItem.fromDouban(data);
+      return (
+        album,
+        <AudioTrack>[
+          for (final Map<String, dynamic> song in doubanMusicSongs(data))
+            AudioTrack.fromDoubanSong(song, audioId: album.id),
+        ],
+      );
+    } on FormatException {
+      return (null, const <AudioTrack>[]);
+    }
+  }
+
   /// A full film record. Only a film id resolves here; a series id has to go
   /// through [getTvShow] or Douban answers 996.
   Future<Movie?> getMovie(String subjectId) async {
@@ -165,6 +221,8 @@ class DoubanSearchApi {
     }
   }
 
+  /// [path] defaults to the shared film/series pool; albums have an endpoint of
+  /// their own, but the paging and the row filtering behave the same way.
   Future<(List<T>, bool, int)> _searchSubjects<T>({
     required String query,
     required int page,
@@ -172,11 +230,12 @@ class DoubanSearchApi {
     required String? targetType,
     required T Function(Map<String, dynamic> json) parse,
     bool Function(Map<String, dynamic> target)? accept,
+    String path = kDoubanSearchMoviePath,
   }) async {
     final int start = (page - 1) * perPage;
     try {
       final Response<dynamic> response = await _client.get(
-        kDoubanSearchMoviePath,
+        path,
         queryParameters: <String, dynamic>{
           'q': query,
           'start': start,

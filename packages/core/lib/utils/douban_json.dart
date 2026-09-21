@@ -180,6 +180,160 @@ bool doubanIsAnimation(Map<String, dynamic> json) =>
 String doubanItemUrl(Map<String, dynamic> json) =>
     'https://movie.douban.com/subject/${doubanItemId(json)}';
 
+/// Music artists. A full record lists them in `singer`; a search row only folds
+/// the lead credit into `card_subtitle`, which for music spells it
+/// "artist / year" — the opposite order from the film pool.
+List<String> doubanMusicArtists(Map<String, dynamic> json) {
+  final Object? singer = json['singer'];
+  if (singer is List<dynamic>) {
+    final List<String> names = <String>[];
+    for (final Object? entry in singer) {
+      final String? name = entry is Map<String, dynamic>
+          ? _nonEmpty(entry['name'])
+          : _nonEmpty(entry);
+      if (name != null) names.add(name);
+    }
+    if (names.isNotEmpty) return names;
+  }
+
+  final List<String> parts = doubanSubtitleParts(json);
+  if (parts.isNotEmpty && !_isYear(parts.first)) return <String>[parts.first];
+  return const <String>[];
+}
+
+/// Release date. A full record sends `pubdate` as a list and spells it as
+/// loosely as Douban stores it ("2000", "2011-07", "2006-1-30"); a search row
+/// carries only the trailing year of `card_subtitle`.
+String? doubanMusicFirstReleaseDate(Map<String, dynamic> json) {
+  final Object? pubdate = json['pubdate'];
+  if (pubdate is List<dynamic>) {
+    for (final Object? entry in pubdate) {
+      final String? value = _nonEmpty(entry);
+      if (value != null) return value;
+    }
+  }
+  final String? single = _nonEmpty(pubdate);
+  if (single != null) return single;
+
+  final List<String> parts = doubanSubtitleParts(json);
+  if (parts.length > 1 && _isYear(parts.last)) return parts.last;
+  return null;
+}
+
+/// Release year, from the leading four digits of the release date. Douban
+/// sends a year-only `pubdate` on most records, so this is usually the whole
+/// value.
+int? doubanMusicYear(Map<String, dynamic> json) {
+  final String? date = doubanMusicFirstReleaseDate(json);
+  if (date == null || date.length < 4) return null;
+  final int? year = int.tryParse(date.substring(0, 4));
+  if (year == null || year < 1800 || year > 2099) return null;
+  return year;
+}
+
+/// Genres. Only a full record carries them; a search row's `card_subtitle`
+/// holds an artist and a year for music, so nothing there can be read as a
+/// genre — unlike the film pool, where the genre list is a subtitle segment.
+List<String> doubanMusicGenres(Map<String, dynamic> json) {
+  final Object? raw = json['genres'];
+  if (raw is! List<dynamic>) return const <String>[];
+  final List<String> genres = <String>[];
+  for (final Object? entry in raw) {
+    final String? value = _nonEmpty(entry);
+    if (value != null) genres.add(value);
+  }
+  return genres;
+}
+
+/// Label / publisher. Always a list on a full record, and a single entry often
+/// names several imprints already ("吉林音像出版社，厦门标旗文化").
+String? doubanMusicLabel(Map<String, dynamic> json) {
+  final Object? publisher = json['publisher'];
+  if (publisher is List<dynamic>) {
+    for (final Object? entry in publisher) {
+      final String? value = _nonEmpty(entry);
+      if (value != null) return value;
+    }
+    return null;
+  }
+  return _nonEmpty(publisher);
+}
+
+/// Medium of the release — "CD", "黑胶". A full record lists `media`.
+String? doubanMusicFormat(Map<String, dynamic> json) {
+  final Object? media = json['media'];
+  if (media is List<dynamic>) {
+    for (final Object? entry in media) {
+      final String? value = _nonEmpty(entry);
+      if (value != null) return value;
+    }
+    return null;
+  }
+  return _nonEmpty(media);
+}
+
+/// Disc count. `discs` lists one entry per disc, and is empty on records that
+/// never said.
+int? doubanMusicDiscCount(Map<String, dynamic> json) {
+  final Object? discs = json['discs'];
+  if (discs is! List<dynamic>) return null;
+  int count = 0;
+  for (final Object? disc in discs) {
+    if (_nonEmpty(disc) != null) count++;
+  }
+  return count > 0 ? count : null;
+}
+
+/// A full record's track list. Rows without a `track_number` are section
+/// headers, not tracks — a user-built compilation interleaves "全套曲目",
+/// "CD1", "早期音乐" and "总时间：70分钟" between the real entries — so they are
+/// dropped here. Douban numbers tracks across the whole release rather than
+/// per disc, so the surviving numbers are unique.
+List<Map<String, dynamic>> doubanMusicSongs(Map<String, dynamic> json) {
+  final Object? songs = json['songs'];
+  if (songs is! List<dynamic>) return const <Map<String, dynamic>>[];
+  final List<Map<String, dynamic>> tracks = <Map<String, dynamic>>[];
+  for (final Object? entry in songs) {
+    if (entry is! Map<String, dynamic>) continue;
+    if (entry['track_number'] is! num) continue;
+    if (_nonEmpty(entry['title']) == null) continue;
+    tracks.add(entry);
+  }
+  return tracks;
+}
+
+/// Track count. Only the detail call carries a list, so a search row reports
+/// none until it is refreshed.
+int? doubanMusicTrackCount(Map<String, dynamic> json) {
+  final int count = doubanMusicSongs(json).length;
+  return count > 0 ? count : null;
+}
+
+/// A track title with its length. Douban's `duration` field is zero on every
+/// row, but a user-built compilation spells "3:46" at the end of the title
+/// instead; an official list carries no length at all.
+({String title, int? lengthMs}) doubanTrackTitleAndLength(Object? raw) {
+  final String value = raw is String ? raw.trim() : '';
+  final RegExpMatch? match =
+      RegExp(r'^(.*?)\s+(\d{1,3}):([0-5]\d)$').firstMatch(value);
+  if (match == null) return (title: value, lengthMs: null);
+  final int minutes = int.parse(match.group(2)!);
+  final int seconds = int.parse(match.group(3)!);
+  return (
+    title: match.group(1)!.trim(),
+    lengthMs: ((minutes * 60) + seconds) * 1000,
+  );
+}
+
+/// Public page. A full record states `url` outright — and on its own host,
+/// `music.douban.com` rather than the film one — while a search row's `uri` is
+/// a `douban://` address, so the page is rebuilt from the id.
+String doubanMusicUrl(Map<String, dynamic> json) {
+  final String? stated = _nonEmpty(json['url']);
+  if (stated != null) return stated;
+  return 'https://music.douban.com/subject/${doubanItemId(json)}/';
+}
+
 String? _nonEmpty(Object? raw) {
   if (raw is! String) return null;
   final String value = raw.trim();

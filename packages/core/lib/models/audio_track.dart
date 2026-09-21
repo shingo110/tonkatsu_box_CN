@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../utils/douban_json.dart';
 import '../utils/json_list.dart';
 import 'audio_item.dart';
 import 'data_source.dart';
@@ -75,6 +76,35 @@ class AudioTrack {
       lengthMs: durationS != null && durationS > 0 ? durationS * 1000 : null,
       datePublished: (json['datePublished'] as num?)?.toInt(),
       source: DataSource.podcastIndex,
+    );
+  }
+
+  /// From a `songs[]` entry of a Douban `/api/v2/music/{id}` record. Douban
+  /// numbers tracks across the whole release rather than per disc, so
+  /// [discNumber] is always 1 and [position] is that number; section headers
+  /// carry none and are filtered out by [doubanMusicSongs]. The length comes
+  /// from a "3:46" suffix on the title when one is there — the `duration`
+  /// field is zero on every row.
+  factory AudioTrack.fromDoubanSong(
+    Map<String, dynamic> json, {
+    required int audioId,
+  }) {
+    final ({String title, int? lengthMs}) parsed =
+        doubanTrackTitleAndLength(json['title']);
+    final Object? names = json['artist_names'];
+    return AudioTrack(
+      audioId: audioId,
+      discNumber: 1,
+      position: (json['track_number'] as num?)?.toInt() ?? 0,
+      title: parsed.title,
+      lengthMs: parsed.lengthMs,
+      artists: names is List<dynamic>
+          ? names
+              .whereType<String>()
+              .where((String name) => name.trim().isNotEmpty)
+              .toList()
+          : const <String>[],
+      source: DataSource.douban,
     );
   }
 

@@ -408,7 +408,7 @@ NeoDB 之后**。图书更惨：8 个图书源**全部** `supportsBrowse => fals
   `/api/v2/tv/{id}` 详情 **73 字段**，含 `episodes_count` / `intro` / `genres` / `rating`（0–10）
   —— **数据比 Bangumi 还全**。⇒ **不必另找源，也不必背 bangumi-data 那 1.45MB 快照与 CC-BY 署名义务。**
 - `/api/v2/search/music` **也是通的**（200 / 中文专辑名 / `rating` 0–10 / `genres` / `pubdate` / `intro` / `discs`）
-  ⇒ 音乐线可照此另开一源（**D18**）。`/api/v2/search/game` **404**（豆瓣无游戏入口）。
+  ⇒ 音乐线**已落地（→ D18）**。`/api/v2/search/game` **404**（豆瓣无游戏入口）。
 - **漫画中文已落地（→ D17）**：**MangaDex 原生支持中文标题检索** —— `?title=进击的巨人` 命中
   "Attack on Titan"，`altTitles` 带 `{'zh': '进击的巨人'}`。修的是**既有源**，零新增；
   本轮实测中文别名覆盖 **61%**（热门头部 83%）。
@@ -507,6 +507,57 @@ D15 手机自检的失败名单里**），**不是**「漫画线有了境内源�
 （中文优先进 `title` · `zh` 优先于 `zh-hk` · 仅繁体时兜底 · **无中文时行为不变** · 描述中文优先）。
 
 **四关**：analyze 干净 · **5741 应用** / **2385 core**（+5）/ 110 server · RPC 字节一致。
+
+### D18 · 豆瓣音乐源（2026-09-21，起源：D17 收尾判定的「音乐线」· 零新增源 / 零新枚举 / 零新文案键）
+
+**问题**：`MediaType.audio` 的专辑半边只有 MusicBrainz（境外、无中文），播客半边是 PodcastIndex（境外）
+⇒ 不挂代理时音频页拿不到任何中文专辑元数据。
+
+**关键发现：豆瓣的音乐是独立条目类型**（不像动画混在影视混合池里）——
+搜索 `/api/v2/search/music`、详情 `/api/v2/music/{id}`，**详情是唯一带 `songs` 的形状**。
+⇒ 又是 D16 的形态：**复用 `DataSource.douban`，只加一个源**，不引新枚举 / 图标 / 密钥界面 / 文案键。
+
+**四个实测出来的坑（决定映射方案）**：
+
+| 现象 | 实测 | 处置 |
+|---|---|---|
+| `songs[].track_number` 为 `null` | 一张 169 行合集里 **31 行**是 `"全套曲目"` / `"CD1"` / `"早期音乐"` / `"总时间：70分钟"` | `doubanMusicSongs` **过滤** —— 它们不是曲目 |
+| 真曲目编号 | **跨碟全局连续**（实测 1..138，无重复） | `discNumber` 恒取 1，position 不撞 `(source, audioId, disc, position)` |
+| `duration` 字段 | **恒为 0** | 不当 `lengthMs`；时长只在**合集标题尾部**（`…《万福，光耀海星 》   2:15`），抽走并**从标题删掉** |
+| 搜索行 `card_subtitle` | 「**歌手 / 年份**」（影视池是「国家 / 题材 / 导演 / 演员」） | **不能复用 `doubanItemGenres`**（它会把 `'2016'` 读成题材），另写 `doubanMusicGenres` 只认 `genres` 数组 |
+
+**映射**：`title` = 中文名 · `artists` = 详情 `singer[].name`（搜索行取 `card_subtitle` 首段）·
+`firstReleaseDate` = `pubdate[0]`（**数组**）· `genres` = `genres` 数组 · `label` = `publisher[0]`（数组）·
+`format` = `media[0]`（`'CD'`）· `discCount` = `discs` 长度 · `rating` = `rating.value`（**已是 0–10，别乘**）·
+`ratingCount` = `rating.count` · `description` = `intro` · `trackCount` = 过滤后曲目数 ·
+`externalUrl` = `url`（`music.douban.com`，**不是 movie 域**）。缓存身份 `nativeId` = 豆瓣 subject id。
+
+**⚠️ 区域规则补丁（本轮唯一的跨功能改动）**：`.audio` 是**唯一一个装着两本目录**的媒体类型
+（`AudioKind.album` / `podcast`），而 D15 的区域规则粒度是**媒体类型** ⇒ 豆瓣音乐（境内）一进来，
+「有境内源 ⇒ 关境外源」会**连带关掉 PodcastIndex** —— 而它是播客唯一的源、**没有任何境内替代**，
+关掉就是凭空空白（正是 D15 注释里要避免的"用沉默骗人"）。新增
+`BrowseNotifier._isAloneInItsCatalogue`：**一个源若独自撑着一本无境内替代的目录，豁免**。
+测试该条必须给 mock prefs 配上 `SettingsKeys.podcastIndexApiKey` / `Secret`，否则它本就因缺密钥被关，
+断言测的就不是区域规则本身。
+
+**连带必改 5 处（全不报编译错）**：`collection_actions` 刷新臂 · `import_service._fetchAlbumRefs`
+（豆瓣用 `externalId` = 豆瓣 id）· `media_handlers` 的 `sheetBuilder` 与 `enrich`（两处）·
+`source_catalog` 的 `mediaTypes` 补 `MediaType.audio` · `search_sources` 注册（炸 id 顺序表）。
+
+**UI**：`DoubanMusicSheet`（仿 `PodcastIndexSheet`，`previewTracks = 50`）—— 豆瓣一条 subject 就是一张专辑，
+**没有** MusicBrainz 那种版本选择；塞给 `MusicBrainzAlbumSheet` 会按 `nativeId` 当 MBID 查 release，
+静默失败。`ItemDetailsSheet.album` 加 `overview`（只有豆瓣填 `intro`，MusicBrainz 为 null ⇒ 行为不变）。
+
+**活体实测**（2026-09-21，真接口喂真解析器）：搜「周杰伦」→ **20 条全中文专辑名** / 歌手 / 年份 / 评分；
+详情 `genres=[流行]`、`label=杰威尔音乐`、`format=CD`、`date=2016-06-24`、`discs=1`、`rating=8.1`、
+`intro` 完整、`url=music.douban.com/subject/26812952/`；曲目 **10 首**，pos 1..10，标题干净，
+`lengthMs=null`（官方专辑无时长，符合预期）。
+
+**护栏**：新增 2 个文件（`douban_music_source_test.dart` 7 条 · `douban_music_json_test.dart` 10 条）
++ `source_output_media_type_test.dart` 加一行；同步 `search_sources_test.dart` 的 id 顺序表、
+`source_region_default_test.dart`（新增 audio 三态用例：`douban_music` + `podcastindex` 开、`musicbrainz` 关）。
+
+**四关**：analyze 干净 · **5759 应用**（+18）/ 2385 core / 110 server · RPC 字节一致。
 
 ## 📋 候选（下一步从这里挑）
 

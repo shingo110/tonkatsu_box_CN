@@ -1,4 +1,5 @@
 import 'package:core/models/audio_item.dart';
+import 'package:core/models/audio_track.dart';
 import 'package:core/models/anime.dart';
 import 'package:core/models/book.dart';
 import 'package:core/models/card_link.dart';
@@ -697,15 +698,33 @@ class CollectionActions {
         case MediaType.audio:
           final AudioItem? cached = item.audioItem;
           if (cached == null) return _RefreshOutcome.unsupported();
-          final AudioItem? full = cached.isPodcast
-              ? await ref.read(podcastIndexApiProvider).getPodcast(cached.id)
-              : await ref
-                  .read(musicBrainzApiProvider)
-                  .getReleaseGroup(cached.nativeId);
-          if (full == null) return _RefreshOutcome.notFound();
-          // Overlay so the picked release (label, format, track list totals)
-          // survives; the DAO's preserving upsert backs this up.
-          await db.audioDao.upsertAudioItem(cached.withLookupDetails(full));
+          if (cached.source == DataSource.douban) {
+            // One call answers the record and its track list, and the detail
+            // is complete where the cached row is thin, so it replaces it.
+            final (AudioItem?, List<AudioTrack>) fetched = await ref
+                .read(doubanApiProvider)
+                .getMusicWithTracks(cached.nativeId);
+            final AudioItem? full = fetched.$1;
+            if (full == null) return _RefreshOutcome.notFound();
+            if (fetched.$2.isNotEmpty) {
+              await db.audioDao.replaceAudioTracks(
+                cached.id,
+                cached.source,
+                fetched.$2,
+              );
+            }
+            await db.audioDao.upsertAudioItem(full);
+          } else {
+            final AudioItem? full = cached.isPodcast
+                ? await ref.read(podcastIndexApiProvider).getPodcast(cached.id)
+                : await ref
+                    .read(musicBrainzApiProvider)
+                    .getReleaseGroup(cached.nativeId);
+            if (full == null) return _RefreshOutcome.notFound();
+            // Overlay so the picked release (label, format, track list totals)
+            // survives; the DAO's preserving upsert backs this up.
+            await db.audioDao.upsertAudioItem(cached.withLookupDetails(full));
+          }
         case MediaType.book:
           final Book? cached = item.book;
           if (cached == null) return _RefreshOutcome.unsupported();

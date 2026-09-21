@@ -10,14 +10,21 @@ import 'package:tonkatsu_box/features/settings/providers/settings_provider.dart'
 import 'package:tonkatsu_box/shared/constants/source_catalog.dart';
 
 /// A tab must open on what this network can reach: wherever a domestic
-/// provider exists, the overseas ones start switched off. Comics, games and
-/// audio have no domestic provider, so switching them off there would only
-/// produce a blank tab — an unreachable chip the user can see beats nothing to
-/// see at all.
+/// provider exists, the overseas ones start switched off. Comics and games
+/// have no domestic provider at all, so switching anything off there would
+/// only produce a blank tab — an unreachable chip the user can see beats
+/// nothing to see at all. Audio is the mixed case: its album half has a
+/// domestic provider while its podcast half never will.
 void main() {
-  Future<ProviderContainer> containerFor(String mediaType) async {
+  Future<ProviderContainer> containerFor(
+    String mediaType, {
+    Map<String, Object> extraPrefs = const <String, Object>{},
+  }) async {
     SharedPreferences.setMockInitialValues(
-      <String, Object>{BrowseSettingsKeys.mediaType: mediaType},
+      <String, Object>{
+        BrowseSettingsKeys.mediaType: mediaType,
+        ...extraPrefs,
+      },
     );
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProviderContainer container = ProviderContainer(
@@ -62,6 +69,28 @@ void main() {
 
     // Hiding them would leave the tab with nothing to show at all.
     expect(container.read(browseProvider).disabledSourceIds, isEmpty);
+  });
+
+  test('audio opens on Douban for albums and keeps Podcast Index on', () async {
+    // A configured Podcast Index key, so the keyless rule is not what the
+    // assertion below is measuring — the region rule is.
+    final ProviderContainer container = await containerFor(
+      'audio',
+      extraPrefs: <String, Object>{
+        SettingsKeys.podcastIndexApiKey: 'key',
+        SettingsKeys.podcastIndexApiSecret: 'secret',
+      },
+    );
+
+    // MusicBrainz is what the domestic album catalogue stands in for, so it
+    // starts off. Podcast Index is the only podcast provider there is and has
+    // no domestic substitute, so it stays on — region has nothing to say about
+    // a corner of the type that has no alternative route.
+    expect(activeIds(container), <String>{'douban_music', 'podcastindex'});
+    expect(
+      container.read(browseProvider).disabledSourceIds,
+      <String>{'musicbrainz'},
+    );
   });
 
   test('every source a tab switches off is one that is hosted abroad',

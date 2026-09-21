@@ -18,6 +18,13 @@ const String kDoubanMoviePath = '/api/v2/movie';
 /// `/api/v2/tv/{id}` — a series.
 const String kDoubanTvPath = '/api/v2/tv';
 
+/// `/api/v2/search/music` — albums. Unlike the film pool this one is its own
+/// endpoint and its rows are all `target_type: music`.
+const String kDoubanSearchMusicPath = '/api/v2/search/music';
+
+/// `/api/v2/music/{id}` — an album, and the only record that carries `songs`.
+const String kDoubanMusicPath = '/api/v2/music';
+
 /// Rows the search endpoint answers per call.
 const int kDoubanSearchCount = 20;
 

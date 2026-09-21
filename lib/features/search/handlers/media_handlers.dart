@@ -35,6 +35,7 @@ import '../widgets/fantlab_book_sheet.dart';
 import '../widgets/hardcover_book_sheet.dart';
 import '../widgets/podcast_index_sheet.dart';
 import '../widgets/musicbrainz_album_sheet.dart';
+import '../widgets/douban_music_sheet.dart';
 import '../widgets/google_books_more_by_author_section.dart';
 import '../../../shared/navigation/search_providers.dart';
 import '../helpers/studio_search.dart';
@@ -247,24 +248,33 @@ class MediaHandlers {
       imageUrlOf: (AudioItem a) => a.coverUrl,
       upsert: (AudioItem a) => ref.read(audioDaoProvider).upsertAudioItem(a),
       sourceOf: (AudioItem a) => a.source,
-      sheetBuilder: (AudioItem a, VoidCallback onAdd) => a.isPodcast
-          ? PodcastIndexSheet(podcast: a, onAddToCollection: onAdd)
-          : MusicBrainzAlbumSheet(
-              album: a,
-              onAddToCollection: onAdd,
-              onReleaseChanged: (
-                String mbid,
-                MusicBrainzRelease? release,
-                List<AudioTrack>? tracks,
-              ) =>
-                  pendingAlbumRelease = release == null
-                      ? null
-                      : (albumMbid: mbid, release: release, tracks: tracks),
-            ),
+      sheetBuilder: (AudioItem a, VoidCallback onAdd) {
+        if (a.isPodcast) {
+          return PodcastIndexSheet(podcast: a, onAddToCollection: onAdd);
+        }
+        // A Douban subject is one release, not a group with editions to pick
+        // between, so it gets the plain sheet instead of the MusicBrainz one.
+        if (a.source == DataSource.douban) {
+          return DoubanMusicSheet(album: a, onAddToCollection: onAdd);
+        }
+        return MusicBrainzAlbumSheet(
+          album: a,
+          onAddToCollection: onAdd,
+          onReleaseChanged: (
+            String mbid,
+            MusicBrainzRelease? release,
+            List<AudioTrack>? tracks,
+          ) =>
+              pendingAlbumRelease = release == null
+                  ? null
+                  : (albumMbid: mbid, release: release, tracks: tracks),
+        );
+      },
       // On add: lookup extras plus the track/episode list, cached so the
       // collection tracker works offline.
       enrich: (AudioItem a) {
         if (a.isPodcast) return _enrichPodcast(ref, a);
+        if (a.source == DataSource.douban) return _enrichDoubanMusic(ref, a);
         final _PendingAlbumRelease? pending = pendingAlbumRelease;
         return _enrichAlbum(
           ref,
@@ -401,6 +411,32 @@ Future<AudioItem> _enrichPodcast(WidgetRef ref, AudioItem podcast) async {
     // Cache write is best-effort; the tracker refetches on first open.
   }
   return enriched;
+}
+
+/// The album record and its track list, in the one call Douban serves them
+/// from. Any failure keeps what the search row had.
+Future<AudioItem> _enrichDoubanMusic(WidgetRef ref, AudioItem album) async {
+  try {
+    final (AudioItem?, List<AudioTrack>) fetched = await ref
+        .read(doubanApiProvider)
+        .getMusicWithTracks(album.nativeId);
+    final AudioItem? full = fetched.$1;
+    if (full == null) return album;
+
+    final List<AudioTrack> tracks = fetched.$2;
+    if (tracks.isNotEmpty) {
+      await ref
+          .read(audioDaoProvider)
+          .replaceAudioTracks(album.id, album.source, tracks);
+    }
+    // The detail record is complete where the search row is thin — it adds the
+    // label, the medium, the disc count and the intro — so it replaces the row
+    // instead of overlaying it.
+    return full;
+  } on Exception {
+    // Lookup extras are optional; the search row is already a valid album.
+    return album;
+  }
 }
 
 /// Loads the full-work description for [book] from its provider. Used by the

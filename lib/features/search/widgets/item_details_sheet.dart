@@ -352,6 +352,9 @@ class ItemDetailsSheet extends StatelessWidget {
       editionsSection: editionsSection,
       title: album.title,
       icon: Icons.album,
+      // Only Douban album records carry an intro; MusicBrainz ones leave it
+      // null and the section stays hidden.
+      overview: album.description,
       year: album.releaseYear,
       rating: album.formattedRating,
       genres: album.genres.isNotEmpty ? album.genres : album.tags,

@@ -11,6 +11,7 @@ import 'comicvine_source.dart';
 import 'douban_anime_source.dart';
 import 'douban_book_source.dart';
 import 'douban_movie_source.dart';
+import 'douban_music_source.dart';
 import 'douban_tv_source.dart';
 import 'fantlab_source.dart';
 import 'google_books_source.dart';
@@ -89,6 +90,9 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     // Comics (a books sub-type)
     ComicVineSource(),
     // Audio: albums + podcasts
+    // Douban leads the album half: it is the one album catalogue a mainland
+    // network reaches without a proxy, the same reason it leads books and film.
+    DoubanMusicSource(),
     MusicBrainzAlbumsSource(),
     PodcastIndexSource(),
   ],

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../utils/douban_json.dart';
 import '../utils/html_text.dart';
 import '../utils/json_list.dart';
 import '../utils/stable_id.dart';
@@ -146,6 +147,35 @@ class AudioItem {
       coverUrl: _nonEmpty(json['artwork'] as String?) ??
           _nonEmpty(json['image'] as String?),
       externalUrl: podcastUrl(feedId),
+    );
+  }
+
+  /// From a Douban album — a `/api/v2/search/music` row or a
+  /// `/api/v2/music/{id}` record. Both shapes map here, so the row and the
+  /// refreshed record cannot drift apart; the detail call is the only one that
+  /// carries the track list, the label and the intro.
+  factory AudioItem.fromDouban(Map<String, dynamic> json) {
+    final int id = doubanItemId(json);
+    return AudioItem(
+      id: id,
+      source: DataSource.douban,
+      kind: AudioKind.album,
+      // Douban's subject id is the handle every later lookup needs.
+      nativeId: id.toString(),
+      title: doubanItemTitle(json) ?? 'Unknown',
+      artists: doubanMusicArtists(json),
+      description: doubanItemOverview(json),
+      genres: doubanMusicGenres(json),
+      rating: doubanItemRating(json),
+      ratingCount: doubanRatingCount(json),
+      releaseYear: doubanMusicYear(json),
+      firstReleaseDate: doubanMusicFirstReleaseDate(json),
+      label: doubanMusicLabel(json),
+      format: doubanMusicFormat(json),
+      trackCount: doubanMusicTrackCount(json),
+      discCount: doubanMusicDiscCount(json),
+      coverUrl: doubanItemCoverUrl(json),
+      externalUrl: doubanMusicUrl(json),
     );
   }
 

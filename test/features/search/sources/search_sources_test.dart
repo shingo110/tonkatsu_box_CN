@@ -53,6 +53,7 @@ void main() {
         'googlebooks',
         'hardcover',
         'comicvine',
+        'douban_music',
         'musicbrainz',
         'podcastindex',
       ]);

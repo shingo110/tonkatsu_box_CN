@@ -7,6 +7,7 @@ import 'package:tonkatsu_box/features/search/sources/bangumi_manga_source.dart';
 import 'package:tonkatsu_box/features/search/sources/douban_anime_source.dart';
 import 'package:tonkatsu_box/features/search/sources/douban_book_source.dart';
 import 'package:tonkatsu_box/features/search/sources/douban_movie_source.dart';
+import 'package:tonkatsu_box/features/search/sources/douban_music_source.dart';
 import 'package:tonkatsu_box/features/search/sources/douban_tv_source.dart';
 import 'package:tonkatsu_box/features/search/sources/fantlab_source.dart';
 import 'package:tonkatsu_box/features/search/sources/igdb_games_source.dart';
@@ -96,6 +97,10 @@ void main() {
 
     test('DoubanAnimeSource → MediaType.anime', () {
       expect(DoubanAnimeSource().outputMediaType, MediaType.anime);
+    });
+
+    test('DoubanMusicSource → MediaType.audio', () {
+      expect(DoubanMusicSource().outputMediaType, MediaType.audio);
     });
   });
 }

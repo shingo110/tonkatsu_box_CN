@@ -1137,12 +1137,19 @@ class ImportService {
     final List<AudioItem> result = <AudioItem>[];
     for (final _MediaRef ref in refs) {
       try {
-        // Podcast feed ids are the external id itself; albums resolve by MBID.
+        // Podcast feed ids are the external id itself; Douban mints numeric
+        // subject ids, so its export keeps a usable one too; a MusicBrainz
+        // album resolves by MBID because the fnv hash cannot be reversed.
         final AudioItem? item = ref.source == DataSource.podcastIndex
             ? await _podcastIndexApi?.getPodcast(ref.externalId)
-            : ref.nativeId != null
-                ? await _musicBrainzApi?.getReleaseGroup(ref.nativeId!)
-                : null;
+            : ref.source == DataSource.douban
+                ? (await _doubanApi?.getMusicWithTracks(
+                      ref.externalId.toString(),
+                    ))
+                    ?.$1
+                : ref.nativeId != null
+                    ? await _musicBrainzApi?.getReleaseGroup(ref.nativeId!)
+                    : null;
         if (item != null) result.add(item);
       } on Exception catch (e) {
         _log.warning('Failed to fetch audio item ${ref.externalId}: $e');
