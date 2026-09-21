@@ -8,6 +8,7 @@ import 'anilist_manga_source.dart';
 import 'bangumi_anime_source.dart';
 import 'bangumi_manga_source.dart';
 import 'comicvine_source.dart';
+import 'douban_anime_source.dart';
 import 'douban_book_source.dart';
 import 'douban_movie_source.dart';
 import 'douban_tv_source.dart';
@@ -52,6 +53,9 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     // AniList
     AniListAnimeSource(),
     AniListMangaSource(),
+    // Douban — files animations among its films and series, and is the one
+    // Chinese animation catalogue a mainland network reaches without a proxy.
+    DoubanAnimeSource(),
     // Bangumi — one catalogue behind two subject types, Chinese titles for
     // both. The manga tab sits here rather than at the head of the manga group
     // so it does not displace the browsable AniList as that tab's primary.

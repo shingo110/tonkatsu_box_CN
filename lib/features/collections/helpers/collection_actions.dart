@@ -650,6 +650,10 @@ class CollectionActions {
               anime = await ref
                   .read(kitsuApiProvider)
                   .getAnimeById(item.externalId);
+            case DataSource.douban:
+              anime = await ref
+                  .read(doubanApiProvider)
+                  .getAnimeById(item.externalId.toString());
             default:
               anime = await ref
                   .read(aniListApiProvider)

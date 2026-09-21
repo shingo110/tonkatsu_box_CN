@@ -1,3 +1,4 @@
+import 'package:core/models/anime.dart';
 import 'package:core/models/book.dart';
 import 'package:core/models/movie.dart';
 import 'package:core/models/tv_show.dart';
@@ -98,6 +99,19 @@ class DoubanApi {
     return _search.searchTvShows(query: query, page: page);
   }
 
+  /// One page of animations out of that same pool, selected by genre.
+  Future<(List<Anime>, bool, int)> searchAnime({
+    required String query,
+    int page = 1,
+  }) {
+    if (!_canRequest) {
+      return Future<(List<Anime>, bool, int)>.value(
+        (const <Anime>[], false, 0),
+      );
+    }
+    return _search.searchAnime(query: query, page: page);
+  }
+
   /// The full record behind a cached film row.
   Future<Movie?> getMovie(String subjectId) =>
       _canRequest ? _search.getMovie(subjectId) : Future<Movie?>.value();
@@ -105,6 +119,11 @@ class DoubanApi {
   /// The full record behind a cached series row.
   Future<TvShow?> getTvShow(String subjectId) =>
       _canRequest ? _search.getTvShow(subjectId) : Future<TvShow?>.value();
+
+  /// The full record behind a cached animation row. An id alone does not say
+  /// whether Douban filed it as a film or a series, so both paths are tried.
+  Future<Anime?> getAnimeById(String subjectId) =>
+      _canRequest ? _search.getAnime(subjectId) : Future<Anime?>.value();
 
   /// True when the stored pair signs a request Frodo accepts.
   Future<bool> validateCredentials() async {

@@ -23,27 +23,33 @@ int doubanItemId(Map<String, dynamic> json) {
 /// Chinese title. Douban answers in Chinese, so this is the display name.
 String? doubanItemTitle(Map<String, dynamic> json) => _nonEmpty(json['title']);
 
-/// Original title. `original_title` came back empty on every record sampled,
-/// but `aka` holds the English name ("The Wandering Earth"), so the first
-/// Latin-script alias is used when it is not just the title repeated.
-String? doubanItemOriginalTitle(Map<String, dynamic> json) {
-  final String? direct = _nonEmpty(json['original_title']);
-  if (direct != null) return direct;
+/// Native title. Douban leaves this empty on its Chinese film records but
+/// fills it with the Japanese name on an animation, so this is the only place
+/// an anime's original title can come from.
+String? doubanItemNativeTitle(Map<String, dynamic> json) =>
+    _nonEmpty(json['original_title']);
 
+/// The first Latin-script alias in `aka` — Douban's English spelling. A Chinese
+/// alias can still carry Latin letters ("流浪地球2(3D版)"), so an alias with Han
+/// characters is not an English title and is skipped.
+String? doubanItemAliasTitle(Map<String, dynamic> json) {
   final Object? aka = json['aka'];
   if (aka is! List<dynamic>) return null;
   final String? title = doubanItemTitle(json);
   for (final Object? entry in aka) {
     final String? value = _nonEmpty(entry);
     if (value == null || value == title) continue;
-    // A Chinese alias can still carry Latin letters ("流浪地球2(3D版)"), so
-    // only an alias free of Han characters counts as the original title.
     if (!RegExp('[A-Za-z]').hasMatch(value)) continue;
     if (RegExp(r'[\u4e00-\u9fff]').hasMatch(value)) continue;
     return value;
   }
   return null;
 }
+
+/// Original title: the field Douban states when it has one, the Latin alias
+/// otherwise.
+String? doubanItemOriginalTitle(Map<String, dynamic> json) =>
+    doubanItemNativeTitle(json) ?? doubanItemAliasTitle(json);
 
 /// Poster. Full records prefer `pic.large`; search rows only carry `cover_url`.
 String? doubanItemCoverUrl(Map<String, dynamic> json) {
@@ -140,6 +146,34 @@ int? doubanEpisodeCount(Map<String, dynamic> json) {
   final int value = raw.toInt();
   return value > 0 ? value : null;
 }
+
+/// Votes behind the score. Douban counts ratings rather than list adds, which
+/// is the nearest thing it offers to a popularity figure.
+int? doubanRatingCount(Map<String, dynamic> json) {
+  final Object? raw = json['rating'];
+  if (raw is! Map<String, dynamic>) return null;
+  final Object? count = raw['count'];
+  if (count is! num || count <= 0) return null;
+  return count.toInt();
+}
+
+/// Whether a record is a film or a series. A full record states it in `type`;
+/// a search row's thin `target` only spells it out in its `douban:///tv/{id}`
+/// uri, so both shapes are read.
+String? doubanSubjectKind(Map<String, dynamic> json) {
+  final String? type = _nonEmpty(json['type']) ?? _nonEmpty(json['subtype']);
+  if (type == 'movie' || type == 'tv') return type;
+  final String? uri = _nonEmpty(json['uri']);
+  if (uri == null) return null;
+  if (uri.contains('/tv/')) return 'tv';
+  if (uri.contains('/movie/')) return 'movie';
+  return null;
+}
+
+/// An animation. Douban files them among films and series rather than under a
+/// subject type of their own, so the genre list is the only marker.
+bool doubanIsAnimation(Map<String, dynamic> json) =>
+    doubanItemGenres(json).contains('动画');
 
 /// Public page. Records carry a `douban://douban.com/...` uri rather than an
 /// https link, so the address is rebuilt from the id.

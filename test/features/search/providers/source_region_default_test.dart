@@ -9,10 +9,11 @@ import 'package:tonkatsu_box/features/search/sources/search_sources.dart';
 import 'package:tonkatsu_box/features/settings/providers/settings_provider.dart';
 import 'package:tonkatsu_box/shared/constants/source_catalog.dart';
 
-/// A tab must open on what this network can reach. Books, films and TV have a
-/// domestic provider, so the overseas ones start switched off; anime, comics,
-/// games and audio have none, so switching them off would only produce a blank
-/// tab — an unreachable chip the user can see beats nothing to see.
+/// A tab must open on what this network can reach: wherever a domestic
+/// provider exists, the overseas ones start switched off. Comics, games and
+/// audio have no domestic provider, so switching them off there would only
+/// produce a blank tab — an unreachable chip the user can see beats nothing to
+/// see at all.
 void main() {
   Future<ProviderContainer> containerFor(String mediaType) async {
     SharedPreferences.setMockInitialValues(
@@ -46,6 +47,23 @@ void main() {
     expect(activeIds(container), <String>{'douban_movie'});
   });
 
+  test('anime opens on Douban, the only domestic provider', () async {
+    final ProviderContainer container = await containerFor('anime');
+
+    expect(activeIds(container), <String>{'douban_anime'});
+    expect(
+      container.read(browseProvider).disabledSourceIds,
+      <String>{'anilist_anime', 'bangumi_anime', 'kitsu_anime'},
+    );
+  });
+
+  test('manga has no domestic provider, so nothing is switched off', () async {
+    final ProviderContainer container = await containerFor('manga');
+
+    // Hiding them would leave the tab with nothing to show at all.
+    expect(container.read(browseProvider).disabledSourceIds, isEmpty);
+  });
+
   test('every source a tab switches off is one that is hosted abroad',
       () async {
     final ProviderContainer container = await containerFor('book');
@@ -60,16 +78,8 @@ void main() {
     }
   });
 
-  test('anime has no domestic provider, so nothing is switched off', () async {
-    final ProviderContainer container = await containerFor('anime');
-
-    // Hiding them would leave 0 of 3 active — an empty tab explains nothing.
-    expect(container.read(browseProvider).disabledSourceIds, isEmpty);
-    expect(activeIds(container), hasLength(3));
-  });
-
   test('switching media type re-applies the rule', () async {
-    final ProviderContainer container = await containerFor('anime');
+    final ProviderContainer container = await containerFor('manga');
     final BrowseNotifier notifier = container.read(browseProvider.notifier);
 
     notifier.setMediaType(MediaType.book);

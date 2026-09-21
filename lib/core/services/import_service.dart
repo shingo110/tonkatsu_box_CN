@@ -1293,6 +1293,9 @@ class ImportService {
         // on AniList here; the collection refresh already handled it.
         case DataSource.bangumi:
           return await _bangumiApi?.getAnimeById(ref.externalId);
+        case DataSource.douban:
+          // Douban mints decimal subject ids, so the export keeps a usable one.
+          return await _doubanApi?.getAnimeById(ref.externalId.toString());
         case DataSource.kitsu:
           return await _kitsuApi?.getAnimeById(ref.externalId);
         default:

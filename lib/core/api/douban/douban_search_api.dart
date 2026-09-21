@@ -1,13 +1,15 @@
 import 'package:core/api/douban_constants.dart';
+import 'package:core/models/anime.dart';
 import 'package:core/models/book.dart';
 import 'package:core/models/movie.dart';
 import 'package:core/models/tv_show.dart';
+import 'package:core/utils/douban_json.dart';
 import 'package:dio/dio.dart';
 
 import 'douban_http_client.dart';
 import 'douban_types.dart';
 
-/// The signed Frodo book endpoints. A search row already carries title, cover,
+/// The signed Frodo endpoints. A search row already carries title, cover,
 /// rating and an "author / year / publisher" line; the by-id and by-ISBN
 /// records add the full intro, page count and, for the ISBN path, the ISBN.
 class DoubanSearchApi {
@@ -97,6 +99,24 @@ class DoubanSearchApi {
     );
   }
 
+  /// One page of animations. Douban has no animation subject type: an animated
+  /// series is an ordinary series and an animated film an ordinary film, so the
+  /// genre list — not the target type — is what selects them.
+  Future<(List<Anime>, bool, int)> searchAnime({
+    required String query,
+    int page = 1,
+    int perPage = kDoubanSearchCount,
+  }) {
+    return _searchSubjects<Anime>(
+      query: query,
+      page: page,
+      perPage: perPage,
+      targetType: null,
+      accept: doubanIsAnimation,
+      parse: Anime.fromDouban,
+    );
+  }
+
   /// A full film record. Only a film id resolves here; a series id has to go
   /// through [getTvShow] or Douban answers 996.
   Future<Movie?> getMovie(String subjectId) async {
@@ -120,12 +140,38 @@ class DoubanSearchApi {
     }
   }
 
+  /// A full animation record. Douban files a series under `/tv` and a film
+  /// under `/movie`, and an id alone does not say which, so the series path is
+  /// tried first and the film path only once it answers nothing.
+  Future<Anime?> getAnime(String subjectId) async {
+    final Anime? asSeries =
+        await _getAnimeOrNull('$kDoubanTvPath/$subjectId');
+    if (asSeries != null) return asSeries;
+    return _getAnimeOrNull('$kDoubanMoviePath/$subjectId');
+  }
+
+  Future<Anime?> _getAnimeOrNull(String path) async {
+    try {
+      final Response<dynamic> response = await _client.get(path);
+      return _parseSubject<Anime>(response.data, Anime.fromDouban);
+    } on DioException catch (e) {
+      // A 404 is the host saying "no such subject of this kind", which is the
+      // signal to try the other one; anything else is a failure worth raising.
+      if (e.response?.statusCode == 404) return null;
+      throw _client.handleDioException(
+        e,
+        'Failed to load the Douban animation',
+      );
+    }
+  }
+
   Future<(List<T>, bool, int)> _searchSubjects<T>({
     required String query,
     required int page,
     required int perPage,
-    required String targetType,
+    required String? targetType,
     required T Function(Map<String, dynamic> json) parse,
+    bool Function(Map<String, dynamic> target)? accept,
   }) async {
     final int start = (page - 1) * perPage;
     try {
@@ -143,6 +189,7 @@ class DoubanSearchApi {
         perPage: perPage,
         targetType: targetType,
         parse: parse,
+        accept: accept,
       );
     } on DioException catch (e) {
       throw _client.handleDioException(e, 'Douban search failed');
@@ -153,8 +200,9 @@ class DoubanSearchApi {
     Object? data, {
     required int start,
     required int perPage,
-    required String targetType,
+    required String? targetType,
     required T Function(Map<String, dynamic> json) parse,
+    bool Function(Map<String, dynamic> target)? accept,
   }) {
     if (data is! Map<String, dynamic>) return (<T>[], false, 0);
     final Object? items = data['items'];
@@ -163,9 +211,10 @@ class DoubanSearchApi {
     final List<T> kept = <T>[];
     for (final Map<String, dynamic> item
         in items.whereType<Map<String, dynamic>>()) {
-      if (item['target_type'] != targetType) continue;
+      if (targetType != null && item['target_type'] != targetType) continue;
       final Object? target = item['target'];
       if (target is! Map<String, dynamic>) continue;
+      if (accept != null && !accept(target)) continue;
       try {
         kept.add(parse(target));
       } on FormatException {

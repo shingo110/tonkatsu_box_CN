@@ -395,8 +395,9 @@ void main() {
 
       final BrowseState state = container.read(browseProvider);
       expect(state.mediaType, MediaType.anime);
-      // Every source of the type comes on — that is the point of the migration.
-      expect(state.activeSources, hasLength(3));
+      // The legacy id only picks the tab; which of its sources come on is then
+      // the region rule's business, and anime opens on Douban alone.
+      expect(state.activeSources, hasLength(1));
     });
 
     test('setMediaType keeps the typed query but drops filters', () async {

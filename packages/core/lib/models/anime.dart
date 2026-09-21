@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'data_source.dart';
 import '../utils/anime_manga_title_language.dart';
 import '../utils/bangumi_json.dart';
+import '../utils/douban_json.dart';
 import '../utils/kitsu_status.dart';
 
 /// Anime metadata. Cache identity is the pair `(id, source)`.
@@ -203,6 +204,35 @@ class Anime {
       tags: bangumiTagNames(json['tags']),
       studios: bangumiAnimeStudios(bangumiInfobox(json['infobox'])),
       externalUrl: 'https://bgm.tv/subject/$id',
+      updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    );
+  }
+
+  /// Douban search row / subject record. Douban answers in Chinese, so that
+  /// name takes [title] and the Latin alias in `aka` becomes [titleEnglish].
+  /// Its score is 0–10 where this model wants 0–100.
+  factory Anime.fromDouban(Map<String, dynamic> json) {
+    final int id = doubanItemId(json);
+    final double? score = doubanItemRating(json);
+    final List<String> genres = doubanItemGenres(json);
+    final String? kind = doubanSubjectKind(json);
+
+    return Anime(
+      id: id,
+      source: DataSource.douban,
+      title: doubanItemTitle(json) ?? 'Unknown',
+      titleEnglish: doubanItemAliasTitle(json),
+      titleNative: doubanItemNativeTitle(json),
+      description: doubanItemOverview(json),
+      coverUrl: doubanItemCoverUrl(json),
+      averageScore: score == null ? null : (score * 10).round(),
+      popularity: doubanRatingCount(json),
+      startYear: doubanItemYear(json),
+      episodes: doubanEpisodeCount(json),
+      duration: doubanRuntimeMinutes(json),
+      format: kind == null ? null : (kind == 'tv' ? 'TV' : 'MOVIE'),
+      genres: genres.isEmpty ? null : genres,
+      externalUrl: doubanItemUrl(json),
       updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     );
   }

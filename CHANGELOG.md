@@ -12,6 +12,36 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — the anime tab now opens on a Chinese catalogue a mainland network reaches
+
+The region work left one hole it could not close by reordering providers: no
+mainland catalogue carried anime at all, so that tab could only ever open on
+hosts abroad. Douban turned out to hold the data already — it simply files
+animations among its films and series rather than under a subject type of its
+own, which is why an earlier sweep missed them.
+
+- `DoubanAnimeSource` (`lib/features/search/sources/douban_anime_source.dart`),
+  id `douban_anime`, reusing `DataSource.douban`: one account already covers the
+  catalogue, so this needed no new enum value, no icon branch, no key screen and
+  no translation key.
+- `DoubanSearchApi.searchAnime` reads the shared `/search/movie` pool and keeps
+  the rows whose genre list holds `动画`; `getAnime` tries `/tv/{id}` and then
+  `/movie/{id}`, because an id alone does not say which Douban filed it under.
+- `doubanIsAnimation`, `doubanSubjectKind` and `doubanRatingCount`
+  (`packages/core/lib/utils/douban_json.dart`). A search row is thin — no
+  `intro`, no `episodes_count`, genres only inside `card_subtitle` — while
+  `/api/v2/tv/{id}` answers with the full record, so both shapes are read.
+- `Anime.fromDouban` (`packages/core/lib/models/anime.dart`): the Chinese name
+  takes `title`, Douban's 0–10 score is scaled to the model's 0–100, `format`
+  comes from the record kind, and the Latin alias in `aka` is filed as
+  `titleEnglish` rather than as a native title.
+- `source_catalog.dart` lists `MediaType.anime` for `DataSource.douban`, so the
+  region rule now opens the anime tab on it. AniList, Bangumi and Kitsu start
+  switched off there and stay one tap away.
+- Guards: `douban_anime_source_test.dart`, `douban_anime_json_test.dart` and a
+  row in `source_output_media_type_test.dart`; `source_region_default_test.dart`
+  now pins the anime tab the way it pins books and films.
+
 ## [cn] Added — a region dimension, and a check that separates reachability from failure
 
 The fork exists so a mainland network can scrape Chinese metadata, yet the

@@ -165,6 +165,7 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
       MediaType.book,
       MediaType.movie,
       MediaType.tvShow,
+      MediaType.anime,
     ],
     url: 'https://www.douban.com/',
     apiHost: 'frodo.douban.com',

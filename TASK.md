@@ -395,6 +395,68 @@ NeoDB 之后**。图书更惨：8 个图书源**全部** `supportsBrowse => fals
 
 **四关**：analyze 干净 · **5722 应用**（+15）/ 2380 core / 110 server · RPC 字节一致 · **Web 构建通过**。
 
+### D16 · 豆瓣动画源（2026-09-21，起源：少爷「我要的就是纯粹的不用梯子就能刮削到所有内容，并且是中文数据」）
+
+少爷否掉了 T6（网络代理输入框）——**「需要在手机上开代理才能用，就跟我没改造它没有太大区别」**。
+判据因此只剩一条：**不挂代理，默认路径就得出中文**。D15 接住了图书 / 电影 / 剧集，
+**动画与漫画是剩下两个洞**（两者此前的中文元数据全押在 Bangumi 一家，而它对少爷的网络不可达）。
+
+**选型实证（先探测、后写码）**：
+
+- **豆瓣没有「动画」条目类型** —— 动画剧集就是剧集、动画电影就是电影，**唯一标记是题材里的「动画」**。
+  实测 `/api/v2/search/movie` 混合池里 `[tv] 孤独摇滚！`（35366293）、`[tv] 咒术回战 第三季`（36714178）都在；
+  `/api/v2/tv/{id}` 详情 **73 字段**，含 `episodes_count` / `intro` / `genres` / `rating`（0–10）
+  —— **数据比 Bangumi 还全**。⇒ **不必另找源，也不必背 bangumi-data 那 1.45MB 快照与 CC-BY 署名义务。**
+- `/api/v2/search/music` **也是通的**（200 / 中文专辑名 / `rating` 0–10 / `genres` / `pubdate` / `intro` / `discs`）
+  ⇒ 音乐线可照此另开一源（**D17 首选**）。`/api/v2/search/game` **404**（豆瓣无游戏入口）。
+- **漫画中文有零成本解法（未落地）**：**MangaDex 原生支持中文标题检索** —— `?title=进击的巨人` 命中
+  "Attack on Titan"，`altTitles` 带 `{'zh': '进击的巨人'}`；而 MangaDex **在少爷网络下本来就连得通**。
+  即「修既有源」而非「加新源」。
+- 候选替代源归属复核（`probe/audit_candidates.py`，DNS + ASN）：境内 = 豆瓣 / 微信读书 /
+  `registry.npmmirror.com` / `www.ximalaya.com`（播客候选）/ `www.taptap.cn`（游戏候选）/ `api.bilibili.com`。
+  **`api.mangabaka.dev` 已官方下线**（500 "deprecated and no longer serves traffic"）；项目用的是 `.org`，不受影响。
+- ⚠️ **`本机通 ≠ 手机通`**：本机 ping 境外站只有 1–28ms，是 **TUN 代理**造成的假象。判据只能看 **DNS 归属**。
+- ⚠️ **阻断是域名级的**，不是整段封锁：同为 Cloudflare，AniList / Kitsu 可达，Bangumi / NeoDB 不可达。
+
+**落地**（`lib/features/search/sources/douban_anime_source.dart`，id `douban_anime`）：
+
+- **复用 `DataSource.douban`** ⇒ **零新枚举值 / 零图标分支 / 零密钥界面 / 零新 l10n 键**
+  （沿用 `l.mediaTypeAnime` / `l.searchHintAnime`）；`source_badge_test` 的枚举计数、
+  `source_catalog_test` 的密钥集合、`welcome_step_sources_test` 的输入框数**全都不动**。
+  缓存身份也不撞车：非 game/manga 的唯一索引是 `(collection_id, media_type, external_id)`，**`media_type` 在内**。
+- `DoubanSearchApi.searchAnime` 复用 `_searchSubjects<T>`（`targetType` 改**可空** + 新增 **`accept` 谓词**），
+  **不复制客户端**。`getAnime` **先 `/tv/{id}` 再 `/movie/{id}`** —— 豆瓣按 id 分不出电影还是剧集；
+  **只把 404 当「不是这一类」继续试**，401 / 403 照抛（密钥问题或封禁，再打只是多烧一次配额）。
+- `Anime.fromDouban`：`title` = 中文名；`titleNative` = `original_title`（**动画记录里豆瓣确实给了日文名**
+  —— 实测 `孤独摇滚！` → `ぼっち・ざ・ろっく！` —— 但中文电影记录恒为空，不能假设它有）；
+  `titleEnglish` = `aka` 里第一个**不含汉字**的别名。**两者必须分开取**：影视那套
+  `doubanItemOriginalTitle`（「`original_title` 优先、`aka` 兜底」）会把**日文名当成英文名**，
+  故另加 `doubanItemNativeTitle` / `doubanItemAliasTitle` 两个 helper。
+  `averageScore` = `rating.value ×10 round()`（0–10 → 0–100）、`format` 由 `type`/`subtype`（详情）
+  或 `uri` 的 `/tv/`、`/movie/`（搜索行）判 `TV` / `MOVIE`、`popularity` = `rating.count`、
+  `episodes` = `episodes_count`、`duration` = `durations[0]` 抽数字、
+  `externalUrl` = `movie.douban.com/subject/{id}`。**搜索行没有 `intro` / `episodes_count`**，刷新后才补全。
+- **活体实测**（2026-09-21，真接口喂真解析器）：搜「孤独摇滚」→ 5 条全中文，评分 90 / 82 / 84，
+  `format` 正确分出 TV 与 MOVIE；详情 `/tv/35366293` → `episodes=12`、`duration=24`、
+  `score=90`、中文 `intro` 完整；`/movie/1291561`（千与千寻）→ `format=MOVIE`、`duration=125`。
+
+**连带必改 3 处（都不报编译错）**：`collection_actions` 的动画刷新 `switch` 加 `DataSource.douban` 臂
+（漏了豆瓣 id 会被送去 AniList）· `import_service._fetchOneAnime` 加臂（`.xcoll` 降级导入）·
+`source_catalog` 的 `mediaTypes` 补 `MediaType.anime`（漏了 region 规则不认，动画页默认仍全境外）。
+`anime_similars_section` 的 `_ => null` 天然覆盖。
+
+**⚠️ 行为变化（必须记住）**：D15 规则是「该类型有境内源 ⇒ 境外源默认关」，所以动画页**默认只开
+`douban_anime`**，AniList / Kitsu / Bangumi 默认关。代价是**动画页打开时是空的**（豆瓣不浏览），
+与图书 / 影视同构 —— 输入中文关键词即出结果；想要英文浏览，点一下 AniList 芯片即可。
+搜索是**并发打所有开启源并做并集**，所以中文查询由豆瓣命中即可，不必抢主源。
+
+**护栏**：新增 2 个文件（`douban_anime_source_test.dart` 6 条 · `douban_anime_json_test.dart` 10 条）
++ `source_output_media_type_test.dart` 加一行；同步 `search_sources_test.dart` 的 id 顺序表、
+`source_region_default_test.dart`（动画改为只留 `douban_anime`，并把「漫画无境内源」作为新的全开用例）、
+`browse_provider_test.dart` 的 pre-0.41 迁移用例（`hasLength(3)` → `1`）。
+
+**四关**：analyze 干净 · **5741 应用**（+19）/ 2380 core / 110 server · RPC 字节一致。
+
 ## 📋 候选（下一步从这里挑）
 
 > 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > Bangumi 漫画 ✅ > 优酷/爱奇艺**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
@@ -484,6 +546,35 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
   越好」，所以先做**全局开关**即可。
 - **D15 已交付度量的那一半**：设置页 → 数据源 → 「网络连通性自检」可**逐个源实测**当前网络能通到谁。
   配上 D15 的 `region` 标注，用户已能自己判断该开哪些源；T6 补的是「开完之后怎么让它通」。
+
+#### T6 合规评估（2026-09-21，结论：**只做「通用网络设置」形态，不做统一出口**）
+
+先把混称的「B」拆成三件性质不同的事：
+
+| 形态 | 架构 | 定性 | 结论 |
+|------|------|------|------|
+| ① 应用内代理设置（本条 T6） | App 只给「`http://host:port`」输入框，出口由用户自备 | 通用网络客户端能力，同浏览器代理设置 | ✅ **可做**，但见下方四条红线 |
+| ② OS 层 TUN | 用户自行挂 Clash 等，App 零介入 | App 不参与 | ✅ 无风险 |
+| ③ 「统一出口」（自有 server 转发全部请求） | 用户 → 本机/自有服务器 → 境外 API | 见下 | ❌ **不做** |
+
+**现行有效依据**（均已核实）：
+
+- 《计算机信息网络国际联网管理暂行规定》**2024-03-10 第二次修订、2024-05-01 施行**：第六条「任何单位和个人不得自行建立或者使用其他信道进行国际联网」；第十四条 → 责令停止联网 + 警告 + **1.5 万元以下**罚款。**该条不区分自用 / 经营、不要求牟利。**
+- 工信部《关于清理规范互联网网络接入服务市场的通知》（信管函〔2017〕32 号）：未经批准不得自行建立或租用专线（含 VPN）等信道**开展跨境经营活动**——此处限定语是「经营」。
+- 《网络安全法》**2025-10-28 修正、2026-01-01 施行**：罚则分层提额（网络运营者最高 **1000 万**、直接责任人最高 **100 万**），并**新增「关闭网站或者应用程序」**这一处罚手段——即 **App 本身可成为处罚对象**。
+- 《网络数据安全管理条例》（国务院令 790 号，**2025-01-01 施行**）第八条第二款：不得为非法网络数据处理活动提供**互联网接入、服务器托管、网络存储、通讯传输**等技术支持——「托管服务器替他人转发」正落在被点名行为里。
+
+**③「统一出口」为何不做**：它把合规风险从「用户的网络环境」搬到了**「你的服务器 + 你的发布行为」**——而这恰是监管能直接触及的两端。变体差异：
+
+- 服务器在**境外** ⇒ 境内用户流量经境外中转，属第六条「使用其他信道」；一旦对外提供，还可能落入 32 号文的「未经批准开展跨境经营」。
+- 服务器在**境内** ⇒ 手机→服务器这一跳合法，但整机实质成为「跨境访问通道」，且**大陆云厂商 ToS 明确禁止搭建代理 / 加速，风控识别即停机封号**（这条几乎必然先于任何执法发生）。
+- **自用 vs 发布是两个档次**：MIT 开源 + APK 分发会使「提供工具」情节显著加重（《刑法》285 条三款 / 非法经营罪的实务落点均在此）。**"我只是刮个番剧元数据"不构成豁免**——监管口径看的是「是否使用了非法定信道」，不是内容是否敏感。
+
+**①形态要守的四条红线**（守住则同浏览器代理设置性质）：
+
+1. 不内置任何节点 / 服务器地址；2. 不提供订阅链接、不做「一键连通」；3. 文案中立——叫「网络代理」，不出现「加速 / 科学上网 / 绕过限制」暗示；4. 不做"只让境外 host 走代理"的自动分流规则（那等于替用户做规避决策）。
+
+**若 T6 后续要做，验收入口**：设置页新增「网络代理」项 → 写入 `createApiDio` 的 `IOHttpClientAdapter.findProxy` → 留空等于直连 → 与 D15 的连通性自检联动（填了代理后境外源是否转为 `Reached`）。
 
 ## 🔧 阻塞与长期债
 

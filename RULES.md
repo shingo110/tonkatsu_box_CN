@@ -67,8 +67,8 @@
 - `test/shared/constants/source_catalog_region_test.dart` —— **钉死「境内源恰好是豆瓣 + 微信读书」**，
   并要求每行都有非空且**唯一**的 `apiHost`（D15 加）。新源没分类、或分类写反，即红。
 - `test/features/search/providers/source_region_default_test.dart` —— 钉死**默认开启集合**：有境内源的
-  类型只留境内源（书 = `douban` + `weread`，影 = `douban_movie`），无境内源的类型一个也不关
-  （动画 3 个全开）。动了 `_initiallyDisabledSourceIds` 的规则即红。
+  类型只留境内源（书 = `douban` + `weread`，影 = `douban_movie`，动画 = `douban_anime`），
+  无境内源的类型一个也不关（漫画 / 游戏 / 音乐 / 播客）。动了 `_initiallyDisabledSourceIds` 的规则即红。
 - RPC 一致性（见 R7，无幸免）
 
 ## 四、Windows 环境坑（全部伪装成"项目坏了"）
