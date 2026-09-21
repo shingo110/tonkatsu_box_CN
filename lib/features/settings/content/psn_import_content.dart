@@ -334,7 +334,10 @@ class _PsnImportContentState extends ConsumerState<PsnImportContent> {
       final PsnAuthTokens tokens = await authorize(api);
       await _rememberToken(tokens);
 
-      final List<PsnPurchasedGame> games = await api.fetchPurchasedGames(
+      // Both halves of the library, not just the purchases: a title played
+      // from the PlayStation Plus catalogue was never bought, and would
+      // otherwise never appear here.
+      final List<String> names = await api.fetchLibraryNames(
         accessToken: tokens.accessToken,
         onPage: (int fetched) {
           if (mounted) setState(() => _fetched = fetched);
@@ -342,9 +345,6 @@ class _PsnImportContentState extends ConsumerState<PsnImportContent> {
       );
 
       if (!mounted) return;
-      final List<String> names = <String>[
-        for (final PsnPurchasedGame game in games) game.name,
-      ];
       if (names.isEmpty) {
         setState(() {
           _busy = false;

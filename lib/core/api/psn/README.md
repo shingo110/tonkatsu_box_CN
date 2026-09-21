@@ -36,6 +36,31 @@ per-device.
 The response is paged with `size`/`start` and has no total count, so the walk
 stops on the first short page, bounded by `kPsnPurchasedMaxPages`.
 
+## The library is two lists, not one
+
+Purchases are half of it. A title played from the PlayStation Plus catalogue was
+never bought, so `getPurchasedGameList` cannot know it exists — a subscriber who
+finished such a game and earned its platinum trophy would not find it in the
+import. The play history is the other half:
+
+| | request | note |
+|---|---|---|
+| bought | `web.np.playstation.com/api/graphql/v1/op`, persisted `getPurchasedGameList` | GraphQL, sha256-pinned |
+| played | `m.np.playstation.com/api/gamelist/v2/users/me/titles` | REST, `limit`/`offset`/`categories` |
+
+The play history is read over REST rather than as the matching
+`getUserGameList` persisted query on the store's own host, because only the REST
+endpoint returns `localizedName` *and* supports real `offset` paging. It is also
+a third Sony domain, hence `ProxyTarget.psnme`.
+
+`PsnApi.fetchLibraryNames` merges the two, purchases first, de-duplicated by
+name. They are read **independently on purpose**: different hosts, different
+privacy surfaces, so one failing must not cost the user the other half. Only a
+run that produced no name at all is reported as an error.
+
+Trophies are deliberately not a third source: `trophyTitles` holds only titles
+played far enough to earn something, which the play history already covers.
+
 ### The `content-type` header is load-bearing, not cosmetic
 
 Sony's GraphQL host sits behind Apollo's CSRF prevention. A request that carries

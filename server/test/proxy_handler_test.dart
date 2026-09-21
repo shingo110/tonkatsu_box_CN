@@ -237,6 +237,30 @@ void main() {
       expect(sent.url.queryParameters['operationName'], 'getPurchasedGameList');
     });
 
+    test('should move a PSN access token for the play history host too', () async {
+      // A third Sony domain, so a third target: the same token has to be
+      // lifted off the URL for this one as well, or a web build would send the
+      // JWT to Sony in a query string.
+      final Handler handler = handlerWith(<String, String>{});
+
+      final Response response = await get(
+        handler,
+        '/proxy/psnme/api/gamelist/v2/users/me/titles'
+        '?limit=100&access_token=a-jwt',
+      );
+
+      expect(response.statusCode, HttpStatus.ok);
+      final ({String method, Uri url, Map<String, String> headers, String body})
+          sent = upstream.sent.single;
+      expect(sent.url.host, 'm.np.playstation.com');
+      expect(sent.headers[HttpHeaders.authorizationHeader], 'Bearer a-jwt');
+      expect(
+        sent.url.queryParameters.containsKey(kPsnAccessTokenParam),
+        isFalse,
+      );
+      expect(sent.url.queryParameters['limit'], '100');
+    });
+
     test('should add the TMDB key as a query parameter', () async {
       final Handler handler =
           handlerWith(<String, String>{CredentialNames.tmdb: 'tmdb-secret'});

@@ -492,6 +492,25 @@ PSN 只剩社区逆向出来的这一套：**NPSSO cookie → code → token**�
 不删，密码级的 NPSSO 就跟着 URL 进了索尼的访问日志。桌面/手机直连，走真实 header，
 同一个客户端代码里只多一个 `kIsWebBuild` 分支。
 
+**「库」= 已购 ∪ 玩过（D24 修正，别只看已购）**：`getPurchasedGameList` 只认**购买**，
+而 **PS+ 订阅目录里玩的游戏永远不在里面** —— 用户玩通、甚至拿了白金，导入列表里照样没有它（真机实测）。
+所以已购之后必须再拉一次**游玩历史**：
+
+| 来源 | 请求 | 关键点 |
+|---|---|---|
+| 已购 | `web.np.playstation.com/api/graphql/v1/op`，persisted `getPurchasedGameList` | 见上文 |
+| 玩过 | `m.np.playstation.com/api/gamelist/v2/users/me/titles?limit&offset&categories=ps4_game,ps5_native_game` | **REST**，`offset` 真分页，每页 100 |
+
+- **为什么不用同宿主的 `getUserGameList`**（persisted query，hash `e780a6d8b921ef0c59ec01ea5c5255671272ca0d819edb61320914cf7a78b3ae`，已活体验证有效）：
+  它只吃 `limit` **没有 `offset`**，而且**不返回 `localizedName`** —— 而 REST 那条两样都有。
+  第二个名字 = 另一条语言赛道上的匹配机会，对中文库尤其值钱。
+- **第三个宿主 ⇒ 第三个 `ProxyTarget`**（`psnme`）。照七之十七「一 host 一个常量」办，
+  `_authorize` 里与 `psnweb` 一样把 `access_token` 从 query 搬进 Bearer 头并删掉。
+- **两半必须独立失败**：不同宿主、不同隐私面，任一半挂掉**不许拖垮另一半**；
+  只有当两边都没拿到任何名字时才把错误抛出。落点是 `PsnApi.fetchLibraryNames`。
+  **「返回一半」比「干净地失败」对用户有用得多。**
+- **仍未采纳**：`trophyTitles`（只含**拿过奖杯**的，玩过但没奖杯的会漏）—— 游玩历史是它的超集。
+
 **别给它写 `ImportSource`**：`ImportSource` 的语义是「名字 → **目录条目**」，而 PSN 只给**裸名字**
 （与粘贴名单同构）。所以 PSN 止步于 `List<String>`，交给 `GameNameListImportContent(initialNames:)` ——
 **匹配、阈值、预览、入库全部复用同一套实现**（即 七之十八 那套）。

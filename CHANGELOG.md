@@ -12,6 +12,37 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — PlayStation Plus titles were missing from the import
+
+Signing in worked but the library was short: games played from the PlayStation
+Plus catalogue never appeared, including one the account had finished and taken
+the platinum trophy in. The reason is that the import read only
+`getPurchasedGameList` — a *purchase* list — and a title played from a
+subscription was never purchased, so no purchase list can contain it.
+
+The library is now read as two halves and merged, purchases first: what was
+bought, and what was played. The play history comes from
+`m.np.playstation.com/api/gamelist/v2/users/me/titles`, over REST rather than as
+the matching persisted query on the store's host — only the REST endpoint
+returns `localizedName` and supports `offset` paging, and it is a third Sony
+domain, hence `ProxyTarget.psnme`. Both halves are read independently: they are
+different hosts with different privacy surfaces, so a failure in one returns the
+other rather than nothing, and only an empty result from both is an error.
+Trophy lists are deliberately not a third source — they hold only titles played
+far enough to earn something, a subset of the play history.
+
+## [cn] Fixed — picking a match closed the review list
+
+On the review step, choosing an option in the "Review" dialog closed the whole
+import screen instead of the dialog, so the user was thrown out before pressing
+Import. The dialog opens on the root navigator while the screen lives on the
+shell's per-tab navigator, and the candidate tiles popped through the *screen's*
+context — which resolves to the tab navigator and therefore popped the screen
+behind the dialog. Every exit now pops the dialog's own context, through a
+single guarded exit so a tap that reaches both a tile and its radio still pops
+once. `game_name_list_import_content_test.dart` drives the real screen inside a
+per-tab navigator and asserts the review list survives the pick.
+
 ## [cn] Fixed — PlayStation sign-in died on a CSRF rejection
 
 Signing in on a device failed before any request reached the account service.

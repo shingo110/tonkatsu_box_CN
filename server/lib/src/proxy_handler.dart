@@ -234,6 +234,12 @@ class ApiProxy {
         if (_takeQuery(query, kPsnAccessTokenParam) case final String token) {
           headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
         }
+      case ProxyTarget.psnme:
+        // The play-history host. Another domain, so another target, but the
+        // JWT travels exactly like the store's.
+        if (_takeQuery(query, kPsnAccessTokenParam) case final String token) {
+          headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
+        }
       case ProxyTarget.tvdb:
         if (path.endsWith('login')) {
           return utf8.encode(jsonEncode(<String, Object?>{

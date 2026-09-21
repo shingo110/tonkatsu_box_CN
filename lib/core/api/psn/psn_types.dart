@@ -100,3 +100,62 @@ class PsnPurchasedGame {
 
   bool get isUsable => name.trim().isNotEmpty;
 }
+
+/// One row of `gamelist/v2/users/me/titles` — a title the account has *played*.
+///
+/// This is the half a purchase list cannot see. A game played from the
+/// PlayStation Plus catalogue is in the play history and was never bought, so
+/// an import built on `getPurchasedGameList` alone silently drops it — a
+/// subscriber who finished a catalogue game and earned its platinum trophy
+/// would not find it in their library.
+class PsnPlayedGame {
+  const PsnPlayedGame({
+    required this.name,
+    this.localizedName,
+    this.titleId,
+    this.imageUrl,
+    this.category,
+  });
+
+  factory PsnPlayedGame.fromJson(Map<String, dynamic> json) {
+    final Object? rawCategory = json['category'];
+    return PsnPlayedGame(
+      name: (json['name'] as String?) ?? '',
+      localizedName: json['localizedName'] as String?,
+      titleId: json['titleId'] as String?,
+      imageUrl: json['imageUrl'] as String?,
+      category: rawCategory is String ? rawCategory : null,
+    );
+  }
+
+  /// Sony's own name for the title, as the store spells it.
+  final String name;
+
+  /// The same title in the account's language, when the store has one.
+  ///
+  /// Only this endpoint returns it — the store's GraphQL has no equivalent —
+  /// which is why the play history is read over REST. It is a second spelling
+  /// of the same game, so it is what a matcher can use to reach a catalogue in
+  /// the other language: the two names, and the two catalogues, are matched on
+  /// either side of the script split.
+  final String? localizedName;
+
+  /// Sony's per-version id, e.g. `CUSA01433_00`.
+  final String? titleId;
+
+  final String? imageUrl;
+
+  /// `ps4_game` / `ps5_native_game` / `pspc_game` / `unknown`.
+  final String? category;
+
+  /// The name to hand the matcher: Sony's, falling back to the localized one
+  /// only when the first is missing. Deliberately *not* a preference for the
+  /// localized spelling — which catalogue to ask is the matcher's decision,
+  /// and it makes that decision from the script of the name it is given.
+  String get displayName {
+    final String plain = name.trim();
+    return plain.isNotEmpty ? plain : (localizedName ?? '').trim();
+  }
+
+  bool get isUsable => displayName.isNotEmpty;
+}

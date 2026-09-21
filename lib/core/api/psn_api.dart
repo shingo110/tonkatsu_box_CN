@@ -42,6 +42,69 @@ class PsnApi {
   }) =>
       _library.fetchPurchasedGames(accessToken: accessToken, onPage: onPage);
 
+  /// The games the account has played, newest first — the half that includes
+  /// titles played from the PlayStation Plus catalogue.
+  Future<List<PsnPlayedGame>> fetchPlayedGames({
+    required String accessToken,
+    void Function(int fetched)? onPage,
+  }) =>
+      _library.fetchPlayedGames(accessToken: accessToken, onPage: onPage);
+
+  /// The whole library as bare names: what was bought, then what was played,
+  /// in that order and de-duplicated.
+  ///
+  /// Both halves are read, because neither is complete on its own — a game
+  /// played from a subscription was never purchased, and a game bought and
+  /// never launched is in no play history. They also come from *different
+  /// hosts* and fail independently: a tightened privacy setting or a title
+  /// Sony never listed can break one while the other is fine, so each is read
+  /// best-effort and a failure only becomes an error when nothing at all came
+  /// back. Returning the half that worked is a better outcome than returning
+  /// none of it, and the user sees the count either way.
+  Future<List<String>> fetchLibraryNames({
+    required String accessToken,
+    void Function(int fetched)? onPage,
+  }) async {
+    final List<String> names = <String>[];
+    final Set<String> seen = <String>{};
+    PsnApiException? firstFailure;
+
+    void collect(Iterable<String> values) {
+      for (final String value in values) {
+        final String name = value.trim();
+        if (name.isNotEmpty && seen.add(name.toLowerCase())) names.add(name);
+      }
+    }
+
+    Future<void> read(Future<Iterable<String>> Function() half) async {
+      try {
+        collect(await half());
+        onPage?.call(names.length);
+      } on PsnApiException catch (e) {
+        firstFailure ??= e;
+      }
+    }
+
+    await read(
+      () async => (await fetchPurchasedGames(
+        accessToken: accessToken,
+        onPage: onPage,
+      ))
+          .map((PsnPurchasedGame game) => game.name),
+    );
+    await read(
+      () async => (await fetchPlayedGames(
+        accessToken: accessToken,
+        onPage: onPage,
+      ))
+          .map((PsnPlayedGame game) => game.displayName),
+    );
+
+    final PsnApiException? failure = firstFailure;
+    if (names.isEmpty && failure != null) throw failure;
+    return names;
+  }
+
   void dispose() {
     _auth.dispose();
     _library.dispose();

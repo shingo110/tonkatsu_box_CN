@@ -275,4 +275,191 @@ void main() {
       );
     });
   });
+
+  group('fetchPlayedGames', () {
+    Map<String, dynamic> playedPage(
+      List<String> names, {
+      List<String>? localized,
+    }) {
+      return <String, dynamic>{
+        'titles': <Map<String, dynamic>>[
+          for (int i = 0; i < names.length; i++)
+            <String, dynamic>{
+              'titleId': 'CUSA_${names[i].replaceAll(' ', '_')}',
+              'name': names[i],
+              if (localized != null && i < localized.length)
+                'localizedName': localized[i],
+              'imageUrl': 'https://img/${names[i]}.png',
+              'category': 'ps5_native_game',
+            },
+        ],
+      };
+    }
+
+    void stubPlayedPages(List<Response<dynamic>> pages) {
+      int index = 0;
+      when(() => mockDio.get<dynamic>(
+            any(),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+          )).thenAnswer((_) async {
+        final Response<dynamic> response =
+            pages[index < pages.length ? index : pages.length - 1];
+        index++;
+        return response;
+      });
+    }
+
+    List<Map<String, dynamic>> capturedQueries() => verify(
+          () => mockDio.get<dynamic>(
+            any(),
+            queryParameters: captureAny(named: 'queryParameters'),
+            options: any(named: 'options'),
+          ),
+        ).captured.cast<Map<String, dynamic>>();
+
+    test('reads the play history off the mobile host, not the store', () async {
+      // The PlayStation Plus half of the library lives on another domain; a
+      // call that went to the store's host would silently return purchases.
+      stubPlayedPages(<Response<dynamic>>[
+        makeResponse(playedPage(<String>['Hogwarts Legacy'])),
+      ]);
+
+      await client.fetchPlayedGames(accessToken: 'jwt');
+
+      final String path = verify(() => mockDio.get<dynamic>(
+            captureAny(),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+          )).captured.single as String;
+      expect(path, startsWith('https://m.np.playstation.com'));
+      expect(path, contains('/api/gamelist/v2/users/me/titles'));
+    });
+
+    test('asks for the console categories and pages by offset', () async {
+      stubPlayedPages(<Response<dynamic>>[
+        makeResponse(playedPage(<String>[
+          for (int i = 0; i < kPsnPlayedGamesPageSize; i++) 'Game $i',
+        ])),
+        makeResponse(playedPage(<String>['Tail'])),
+      ]);
+
+      final List<PsnPlayedGame> games =
+          await client.fetchPlayedGames(accessToken: 'jwt');
+
+      expect(games, hasLength(kPsnPlayedGamesPageSize + 1));
+      final List<Map<String, dynamic>> queries = capturedQueries();
+      expect(queries, hasLength(2));
+      expect(queries.first['categories'], kPsnPlayedGamesCategories);
+      expect(queries.first['limit'], kPsnPlayedGamesPageSize);
+      expect(queries.first['offset'], 0);
+      expect(queries.last['offset'], kPsnPlayedGamesPageSize);
+    });
+
+    test('stops on a short page', () async {
+      stubPlayedPages(<Response<dynamic>>[
+        makeResponse(playedPage(<String>['A', 'B'])),
+      ]);
+
+      await client.fetchPlayedGames(accessToken: 'jwt');
+
+      expect(capturedQueries(), hasLength(1));
+    });
+
+    test('collapses the same title listed twice to one row', () async {
+      stubPlayedPages(<Response<dynamic>>[
+        makeResponse(playedPage(<String>['Bloodborne', 'bloodborne'])),
+      ]);
+
+      final List<PsnPlayedGame> games =
+          await client.fetchPlayedGames(accessToken: 'jwt');
+
+      expect(games.map((PsnPlayedGame g) => g.displayName), <String>['Bloodborne']);
+    });
+
+    test('drops a row Sony left without a name', () async {
+      stubPlayedPages(<Response<dynamic>>[
+        makeResponse(<String, dynamic>{
+          'titles': <Map<String, dynamic>>[
+            <String, dynamic>{'titleId': 'X', 'name': '  '},
+            <String, dynamic>{'titleId': 'Y', 'name': 'Real Game'},
+          ],
+        }),
+      ]);
+
+      final List<PsnPlayedGame> games =
+          await client.fetchPlayedGames(accessToken: 'jwt');
+
+      expect(games.map((PsnPlayedGame g) => g.displayName), <String>['Real Game']);
+    });
+
+    test('falls back to the localized name when the plain one is missing',
+        () async {
+      stubPlayedPages(<Response<dynamic>>[
+        makeResponse(<String, dynamic>{
+          'titles': <Map<String, dynamic>>[
+            <String, dynamic>{
+              'name': '',
+              'localizedName': '霍格沃茨之遗',
+            },
+          ],
+        }),
+      ]);
+
+      final List<PsnPlayedGame> games =
+          await client.fetchPlayedGames(accessToken: 'jwt');
+
+      expect(games.single.displayName, '霍格沃茨之遗');
+      expect(games.single.localizedName, '霍格沃茨之遗');
+    });
+
+    test('declares a content type here too, and carries the JWT', () async {
+      stubPlayedPages(<Response<dynamic>>[
+        makeResponse(playedPage(<String>['Solo'])),
+      ]);
+
+      await client.fetchPlayedGames(accessToken: '  jwt  ');
+
+      final Options options = verify(() => mockDio.get<dynamic>(
+            any(),
+            queryParameters: any(named: 'queryParameters'),
+            options: captureAny(named: 'options'),
+          )).captured.single as Options;
+      expect(options.contentType, 'application/json');
+      expect(options.headers?['Authorization'], 'Bearer jwt');
+    });
+
+    test('surfaces the REST error body rather than a generic message',
+        () async {
+      // This host answers a rejected token with a top-level `error` object.
+      stubPlayedPages(<Response<dynamic>>[
+        makeResponse(<String, dynamic>{
+          'error': <String, dynamic>{'message': 'invalid token'},
+        }),
+      ]);
+
+      expect(
+        () => client.fetchPlayedGames(accessToken: 'stale'),
+        throwsA(
+          isA<PsnApiException>().having(
+            (PsnApiException e) => e.message,
+            'message',
+            'invalid token',
+          ),
+        ),
+      );
+    });
+
+    test('refuses an empty token without spending a request', () async {
+      expect(
+        () => client.fetchPlayedGames(accessToken: ' '),
+        throwsA(isA<PsnApiException>()),
+      );
+      verifyNever(() => mockDio.get<dynamic>(
+            any(),
+            queryParameters: any(named: 'queryParameters'),
+            options: any(named: 'options'),
+          ));
+    });
+  });
 }

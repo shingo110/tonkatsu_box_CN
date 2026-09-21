@@ -75,3 +75,27 @@ const String kPsnNpssoParam = 'npsso';
 
 /// The same trick for the access token the library call needs.
 const String kPsnAccessTokenParam = 'access_token';
+
+/// The mobile host that carries play history — a third Sony domain, and so a
+/// third proxy target.
+const String kPsnMobileBase = 'https://m.np.playstation.com';
+
+/// What the account has *played*, newest first.
+///
+/// Purchases alone are not the library: a title played from the PlayStation
+/// Plus catalogue is in the play history and was never bought, so an import
+/// built only on `getPurchasedGameList` silently drops it. The PlayStation App
+/// shows both halves; this is the other half.
+const String kPsnPlayedGamesPath = '/api/gamelist/v2/users/me/titles';
+
+/// Sony's own platform tokens for that call. The two console families only:
+/// the same call can also return PC and "unknown" rows, which are not what a
+/// PlayStation library means.
+const String kPsnPlayedGamesCategories = 'ps4_game,ps5_native_game';
+
+/// Rows per page on the play history. Larger than the store's 24 because this
+/// endpoint answers a plain REST page and a real library runs to hundreds.
+const int kPsnPlayedGamesPageSize = 100;
+
+/// Stop after this many pages. 20 × 100 = 2000 titles.
+const int kPsnPlayedGamesMaxPages = 20;

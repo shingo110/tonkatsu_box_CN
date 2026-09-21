@@ -8,13 +8,17 @@ import '../api_dio.dart';
 import '../api_error_detail.dart';
 import 'psn_types.dart';
 
-/// Reads the account's purchase history out of the web store's GraphQL host.
+/// Reads the account's library — what it bought *and* what it played.
 ///
-/// This is the one PSN surface that answers "what have I bought": the trophy
-/// list only covers titles that were played, and the gamelist is per-device.
-/// The query is a *persisted* one — Sony stores the document server-side and
-/// the request carries nothing but its name, a sha256 and the variables — so
-/// there is no GraphQL text to keep in sync here.
+/// Two sources, because neither is the whole library. The store's GraphQL host
+/// answers "what have I bought"; the mobile host answers "what have I played",
+/// which is the only place a title played from the PlayStation Plus catalogue
+/// shows up, having never been purchased. The trophy list is not used: it only
+/// holds titles an account played far enough to earn something in.
+///
+/// The purchase query is a *persisted* one — Sony stores the document
+/// server-side and the request carries nothing but its name, a sha256 and the
+/// variables — so there is no GraphQL text to keep in sync here.
 class PsnLibraryClient {
   PsnLibraryClient({Dio? dio})
       : _dio = dio ??
@@ -133,6 +137,103 @@ class PsnLibraryClient {
     } on DioException catch (e) {
       throw _mapError(e);
     }
+  }
+
+  /// Every title the account has played, newest first, until a short page.
+  ///
+  /// Read over REST rather than the store's GraphQL: this is where a title
+  /// played from the PlayStation Plus catalogue appears — it was never bought,
+  /// so the purchase list cannot know about it — and it is the only endpoint
+  /// that also returns the localized name.
+  Future<List<PsnPlayedGame>> fetchPlayedGames({
+    required String accessToken,
+    void Function(int fetched)? onPage,
+  }) async {
+    final String token = accessToken.trim();
+    if (token.isEmpty) {
+      throw const PsnApiException('PlayStation account is not connected');
+    }
+
+    final List<PsnPlayedGame> games = <PsnPlayedGame>[];
+    final Set<String> seen = <String>{};
+
+    for (int page = 0; page < kPsnPlayedGamesMaxPages; page++) {
+      final List<PsnPlayedGame> batch = await _fetchPlayedPage(
+        token: token,
+        offset: page * kPsnPlayedGamesPageSize,
+      );
+      for (final PsnPlayedGame game in batch) {
+        if (game.isUsable && seen.add(game.displayName.toLowerCase())) {
+          games.add(game);
+        }
+      }
+      onPage?.call(games.length);
+      if (batch.length < kPsnPlayedGamesPageSize) break;
+    }
+
+    return games;
+  }
+
+  Future<List<PsnPlayedGame>> _fetchPlayedPage({
+    required String token,
+    required int offset,
+  }) async {
+    final Map<String, dynamic> query = <String, dynamic>{
+      'limit': kPsnPlayedGamesPageSize,
+      'offset': offset,
+      'categories': kPsnPlayedGamesCategories,
+    };
+    if (kIsWebBuild) {
+      // Same reason as the purchase call: on web the token rides the URL and
+      // the server lifts it back into the header, because the proxy forwards
+      // only content-type and accept.
+      query[kPsnAccessTokenParam] = token;
+    }
+
+    try {
+      final Response<dynamic> response = await _dio.get<dynamic>(
+        '$kPsnMobileBase$kPsnPlayedGamesPath',
+        queryParameters: query,
+        options: Options(
+          headers: <String, String>{'Authorization': 'Bearer $token'},
+          // Same gate as the persisted query: a body-less GET that declares no
+          // content type is refused by the gateway's CSRF check before the
+          // token is even read.
+          contentType: 'application/json',
+          validateStatus: (int? status) => status != null && status < 500,
+        ),
+      );
+
+      final Object? body = decodeJsonBody(response.data) ?? response.data;
+      if (body is! Map<String, dynamic>) {
+        throw PsnApiException(
+          'PlayStation returned an unexpected response',
+          statusCode: response.statusCode,
+        );
+      }
+      // This host reports failures as a top-level `error` object, unlike the
+      // GraphQL one, which buries them in `data.errors`.
+      final Object? error = body['error'];
+      if (error is Map<String, dynamic>) {
+        throw PsnApiException(
+          (error['message'] as String?)?.trim() ??
+              'PlayStation refused the play history request',
+          statusCode: response.statusCode,
+        );
+      }
+      return _playedFrom(body);
+    } on DioException catch (e) {
+      throw _mapError(e);
+    }
+  }
+
+  static List<PsnPlayedGame> _playedFrom(Map<String, dynamic> body) {
+    final List<dynamic> rows =
+        (body['titles'] as List<dynamic>?) ?? <dynamic>[];
+    return <PsnPlayedGame>[
+      for (final Object? row in rows)
+        if (row is Map<String, dynamic>) PsnPlayedGame.fromJson(row),
+    ];
   }
 
   static List<PsnPurchasedGame> _gamesFrom(Map<String, dynamic> body) {

@@ -640,57 +640,79 @@ class _GameNameListImportContentState
 
     final int? picked = await showDialog<int>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(row.original),
-        contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-        content: SizedBox(
-          width: 420,
-          child: SingleChildScrollView(
-            child: RadioGroup<int>(
-              groupValue: row.selectedIndex,
-              onChanged: (int? value) => Navigator.of(context).pop(value),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  if (row.candidates.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      child: Text(
-                        row.searchFailed
-                            ? l.gameListImportSearchFailed
-                            : l.gameListImportNoCandidates,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
+      builder: (BuildContext dialogContext) {
+        // Every exit pops *this dialog* — never through the screen's context.
+        // `showDialog` puts the dialog on the root navigator while the screen
+        // sits on the shell's per-tab navigator, so a pop resolved from the
+        // screen's context closes the screen behind the dialog: the user picks
+        // an option and the review list is gone before Import. The guard makes
+        // the pop one-shot, since a tap can land on both a tile and its radio.
+        bool settled = false;
+        void choose(int value) {
+          if (settled) return;
+          settled = true;
+          Navigator.of(dialogContext).pop(value);
+        }
+
+        return AlertDialog(
+          title: Text(row.original),
+          contentPadding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+          content: SizedBox(
+            width: 420,
+            child: SingleChildScrollView(
+              child: RadioGroup<int>(
+                groupValue: row.selectedIndex,
+                onChanged: (int? value) {
+                  if (value != null) choose(value);
+                },
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    if (row.candidates.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Text(
+                          row.searchFailed
+                              ? l.gameListImportSearchFailed
+                              : l.gameListImportNoCandidates,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
                         ),
                       ),
-                    ),
-                  for (final int value in values)
-                    _buildCandidateTile(l, row, value),
-                ],
+                    for (final int value in values)
+                      _buildCandidateTile(l, row, value, choose),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l.cancel),
-          ),
-        ],
-      ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l.cancel),
+            ),
+          ],
+        );
+      },
     );
 
     if (picked == null || !mounted) return;
     setState(() => row.selectedIndex = picked);
   }
 
-  Widget _buildCandidateTile(S l, GameNameMatchRow row, int value) {
+  Widget _buildCandidateTile(
+    S l,
+    GameNameMatchRow row,
+    int value,
+    void Function(int value) onChoose,
+  ) {
     if (value < 0) {
       return ListTile(
         dense: true,
         leading: const Radio<int>(value: -1),
         title: Text(l.gameListImportSkip),
-        onTap: () => Navigator.of(context).pop(-1),
+        onTap: () => onChoose(-1),
       );
     }
 
@@ -706,7 +728,7 @@ class _GameNameListImportContentState
           color: AppColors.textTertiary,
         ),
       ),
-      onTap: () => Navigator.of(context).pop(value),
+      onTap: () => onChoose(value),
     );
   }
 
