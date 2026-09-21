@@ -25,6 +25,7 @@
 | R6 | **UI 文案必须进 ARB**：`lib/l10n/app_*.arb` × 6 语言，键必须齐平 | 缺一语言 `gen-l10n` 失败 |
 | R7 | **改动 DAO 或模型**：必须 `cd packages/core && dart run tool/generate_rpc.dart` 并提交生成物 | `generated_up_to_date_test` 必挂 |
 | R8 | **引用路径必须已被 git 跟踪**：写进提交文件前用 `git ls-files <path>` 核验 | 幽灵链接，克隆后即死 |
+| R9 | **凭据字面量只准存在于它唯一的那处来源**：内置的第三方密钥（如豆瓣那对公开凭据）客户端在 `lib/shared/constants/douban_defaults*.dart`、服务端在 `server/lib/src/douban_defaults.dart`；**文档与测试一律引用常量，不得复制字面量** | 每多一份副本就多一个被爬虫 / 代码搜索捞走的点，且值一换就要全仓追杀 |
 
 ## 三、加数据源 SOP（八步 + 三处连带 + 八处护栏）
 
@@ -102,7 +103,11 @@
 
 **稳定可用**：Bangumi `api.bgm.tv/v0` · NeoDB `neodb.social/api/catalog/search` · 微信读书 `weread.qq.com/web/search/global`（**已接入，仅搜索** —— 无 by-id 端点，见七之四）· 优酷 `search.youku.com/api/search` · 爱奇艺 `mesh.if.iqiyi.com/.../homePageV3` · 网易云 · QQ 音乐。
 
-**可用但限流极狠**：豆瓣 Frodo `frodo.douban.com/api/v2/*` —— HMAC-SHA1 签名（secret `bf7dddc7c9cfe6f7` + apiKey `0dad551ec0f84ed02907ff5c42e8ec70` + 配对 UA）；**连打 10 次即 403，冷却 3–5 分钟**；签名 path 必须等于最终请求 path（剧集 `/tv/{id}`，用 `/movie/{id}` 会 996）。**图书源已接入（ISBN 直查 + 关键词搜索），契约详见七之六。**
+**可用但限流极狠**：豆瓣 Frodo `frodo.douban.com/api/v2/*` —— HMAC-SHA1 签名（**apiKey / secret 的取值只认
+`lib/shared/constants/douban_defaults_io.dart`（客户端）与 `server/lib/src/douban_defaults.dart`（服务端兜底），
+本文件不再复制其字面量** —— 那对是 Frodo 官方客户端自带的公开配对，多抄一份只是多一个被爬虫与代码搜索捞走的
+点；+ 配对 UA）；**连打 10 次即 403，冷却 3–5 分钟**；签名 path 必须等于最终请求 path（剧集 `/tv/{id}`，用
+`/movie/{id}` 会 996）。**图书源已接入（ISBN 直查 + 关键词搜索），契约详见七之六。**
 
 **免签补充**：`movie.douban.com/j/subject_suggest`（需 Referer），无限流，字段少。
 

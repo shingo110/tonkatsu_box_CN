@@ -365,8 +365,11 @@ void main() {
         () async {
       final Handler handler = handlerWith(
         <String, String>{
-          CredentialNames.doubanKey: '0dad551ec0f84ed02907ff5c42e8ec70',
-          CredentialNames.doubanSecret: 'bf7dddc7c9cfe6f7',
+          // The pair this build ships — the only one the probe vector below
+          // (and therefore the client signer) is pinned to. Held by reference
+          // on purpose: the literal lives in one place, not in every test.
+          CredentialNames.doubanKey: kDoubanDefaultKey,
+          CredentialNames.doubanSecret: kDoubanDefaultSecret,
         },
         clock: () => DateTime.fromMillisecondsSinceEpoch(1700000000000),
       );
@@ -377,7 +380,7 @@ void main() {
           upstream.sent.single.url.queryParameters;
       expect(upstream.sent.single.url.host, 'frodo.douban.com');
       expect(upstream.sent.single.url.path, '/api/v2/book/isbn/9787536692930');
-      expect(query['apiKey'], '0dad551ec0f84ed02907ff5c42e8ec70');
+      expect(query['apiKey'], kDoubanDefaultKey);
       expect(query['_ts'], '1700000000');
       // The vector `probe/douban_sig_vectors.py` prints for this path and
       // timestamp, so the proxy is pinned to the same bytes as the client.

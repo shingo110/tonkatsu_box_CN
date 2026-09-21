@@ -12,6 +12,31 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Changed — a credential literal now lives in exactly one place
+
+An audit of what the repository actually publishes turned up one plaintext
+credential: the Douban Frodo pair, in the two files that must carry it. That
+pair is public by construction — Frodo no longer issues keys, so the app ships
+the same one its own client carries, which is why Douban has no key screen —
+so this is a shared credential rather than a leak of ours. But copies had
+spread past the files that need them: the docs quoted both halves, and the
+test suite retyped them in eight places. Every copy is another spot a crawler
+or a code search can index, and changing the value would mean hunting the
+whole tree. The docs now point at the file and the tests reference the symbol.
+
+- `RULES.md`: section 6 names the two source files instead of the literal, and
+  new **R9** makes it a hard constraint that a credential literal has exactly
+  one home, with docs and tests referencing it rather than reproducing it.
+- `server/test/proxy_handler_test.dart`,
+  `server/test/proxy_serve_integration_test.dart`: `kDoubanDefaultKey` /
+  `kDoubanDefaultSecret` in place of a retyped pair.
+- `test/core/api/douban_api_test.dart`: `DoubanAuthInterceptor`'s vector test
+  takes its secret from `DoubanDefaults.apiSecret`.
+- `packages/core/test/api/douban_signature_test.dart` keeps the literal on
+  purpose: it is the byte-for-byte vector reference shared with
+  `probe/douban_sig_vectors.py`, and `packages/core` cannot reach the
+  Flutter-side constants to reference them.
+
 ## [cn] Fixed — TapTap answered 400 INVALID_XUA on the web build
 
 The web client reaches every external API through the server's `/proxy`, and

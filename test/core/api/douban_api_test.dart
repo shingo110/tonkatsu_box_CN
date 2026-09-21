@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:tonkatsu_box/core/api/douban/douban_http_client.dart';
 import 'package:tonkatsu_box/core/api/douban_api.dart';
 import 'package:tonkatsu_box/core/api/host_rate_limiter.dart';
+import 'package:tonkatsu_box/shared/constants/douban_defaults.dart';
 
 import '../../helpers/test_helpers.dart';
 
@@ -277,9 +278,12 @@ void main() {
 
   group('DoubanAuthInterceptor', () {
     test('signs the request path with the pair', () {
+      // The secret half is the shipped pair's, because the vector asserted
+      // below is the one the Python reference prints for it. The key half is
+      // arbitrary — it does not enter the signature.
       final DoubanAuthInterceptor auth = DoubanAuthInterceptor(
         now: () => DateTime.fromMillisecondsSinceEpoch(1700000000 * 1000),
-      )..setCredentials('mykey', 'bf7dddc7c9cfe6f7');
+      )..setCredentials('mykey', DoubanDefaults.apiSecret);
 
       final RequestOptions options =
           RequestOptions(path: '/api/v2/book/isbn/9787536692930');

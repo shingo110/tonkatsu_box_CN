@@ -8,6 +8,7 @@ import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:test/test.dart';
 import 'package:tonkatsu_server/src/api_credentials.dart';
 import 'package:tonkatsu_server/src/app_handler.dart';
+import 'package:tonkatsu_server/src/douban_defaults.dart';
 import 'package:tonkatsu_server/src/proxy_handler.dart';
 import 'package:tonkatsu_server/src/upstream_client.dart';
 
@@ -286,8 +287,8 @@ void main() {
 
     test('should sign a Douban call server-side before it leaves', () async {
       final HttpServer server = await serve(keys: <String, String>{
-        CredentialNames.doubanKey: '0dad551ec0f84ed02907ff5c42e8ec70',
-        CredentialNames.doubanSecret: 'bf7dddc7c9cfe6f7',
+        CredentialNames.doubanKey: kDoubanDefaultKey,
+        CredentialNames.doubanSecret: kDoubanDefaultSecret,
       });
 
       final _Reply reply = await send(
@@ -301,7 +302,7 @@ void main() {
       expect(sent.path, '/api/v2/book/isbn/9787536692930');
       expect(
         sent.query['apiKey'],
-        <String>['0dad551ec0f84ed02907ff5c42e8ec70'],
+        <String>[kDoubanDefaultKey],
       );
       expect(sent.query['_ts'], <String>['1700000000']);
       // The vector `probe/douban_sig_vectors.py` prints for this path and
