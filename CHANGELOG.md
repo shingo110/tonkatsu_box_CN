@@ -12,6 +12,53 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — a PlayStation library can now be imported by signing in
+
+The paste-a-list importer shipped first, and it had a hole where the list was
+supposed to come from: PlayStation offers no export anywhere, so a user who had
+never typed their library out had nothing to paste. This adds the missing half.
+Sign in at playstation.com, copy the NPSSO the account page prints, and the app
+reads the purchase history and drops the titles straight into the matching flow
+that already existed.
+
+Sony registers no OAuth clients and ships no PIN flow, so there is no redirect
+URI, no WebView and no loopback listener here: the NPSSO is exchanged for a
+one-shot code whose redirect target belongs to the PlayStation App, and that
+code is read out of the `Location` header without ever following it. The NPSSO
+itself is never stored — it is password-equivalent — and only the refresh token
+is offered for keeping, behind an explicit opt-in.
+
+The purchase list comes from the web store's GraphQL host rather than the
+trophy API: `trophyTitles` covers only titles played enough to earn a trophy,
+while `getPurchasedGameList` is the purchase history proper. It is a persisted
+query, so the request carries an operation name, a sha256 and the variables,
+and the walk stops on the first short page.
+
+Nothing about name matching was duplicated. The PlayStation client returns bare
+titles, exactly like a pasted list, so it stops at `List<String>` and hands
+them to the existing importer through a new `initialNames` parameter — the
+confidence thresholds, the review step and the write stay one implementation,
+and `lib/core/import/sources/psn/` deliberately does not exist.
+
+- `lib/core/api/psn/`: `PsnAuthClient` (NPSSO → code → tokens, plus refresh),
+  `PsnLibraryClient` (paged purchase history), `psn_types.dart`, and a README
+  recording the flow and the no-`ImportSource` decision.
+- `lib/core/api/psn_api.dart`: the `PsnApi` facade and `psnApiProvider`.
+- `lib/features/settings/content/psn_import_content.dart` and its screen: the
+  sign-in form, reuse of a saved session, and the hand-off to the review stage.
+- `packages/core/lib/api/psn_constants.dart`: the public client pair and the
+  endpoints, shared with the server the way the Douban constants are.
+- `ProxyTarget.psnauth` / `ProxyTarget.psnweb`, and `ApiProxy._authorize`
+  branches that lift the NPSSO and the access token out of the query string
+  into headers — a web build has nowhere else to put them — and remove them
+  from the URL so a password-equivalent value never reaches Sony as a URL.
+- `lib/core/api/api_error_extract.dart` unwraps `PsnApiException`.
+- `GameNameListImportContent.initialNames` seeds the review stage, which is how
+  the fetched library reaches the matcher without a second code path.
+- 20 new ARB keys in all six locales (1811 keys each, identical key sets).
+- RULES 七之十九 pins the endpoints, the purchase-list operation and the
+  credential rules.
+
 ## [cn] Changed — a credential literal now lives in exactly one place
 
 An audit of what the repository actually publishes turned up one plaintext

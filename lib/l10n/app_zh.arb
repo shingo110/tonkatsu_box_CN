@@ -2599,6 +2599,36 @@
   "sourceNeedsIntlNetwork": "需国际网络",
   "settingsGameListImport": "从游戏名列表导入",
   "settingsGameListImportSubtitle": "粘贴游戏库列表，自动匹配条目",
+  "settingsPsnImport": "PlayStation 登录",
+  "settingsPsnImportSubtitle": "登录 PSN 账号，读取已购游戏库",
+  "psnImportTitle": "PlayStation Network",
+  "psnImportDescription": "在任何浏览器里登录 playstation.com，然后在同一浏览器中打开下面的 NPSSO 页面，把它显示的字符串粘贴到这里，应用即可读取该账号已购的游戏。",
+  "psnImportHowTo": "NPSSO 是登录会话凭据，等同于账号密码。它只被使用一次、绝不保存；只有勾选「保持登录」时，本机才会留存约两个月的刷新令牌。",
+  "psnImportNpssoLabel": "NPSSO",
+  "psnImportNpssoHint": "粘贴 NPSSO",
+  "psnImportNpssoEmpty": "请先填入 NPSSO",
+  "psnImportSignIn": "登录",
+  "psnImportOpenNpssoPage": "获取 NPSSO",
+  "psnImportConnect": "连接并读取游戏库",
+  "psnImportSigningIn": "正在登录 PlayStation…",
+  "psnImportFetchingPages": "正在读取游戏库——已读到 {count} 个…",
+  "@psnImportFetchingPages": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportFetched": "已读取 {count} 个已购游戏",
+  "@psnImportFetched": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportEmpty": "该账号没有返回已购游戏",
+  "psnImportRemember": "保持登录",
+  "psnImportSecurityNote": "在本机留存刷新令牌（约两个月）。NPSSO 本身从不保存。",
+  "psnImportSavedSession": "已保存的登录",
+  "psnImportUseSaved": "使用已保存的登录",
+  "psnImportChangeAccount": "更换账号",
   "gameListImportTitle": "游戏名列表",
   "gameListImportDescription": "粘贴你的游戏库，每行一个游戏名。可直接从 PS App、奖杯网站或记事本复制——行首编号、项目符号与行尾平台标记会自动清理。",
   "gameListImportFieldHint": "每行一个游戏名…",

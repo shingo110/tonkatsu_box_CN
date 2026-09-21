@@ -5755,6 +5755,72 @@ class SZh extends S {
   String get settingsGameListImportSubtitle => '粘贴游戏库列表，自动匹配条目';
 
   @override
+  String get settingsPsnImport => 'PlayStation 登录';
+
+  @override
+  String get settingsPsnImportSubtitle => '登录 PSN 账号，读取已购游戏库';
+
+  @override
+  String get psnImportTitle => 'PlayStation Network';
+
+  @override
+  String get psnImportDescription =>
+      '在任何浏览器里登录 playstation.com，然后在同一浏览器中打开下面的 NPSSO 页面，把它显示的字符串粘贴到这里，应用即可读取该账号已购的游戏。';
+
+  @override
+  String get psnImportHowTo =>
+      'NPSSO 是登录会话凭据，等同于账号密码。它只被使用一次、绝不保存；只有勾选「保持登录」时，本机才会留存约两个月的刷新令牌。';
+
+  @override
+  String get psnImportNpssoLabel => 'NPSSO';
+
+  @override
+  String get psnImportNpssoHint => '粘贴 NPSSO';
+
+  @override
+  String get psnImportNpssoEmpty => '请先填入 NPSSO';
+
+  @override
+  String get psnImportSignIn => '登录';
+
+  @override
+  String get psnImportOpenNpssoPage => '获取 NPSSO';
+
+  @override
+  String get psnImportConnect => '连接并读取游戏库';
+
+  @override
+  String get psnImportSigningIn => '正在登录 PlayStation…';
+
+  @override
+  String psnImportFetchingPages(int count) {
+    return '正在读取游戏库——已读到 $count 个…';
+  }
+
+  @override
+  String psnImportFetched(int count) {
+    return '已读取 $count 个已购游戏';
+  }
+
+  @override
+  String get psnImportEmpty => '该账号没有返回已购游戏';
+
+  @override
+  String get psnImportRemember => '保持登录';
+
+  @override
+  String get psnImportSecurityNote => '在本机留存刷新令牌（约两个月）。NPSSO 本身从不保存。';
+
+  @override
+  String get psnImportSavedSession => '已保存的登录';
+
+  @override
+  String get psnImportUseSaved => '使用已保存的登录';
+
+  @override
+  String get psnImportChangeAccount => '更换账号';
+
+  @override
   String get gameListImportTitle => '游戏名列表';
 
   @override

@@ -2265,6 +2265,36 @@
   "sourceNeedsIntlNetwork": "Нужен международный доступ",
   "settingsGameListImport": "Импорт из списка игр",
   "settingsGameListImportSubtitle": "Вставьте список своей библиотеки — совпадения подберутся автоматически",
+  "settingsPsnImport": "Вход в PlayStation",
+  "settingsPsnImportSubtitle": "Войдите в PSN и прочитайте купленные игры",
+  "psnImportTitle": "PlayStation Network",
+  "psnImportDescription": "Войдите на playstation.com в любом браузере, затем откройте в нём страницу NPSSO ниже. Вставьте показанное значение, и приложение прочитает игры, принадлежащие вашей учётной записи.",
+  "psnImportHowTo": "NPSSO — это сессионный cookie, а не пароль, но обращайтесь с ним как с паролем. Он используется один раз и никогда не сохраняется; хранится только токен обновления (около двух месяцев), и только если вы это включите.",
+  "psnImportNpssoLabel": "NPSSO",
+  "psnImportNpssoHint": "Вставьте значение NPSSO",
+  "psnImportNpssoEmpty": "Сначала введите NPSSO",
+  "psnImportSignIn": "Войти",
+  "psnImportOpenNpssoPage": "Получить NPSSO",
+  "psnImportConnect": "Подключиться и прочитать библиотеку",
+  "psnImportSigningIn": "Вход в PlayStation...",
+  "psnImportFetchingPages": "Чтение библиотеки — пока {count} игр...",
+  "@psnImportFetchingPages": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportFetched": "Прочитано купленных игр: {count}",
+  "@psnImportFetched": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportEmpty": "Учётная запись не вернула купленных игр",
+  "psnImportRemember": "Оставаться в системе",
+  "psnImportSecurityNote": "Хранит токен обновления (около 2 месяцев) на этом устройстве. Сам NPSSO не сохраняется.",
+  "psnImportSavedSession": "Сохранённый сеанс",
+  "psnImportUseSaved": "Использовать сохранённый вход",
+  "psnImportChangeAccount": "Сменить учётную запись",
   "gameListImportTitle": "Список названий игр",
   "gameListImportDescription": "Вставьте свою библиотеку игр, по одному названию в строке. Можно скопировать прямо из PS App, с сайта трофеев или из заметок — нумерация в начале строки, маркеры и метки платформы в конце удаляются автоматически.",
   "gameListImportFieldHint": "По одному названию игры в строке…",

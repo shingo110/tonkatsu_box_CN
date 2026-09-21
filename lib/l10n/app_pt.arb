@@ -3032,6 +3032,36 @@
   "sourceNeedsIntlNetwork": "Requer acesso internacional",
   "settingsGameListImport": "Importar de uma lista de jogos",
   "settingsGameListImportSubtitle": "Cole uma lista da sua biblioteca e associe as entradas automaticamente",
+  "settingsPsnImport": "Login da PlayStation",
+  "settingsPsnImportSubtitle": "Entre na PSN e leia seus jogos comprados",
+  "psnImportTitle": "PlayStation Network",
+  "psnImportDescription": "Entre em playstation.com em qualquer navegador e abra nele a pagina de NPSSO abaixo. Cole o valor exibido e o aplicativo lera os jogos que sua conta possui.",
+  "psnImportHowTo": "O NPSSO e um cookie de sessao, nao uma senha, mas trate-o como tal. Ele e usado uma unica vez e nunca e armazenado; apenas o token de atualizacao (cerca de dois meses) e mantido, e so se voce pedir.",
+  "psnImportNpssoLabel": "NPSSO",
+  "psnImportNpssoHint": "Cole o valor do NPSSO",
+  "psnImportNpssoEmpty": "Informe um NPSSO primeiro",
+  "psnImportSignIn": "Entrar",
+  "psnImportOpenNpssoPage": "Obter NPSSO",
+  "psnImportConnect": "Conectar e ler a biblioteca",
+  "psnImportSigningIn": "Entrando na PlayStation...",
+  "psnImportFetchingPages": "Lendo sua biblioteca - {count} jogos ate agora...",
+  "@psnImportFetchingPages": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportFetched": "{count} jogos comprados lidos",
+  "@psnImportFetched": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportEmpty": "A conta nao retornou jogos comprados",
+  "psnImportRemember": "Manter conectado",
+  "psnImportSecurityNote": "Guarda um token de atualizacao (cerca de 2 meses) neste dispositivo. O NPSSO nunca e salvo.",
+  "psnImportSavedSession": "Sessao salva",
+  "psnImportUseSaved": "Reutilizar o login salvo",
+  "psnImportChangeAccount": "Trocar de conta",
   "gameListImportTitle": "Lista de nomes de jogos",
   "gameListImportDescription": "Cole a sua biblioteca de jogos, um título por linha. Pode copiá-la diretamente do PS App, de um site de troféus ou de uma nota — a numeração inicial, os marcadores e as etiquetas de plataforma no fim da linha são removidos automaticamente.",
   "gameListImportFieldHint": "Um nome de jogo por linha…",

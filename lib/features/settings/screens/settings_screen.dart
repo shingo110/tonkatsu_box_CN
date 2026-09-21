@@ -50,6 +50,7 @@ import 'hardcover_import_screen.dart';
 import 'custom_cards_import_screen.dart';
 import 'igdb_list_import_screen.dart';
 import 'game_name_list_import_screen.dart';
+import 'psn_import_screen.dart';
 import 'mal_import_screen.dart';
 import 'ra_import_screen.dart';
 import 'kinorium_import_screen.dart';
@@ -84,6 +85,9 @@ const Map<String, String> _kAppLanguageNames = <String, String>{
   'fr': 'Français',
 };
 const Color _kImportColor = Color(0xFF5C6BC0);
+
+/// PlayStation blue (the PS Store's own accent), for the PSN sign-in tile.
+const Color _kPsnColor = Color(0xFF0070D1);
 const Color _kApiKeysColor = Color(0xFFEF5350);
 const Color _kReachabilityColor = Color(0xFF26A69A);
 const Color _kDiscordColor = Color(0xFF5865F2); // Discord blurple (used for RA-sync Icons.sync tile)
@@ -316,6 +320,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: l.settingsIgdbImport,
             subtitle: l.settingsIgdbImportSubtitle,
             onTap: () => _pushScreen(const IgdbListImportScreen()),
+          ),
+          SettingsTile(
+            leadingIcon: Icons.videogame_asset,
+            leadingColor: _kPsnColor,
+            title: l.settingsPsnImport,
+            subtitle: l.settingsPsnImportSubtitle,
+            onTap: () => _pushScreen(const PsnImportScreen()),
           ),
           SettingsTile(
             leadingIcon: Icons.playlist_add,

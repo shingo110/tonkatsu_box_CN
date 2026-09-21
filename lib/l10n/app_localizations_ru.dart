@@ -6168,6 +6168,74 @@ class SRu extends S {
       'Вставьте список своей библиотеки — совпадения подберутся автоматически';
 
   @override
+  String get settingsPsnImport => 'Вход в PlayStation';
+
+  @override
+  String get settingsPsnImportSubtitle =>
+      'Войдите в PSN и прочитайте купленные игры';
+
+  @override
+  String get psnImportTitle => 'PlayStation Network';
+
+  @override
+  String get psnImportDescription =>
+      'Войдите на playstation.com в любом браузере, затем откройте в нём страницу NPSSO ниже. Вставьте показанное значение, и приложение прочитает игры, принадлежащие вашей учётной записи.';
+
+  @override
+  String get psnImportHowTo =>
+      'NPSSO — это сессионный cookie, а не пароль, но обращайтесь с ним как с паролем. Он используется один раз и никогда не сохраняется; хранится только токен обновления (около двух месяцев), и только если вы это включите.';
+
+  @override
+  String get psnImportNpssoLabel => 'NPSSO';
+
+  @override
+  String get psnImportNpssoHint => 'Вставьте значение NPSSO';
+
+  @override
+  String get psnImportNpssoEmpty => 'Сначала введите NPSSO';
+
+  @override
+  String get psnImportSignIn => 'Войти';
+
+  @override
+  String get psnImportOpenNpssoPage => 'Получить NPSSO';
+
+  @override
+  String get psnImportConnect => 'Подключиться и прочитать библиотеку';
+
+  @override
+  String get psnImportSigningIn => 'Вход в PlayStation...';
+
+  @override
+  String psnImportFetchingPages(int count) {
+    return 'Чтение библиотеки — пока $count игр...';
+  }
+
+  @override
+  String psnImportFetched(int count) {
+    return 'Прочитано купленных игр: $count';
+  }
+
+  @override
+  String get psnImportEmpty => 'Учётная запись не вернула купленных игр';
+
+  @override
+  String get psnImportRemember => 'Оставаться в системе';
+
+  @override
+  String get psnImportSecurityNote =>
+      'Хранит токен обновления (около 2 месяцев) на этом устройстве. Сам NPSSO не сохраняется.';
+
+  @override
+  String get psnImportSavedSession => 'Сохранённый сеанс';
+
+  @override
+  String get psnImportUseSaved => 'Использовать сохранённый вход';
+
+  @override
+  String get psnImportChangeAccount => 'Сменить учётную запись';
+
+  @override
   String get gameListImportTitle => 'Список названий игр';
 
   @override

@@ -6067,6 +6067,74 @@ class SEn extends S {
       'Paste a library list and match entries automatically';
 
   @override
+  String get settingsPsnImport => 'PlayStation sign-in';
+
+  @override
+  String get settingsPsnImportSubtitle =>
+      'Sign in to PSN and read your purchased games';
+
+  @override
+  String get psnImportTitle => 'PlayStation Network';
+
+  @override
+  String get psnImportDescription =>
+      'Sign in at playstation.com in any browser, then open the NPSSO page below in that same browser. Paste the value it shows and the app will read the games your account owns.';
+
+  @override
+  String get psnImportHowTo =>
+      'An NPSSO is a session cookie rather than a password, but treat it like one. It is used once and never stored; only the refresh token (about two months) is kept, and only if you ask.';
+
+  @override
+  String get psnImportNpssoLabel => 'NPSSO';
+
+  @override
+  String get psnImportNpssoHint => 'Paste the NPSSO value';
+
+  @override
+  String get psnImportNpssoEmpty => 'Enter an NPSSO first';
+
+  @override
+  String get psnImportSignIn => 'Sign in';
+
+  @override
+  String get psnImportOpenNpssoPage => 'Get NPSSO';
+
+  @override
+  String get psnImportConnect => 'Connect and read library';
+
+  @override
+  String get psnImportSigningIn => 'Signing in to PlayStation...';
+
+  @override
+  String psnImportFetchingPages(int count) {
+    return 'Reading your library - $count games so far...';
+  }
+
+  @override
+  String psnImportFetched(int count) {
+    return '$count purchased games read';
+  }
+
+  @override
+  String get psnImportEmpty => 'The account returned no purchased games';
+
+  @override
+  String get psnImportRemember => 'Stay signed in';
+
+  @override
+  String get psnImportSecurityNote =>
+      'Keeps a refresh token (about 2 months) on this device. The NPSSO itself is never saved.';
+
+  @override
+  String get psnImportSavedSession => 'Saved session';
+
+  @override
+  String get psnImportUseSaved => 'Reuse the saved sign-in';
+
+  @override
+  String get psnImportChangeAccount => 'Switch account';
+
+  @override
   String get gameListImportTitle => 'Game name list';
 
   @override

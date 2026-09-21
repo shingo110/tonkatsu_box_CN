@@ -17,6 +17,8 @@ enum ProxyTarget {
   neodb('neodb.social'),
   openlibrary('openlibrary.org'),
   podcastindex('api.podcastindex.org'),
+  psnauth('ca.account.sony.com'),
+  psnweb('web.np.playstation.com'),
   ra('retroachievements.org'),
   screenscraper('api.screenscraper.fr'),
   simkl('api.simkl.com'),

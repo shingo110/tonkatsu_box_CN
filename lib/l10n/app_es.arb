@@ -2604,6 +2604,36 @@
   "sourceNeedsIntlNetwork": "Requiere acceso internacional",
   "settingsGameListImport": "Importar desde una lista de juegos",
   "settingsGameListImportSubtitle": "Pega una lista de tu biblioteca y empareja las entradas automáticamente",
+  "settingsPsnImport": "Inicio de sesion de PlayStation",
+  "settingsPsnImportSubtitle": "Inicia sesion en PSN y lee tus juegos comprados",
+  "psnImportTitle": "PlayStation Network",
+  "psnImportDescription": "Inicia sesion en playstation.com en cualquier navegador y abre alli la pagina de NPSSO que hay abajo. Pega el valor que muestra y la aplicacion leera los juegos que posee tu cuenta.",
+  "psnImportHowTo": "El NPSSO es una cookie de sesion, no una contrasena, pero tratala como tal. Se usa una sola vez y nunca se guarda; solo se conserva el token de refresco (unos dos meses), y solo si lo pides.",
+  "psnImportNpssoLabel": "NPSSO",
+  "psnImportNpssoHint": "Pega el valor NPSSO",
+  "psnImportNpssoEmpty": "Introduce primero un NPSSO",
+  "psnImportSignIn": "Iniciar sesion",
+  "psnImportOpenNpssoPage": "Obtener NPSSO",
+  "psnImportConnect": "Conectar y leer la biblioteca",
+  "psnImportSigningIn": "Iniciando sesion en PlayStation...",
+  "psnImportFetchingPages": "Leyendo tu biblioteca: {count} juegos hasta ahora...",
+  "@psnImportFetchingPages": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportFetched": "{count} juegos comprados leidos",
+  "@psnImportFetched": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportEmpty": "La cuenta no devolvio juegos comprados",
+  "psnImportRemember": "Mantener la sesion",
+  "psnImportSecurityNote": "Guarda un token de refresco (unos 2 meses) en este dispositivo. El NPSSO nunca se guarda.",
+  "psnImportSavedSession": "Sesion guardada",
+  "psnImportUseSaved": "Reutilizar la sesion guardada",
+  "psnImportChangeAccount": "Cambiar de cuenta",
   "gameListImportTitle": "Lista de nombres de juegos",
   "gameListImportDescription": "Pega tu biblioteca de juegos, un título por línea. Puedes copiarla directamente desde la PS App, un sitio de trofeos o una nota: la numeración inicial, las viñetas y las etiquetas de plataforma finales se limpian automáticamente.",
   "gameListImportFieldHint": "Un nombre de juego por línea…",

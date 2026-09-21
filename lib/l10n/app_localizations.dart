@@ -10694,6 +10694,126 @@ abstract class S {
   /// **'Paste a library list and match entries automatically'**
   String get settingsGameListImportSubtitle;
 
+  /// No description provided for @settingsPsnImport.
+  ///
+  /// In en, this message translates to:
+  /// **'PlayStation sign-in'**
+  String get settingsPsnImport;
+
+  /// No description provided for @settingsPsnImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to PSN and read your purchased games'**
+  String get settingsPsnImportSubtitle;
+
+  /// No description provided for @psnImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'PlayStation Network'**
+  String get psnImportTitle;
+
+  /// No description provided for @psnImportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in at playstation.com in any browser, then open the NPSSO page below in that same browser. Paste the value it shows and the app will read the games your account owns.'**
+  String get psnImportDescription;
+
+  /// No description provided for @psnImportHowTo.
+  ///
+  /// In en, this message translates to:
+  /// **'An NPSSO is a session cookie rather than a password, but treat it like one. It is used once and never stored; only the refresh token (about two months) is kept, and only if you ask.'**
+  String get psnImportHowTo;
+
+  /// No description provided for @psnImportNpssoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'NPSSO'**
+  String get psnImportNpssoLabel;
+
+  /// No description provided for @psnImportNpssoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste the NPSSO value'**
+  String get psnImportNpssoHint;
+
+  /// No description provided for @psnImportNpssoEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an NPSSO first'**
+  String get psnImportNpssoEmpty;
+
+  /// No description provided for @psnImportSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get psnImportSignIn;
+
+  /// No description provided for @psnImportOpenNpssoPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Get NPSSO'**
+  String get psnImportOpenNpssoPage;
+
+  /// No description provided for @psnImportConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect and read library'**
+  String get psnImportConnect;
+
+  /// No description provided for @psnImportSigningIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing in to PlayStation...'**
+  String get psnImportSigningIn;
+
+  /// No description provided for @psnImportFetchingPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading your library - {count} games so far...'**
+  String psnImportFetchingPages(int count);
+
+  /// No description provided for @psnImportFetched.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} purchased games read'**
+  String psnImportFetched(int count);
+
+  /// No description provided for @psnImportEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'The account returned no purchased games'**
+  String get psnImportEmpty;
+
+  /// No description provided for @psnImportRemember.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay signed in'**
+  String get psnImportRemember;
+
+  /// No description provided for @psnImportSecurityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps a refresh token (about 2 months) on this device. The NPSSO itself is never saved.'**
+  String get psnImportSecurityNote;
+
+  /// No description provided for @psnImportSavedSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved session'**
+  String get psnImportSavedSession;
+
+  /// No description provided for @psnImportUseSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse the saved sign-in'**
+  String get psnImportUseSaved;
+
+  /// No description provided for @psnImportChangeAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch account'**
+  String get psnImportChangeAccount;
+
   /// No description provided for @gameListImportTitle.
   ///
   /// In en, this message translates to:

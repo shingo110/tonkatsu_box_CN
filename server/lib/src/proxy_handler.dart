@@ -5,6 +5,7 @@ import 'package:core/api/douban_constants.dart';
 import 'package:core/api/douban_signature.dart';
 import 'package:core/api/podcast_index_signature.dart';
 import 'package:core/api/proxy_targets.dart';
+import 'package:core/api/psn_constants.dart';
 import 'package:core/api/taptap_constants.dart';
 import 'package:shelf/shelf.dart';
 
@@ -217,6 +218,22 @@ class ApiProxy {
           doubanSignature(doubanSecret, '/$path', doubanTime),
         ];
         headers[HttpHeaders.userAgentHeader] = kDoubanUserAgent;
+      case ProxyTarget.psnauth:
+        // The NPSSO is password-equivalent, and a browser refuses to set a
+        // Cookie header at all. The web client therefore carries it as a query
+        // parameter; the proxy lifts it into the Cookie header and removes it
+        // so it never reaches Sony as a URL. The client pair is a fixed public
+        // constant, so the server supplies it rather than forwarding whatever
+        // arrived — the same reason every other branch owns its auth.
+        if (_takeQuery(query, kPsnNpssoParam) case final String npsso) {
+          headers[HttpHeaders.cookieHeader] = 'npsso=$npsso';
+        }
+        headers[HttpHeaders.authorizationHeader] = kPsnBasicAuth;
+      case ProxyTarget.psnweb:
+        // Same transport for the JWT the purchase list carries.
+        if (_takeQuery(query, kPsnAccessTokenParam) case final String token) {
+          headers[HttpHeaders.authorizationHeader] = 'Bearer $token';
+        }
       case ProxyTarget.tvdb:
         if (path.endsWith('login')) {
           return utf8.encode(jsonEncode(<String, Object?>{
@@ -349,6 +366,18 @@ class ApiProxy {
       );
     }
     return value;
+  }
+
+  /// Lifts a single-valued query parameter that the client used to carry a
+  /// credential past [_forwardedRequestHeaders], and removes it so the value
+  /// is not *also* sent upstream inside the URL. Returns null for an absent or
+  /// blank value, so a caller can treat "not supplied" and "supplied empty"
+  /// the same way.
+  String? _takeQuery(Map<String, List<String>> query, String name) {
+    final List<String>? values = query.remove(name);
+    if (values == null || values.isEmpty) return null;
+    final String value = values.first.trim();
+    return value.isEmpty ? null : value;
   }
 }
 

@@ -2604,6 +2604,36 @@
   "sourceNeedsIntlNetwork": "Nécessite un accès international",
   "settingsGameListImport": "Importer depuis une liste de jeux",
   "settingsGameListImportSubtitle": "Collez une liste de votre bibliothèque et associez les entrées automatiquement",
+  "settingsPsnImport": "Connexion PlayStation",
+  "settingsPsnImportSubtitle": "Connectez-vous a PSN et lisez vos jeux achetes",
+  "psnImportTitle": "PlayStation Network",
+  "psnImportDescription": "Connectez-vous a playstation.com dans un navigateur, puis ouvrez-y la page NPSSO ci-dessous. Collez la valeur affichee et l'application lira les jeux possedes par votre compte.",
+  "psnImportHowTo": "Le NPSSO est un cookie de session, pas un mot de passe, mais traitez-le comme tel. Il sert une seule fois et n'est jamais stocke ; seul le jeton de rafraichissement (environ deux mois) est conserve, et seulement si vous le demandez.",
+  "psnImportNpssoLabel": "NPSSO",
+  "psnImportNpssoHint": "Collez la valeur NPSSO",
+  "psnImportNpssoEmpty": "Saisissez d'abord un NPSSO",
+  "psnImportSignIn": "Se connecter",
+  "psnImportOpenNpssoPage": "Obtenir le NPSSO",
+  "psnImportConnect": "Se connecter et lire la bibliotheque",
+  "psnImportSigningIn": "Connexion a PlayStation...",
+  "psnImportFetchingPages": "Lecture de votre bibliotheque - {count} jeux pour l'instant...",
+  "@psnImportFetchingPages": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportFetched": "{count} jeux achetes lus",
+  "@psnImportFetched": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "psnImportEmpty": "Le compte n'a renvoye aucun jeu achete",
+  "psnImportRemember": "Rester connecte",
+  "psnImportSecurityNote": "Conserve un jeton de rafraichissement (environ 2 mois) sur cet appareil. Le NPSSO n'est jamais enregistre.",
+  "psnImportSavedSession": "Session enregistree",
+  "psnImportUseSaved": "Reutiliser la connexion enregistree",
+  "psnImportChangeAccount": "Changer de compte",
   "gameListImportTitle": "Liste de noms de jeux",
   "gameListImportDescription": "Collez votre bibliothèque de jeux, un titre par ligne. Vous pouvez la copier directement depuis la PS App, un site de trophées ou une note : la numérotation en début de ligne, les puces et les balises de plateforme en fin de ligne sont nettoyées automatiquement.",
   "gameListImportFieldHint": "Un nom de jeu par ligne…",

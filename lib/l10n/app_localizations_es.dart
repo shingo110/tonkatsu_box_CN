@@ -6142,6 +6142,74 @@ class SEs extends S {
       'Pega una lista de tu biblioteca y empareja las entradas automáticamente';
 
   @override
+  String get settingsPsnImport => 'Inicio de sesion de PlayStation';
+
+  @override
+  String get settingsPsnImportSubtitle =>
+      'Inicia sesion en PSN y lee tus juegos comprados';
+
+  @override
+  String get psnImportTitle => 'PlayStation Network';
+
+  @override
+  String get psnImportDescription =>
+      'Inicia sesion en playstation.com en cualquier navegador y abre alli la pagina de NPSSO que hay abajo. Pega el valor que muestra y la aplicacion leera los juegos que posee tu cuenta.';
+
+  @override
+  String get psnImportHowTo =>
+      'El NPSSO es una cookie de sesion, no una contrasena, pero tratala como tal. Se usa una sola vez y nunca se guarda; solo se conserva el token de refresco (unos dos meses), y solo si lo pides.';
+
+  @override
+  String get psnImportNpssoLabel => 'NPSSO';
+
+  @override
+  String get psnImportNpssoHint => 'Pega el valor NPSSO';
+
+  @override
+  String get psnImportNpssoEmpty => 'Introduce primero un NPSSO';
+
+  @override
+  String get psnImportSignIn => 'Iniciar sesion';
+
+  @override
+  String get psnImportOpenNpssoPage => 'Obtener NPSSO';
+
+  @override
+  String get psnImportConnect => 'Conectar y leer la biblioteca';
+
+  @override
+  String get psnImportSigningIn => 'Iniciando sesion en PlayStation...';
+
+  @override
+  String psnImportFetchingPages(int count) {
+    return 'Leyendo tu biblioteca: $count juegos hasta ahora...';
+  }
+
+  @override
+  String psnImportFetched(int count) {
+    return '$count juegos comprados leidos';
+  }
+
+  @override
+  String get psnImportEmpty => 'La cuenta no devolvio juegos comprados';
+
+  @override
+  String get psnImportRemember => 'Mantener la sesion';
+
+  @override
+  String get psnImportSecurityNote =>
+      'Guarda un token de refresco (unos 2 meses) en este dispositivo. El NPSSO nunca se guarda.';
+
+  @override
+  String get psnImportSavedSession => 'Sesion guardada';
+
+  @override
+  String get psnImportUseSaved => 'Reutilizar la sesion guardada';
+
+  @override
+  String get psnImportChangeAccount => 'Cambiar de cuenta';
+
+  @override
   String get gameListImportTitle => 'Lista de nombres de juegos';
 
   @override

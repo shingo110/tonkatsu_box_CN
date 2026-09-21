@@ -43,7 +43,13 @@ enum _Stage { input, review }
 /// inherently lossy, so nothing is written until the user has seen what each
 /// line resolved to and had the chance to skip or replace it.
 class GameNameListImportContent extends ConsumerStatefulWidget {
-  const GameNameListImportContent({super.key});
+  const GameNameListImportContent({super.key, this.initialNames});
+
+  /// Names to drop straight into the review step, skipping the paste stage.
+  ///
+  /// The PlayStation importer feeds the library it just fetched through here,
+  /// so matching, review and writing stay one implementation instead of two.
+  final List<String>? initialNames;
 
   @override
   ConsumerState<GameNameListImportContent> createState() =>
@@ -67,6 +73,10 @@ class _GameNameListImportContentState
   List<model.Platform> _platforms = <model.Platform>[];
   bool _platformsLoaded = false;
 
+  /// Guards the seeded run so it fires once, and only after the platform table
+  /// has loaded.
+  bool _autoStarted = false;
+
   @override
   void initState() {
     super.initState();
@@ -85,6 +95,30 @@ class _GameNameListImportContentState
     final List<String> parsed = NameListParser.parse(_controller.text);
     if (parsed.length == _parsed.length) return;
     setState(() => _parsed = parsed);
+  }
+
+  /// Runs the match once, for a caller that supplied its names up front.
+  ///
+  /// Fires only after the platform table has loaded: the platform breaks score
+  /// ties, and a match started before it settles would rank differently from
+  /// the same list typed by hand.
+  void _maybeAutoStart() {
+    if (_autoStarted || !_platformsLoaded) return;
+    final List<String>? seeded = widget.initialNames;
+    if (seeded == null || seeded.isEmpty) return;
+    _autoStarted = true;
+
+    // Through the same parser a pasted list goes through, so a fetched name
+    // that the parser would have dropped behaves identically either way.
+    _controller.text = seeded.join('\n');
+    _parsed = NameListParser.parse(_controller.text);
+    if (_parsed.isEmpty) return;
+
+    // Out of the frame that loaded the platforms, because the match opens a
+    // dialog.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _startMatching();
+    });
   }
 
   void _loadPlatforms() {
@@ -107,6 +141,9 @@ class _GameNameListImportContentState
           _platformName = _platformLabel(ps5);
         }
       });
+      // Seeded names sort against the platform, so the automatic run waits for
+      // the table rather than firing from initState.
+      _maybeAutoStart();
     });
   }
 

@@ -114,6 +114,12 @@ abstract class SettingsKeys {
 
   static const String simklRememberClientId = 'simkl_remember_client_id';
 
+  /// PlayStation refresh token from the NPSSO sign-in. Worth about two months
+  /// of account access, so it is persisted only when the user opts in.
+  static const String psnRefreshToken = 'psn_refresh_token';
+
+  static const String psnRememberToken = 'psn_remember_token';
+
   /// Last AniList username used in import dialog. Persisted on successful import.
   static const String aniListUsername = 'anilist_username';
 

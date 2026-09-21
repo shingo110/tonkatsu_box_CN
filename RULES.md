@@ -455,6 +455,52 @@
 - **别为"提高匹配率"松开这几条**：松开的直接后果是把 `烈火战神` 写进用户的收藏。宁可少匹配（落进愿望
   单，用户看得见），不可错匹配（静默污染）。要动，先跑 `probe/ps5_name_match_probe.py` 拿新数据。
 
+### 七之十九、PSN 登录导入：授权流、已购库与凭据纪律（2026-09-21，D22）
+
+**索尼不提供第三方 OAuth 注册，也没有 PIN flow。** 本项目里 Simkl 走的 PIN 是 OAuth 变体中最省事的那种，
+PSN 只剩社区逆向出来的这一套：**NPSSO cookie → code → token**。以下全部是实测值，**照抄，别再猜**：
+
+| 步骤 | 请求 | 关键点 |
+|---|---|---|
+| 换 code | `GET https://ca.account.sony.com/api/authz/v3/oauth/authorize`，参数 `access_type=offline`、`client_id=…`、`redirect_uri=com.scee.psxandroid.scecompcall://redirect`、`response_type=code`、`scope=psn:mobile.v2.core psn:clientapp` | 带 `Cookie: npsso=<x>`；**必须 `followRedirects: false`**，从 302 的 `Location` 里抠 `code` |
+| 换 token | `POST https://ca.account.sony.com/api/authz/v3/oauth/token` | `Authorization: Basic <base64(clientId:clientSecret)>`；form-urlencoded：`code`/`redirect_uri`/`grant_type=authorization_code`/`token_format=jwt` |
+| 续期 | 同端点 | `grant_type=refresh_token` + `refresh_token`，**scope 必须与授权时同一组** |
+
+- **`client_id` / `client_secret` 是索尼 PS App 的公开常量**（`09515159-7237-4370-9b40-3806e67c0891` /
+  `ucPjka5tnrB2KqsP`），每个开源 PSN 客户端都携带同一份。**不做成用户可配**：一个字节错就是 `invalid_grant`，
+  且用户手上不会有更好的值。落在 `packages/core/lib/api/psn_constants.dart`，**两端共用**（照 `douban_constants` 先例）。
+- **「302 但没有 code」= NPSSO 失效**（索尼把人弹去登录页），不是畸形响应。判据写在 `PsnAuthClient._codeFrom`，
+  文案必须引导"重新登录拿新的"，而不是报网络错误。
+
+**「已购库」确实存在，但不在 trophy 域**：`trophy/v1/.../trophyTitles` 只有**玩过的**，
+`gamelist/v2/.../titles` 是**单设备**的，真正的购买记录在
+**`web.np.playstation.com/api/graphql/v1/op`** 的 **persisted query** `getPurchasedGameList`
+（sha256 `827a423f6a8ddca4107ac01395af2ec0eafd8396fc7fa204aaf9b7ed2eefa168`），
+请求只发 `operationName` + hash + variables。
+- 响应**没有 total**，分页靠**「短页即止」**（`games.length < size`），并用 `kPsnPurchasedMaxPages` 兜底。
+- 同一游戏 PS4/PS5 是两条记录 ⇒ **按显示名去重**。收藏的是「游戏」，不是「权益」。
+- 未授权实测：该端点返 **400**（GraphQL 惯例），不是 404 —— 别拿 400 当"端点不存在"。
+
+**NPSSO 等同账号密码，纪律三条**：① **绝不落盘**（读进内存、用完即弃，`dispose` 里 `clear()`）；
+② 只有**刷新令牌**可持久化，且必须 **opt-in**（`SettingsKeys.psnRememberToken` 为真才写 `psnRefreshToken`）；
+③ 不允许出现在日志或 URL 里（见下条）。
+
+**三端一条流，靠服务端搬凭据** —— 这是 **七之十七** 的第二次验证：
+浏览器**不允许**设置 `Cookie` 请求头，而 `/proxy` 只转发 `content-type` / `accept`（`_forwardedRequestHeaders`），
+所以 Web 端把凭据放 **query**（`npsso` / `access_token`），服务端 `_authorize` 的
+`ProxyTarget.psnauth` / `psnweb` 分支**把它搬进 header 并从 query 里删掉** ——
+不删，密码级的 NPSSO 就跟着 URL 进了索尼的访问日志。桌面/手机直连，走真实 header，
+同一个客户端代码里只多一个 `kIsWebBuild` 分支。
+
+**别给它写 `ImportSource`**：`ImportSource` 的语义是「名字 → **目录条目**」，而 PSN 只给**裸名字**
+（与粘贴名单同构）。所以 PSN 止步于 `List<String>`，交给 `GameNameListImportContent(initialNames:)` ——
+**匹配、阈值、预览、入库全部复用同一套实现**（即 七之十八 那套）。
+`lib/core/import/sources/psn/` 因此**不存在**，不是漏了；设计理由写在 `lib/core/api/psn/README.md`。
+
+**可达性判据（30 秒，必须在用户设备上跑）**：浏览器打开
+`https://m.np.playstation.com/api/trophy/v1/users/me/trophyTitles` —— 出 JSON **401** ⇒ 可达；
+转圈超时 ⇒ 该网络到不了 PSN。**本机测出来的不算数**（本机跑着 TUN 代理，见 七之十一）。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。

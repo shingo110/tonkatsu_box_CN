@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:core/api/douban_constants.dart';
+import 'package:core/api/psn_constants.dart';
 import 'package:core/api/taptap_constants.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
@@ -176,6 +177,66 @@ void main() {
   });
 
   group('credential injection', () {
+    test('should move an NPSSO query parameter into the PSN Cookie header',
+        () async {
+      // A browser refuses to set Cookie, and the proxy forwards only
+      // content-type and accept — so the web client carries the NPSSO in the
+      // URL and the server puts it back where Sony expects it.
+      final Handler handler = handlerWith(<String, String>{});
+
+      final Response response = await get(
+        handler,
+        '/proxy/psnauth/api/authz/v3/oauth/authorize'
+        '?npsso=my-npsso&client_id=09515159-7237-4370-9b40-3806e67c0891',
+      );
+
+      expect(response.statusCode, HttpStatus.ok);
+      final ({String method, Uri url, Map<String, String> headers, String body})
+          sent = upstream.sent.single;
+      expect(sent.url.host, 'ca.account.sony.com');
+      expect(sent.headers[HttpHeaders.cookieHeader], 'npsso=my-npsso');
+      expect(sent.headers[HttpHeaders.authorizationHeader], kPsnBasicAuth);
+      // Stripped, so a password-equivalent value never travels upstream as a
+      // URL or lands in Sony's access log.
+      expect(sent.url.queryParameters.containsKey(kPsnNpssoParam), isFalse);
+      expect(sent.url.queryParameters['client_id'],
+          '09515159-7237-4370-9b40-3806e67c0891');
+    });
+
+    test('should still send the PSN client pair when no NPSSO is supplied',
+        () async {
+      // The sign-in page request carries no credential of its own, but the
+      // token exchange always needs the pair.
+      final Handler handler = handlerWith(<String, String>{});
+
+      await get(handler, '/proxy/psnauth/api/authz/v3/oauth/token');
+
+      expect(upstream.sent.single.headers[HttpHeaders.authorizationHeader],
+          kPsnBasicAuth);
+    });
+
+    test('should move a PSN access token into the Authorization header',
+        () async {
+      final Handler handler = handlerWith(<String, String>{});
+
+      final Response response = await get(
+        handler,
+        '/proxy/psnweb/api/graphql/v1/op'
+        '?operationName=getPurchasedGameList&access_token=a-jwt',
+      );
+
+      expect(response.statusCode, HttpStatus.ok);
+      final ({String method, Uri url, Map<String, String> headers, String body})
+          sent = upstream.sent.single;
+      expect(sent.url.host, 'web.np.playstation.com');
+      expect(sent.headers[HttpHeaders.authorizationHeader], 'Bearer a-jwt');
+      expect(
+        sent.url.queryParameters.containsKey(kPsnAccessTokenParam),
+        isFalse,
+      );
+      expect(sent.url.queryParameters['operationName'], 'getPurchasedGameList');
+    });
+
     test('should add the TMDB key as a query parameter', () async {
       final Handler handler =
           handlerWith(<String, String>{CredentialNames.tmdb: 'tmdb-secret'});

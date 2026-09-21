@@ -15,6 +15,7 @@ import 'musicbrainz_api.dart';
 import 'neodb_api.dart';
 import 'openlibrary_api.dart';
 import 'podcast_index_api.dart';
+import 'psn_api.dart';
 import 'ra_api.dart';
 import 'screenscraper_api.dart';
 import 'simkl_api.dart';
@@ -79,6 +80,8 @@ ApiError extractApiError(Exception e) {
     NeoDBApiException(:final String message, :final String? detail) =>
       (message: message, detail: detail),
     PodcastIndexApiException(:final String message, :final String? detail) =>
+      (message: message, detail: detail),
+    PsnApiException(:final String message, :final String? detail) =>
       (message: message, detail: detail),
     TvdbApiException(:final String message, :final String? detail) =>
       (message: message, detail: detail),

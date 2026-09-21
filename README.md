@@ -71,7 +71,7 @@
 | 📝 | **愿望单** | 顶层独立清单；导入器未能匹配的条目会安放于此 |
 | 🎨 | **画板** | 拖拽式画布，可放海报、便签与连线 |
 | 🏆 | **等级表与情绪网格** | S/A/B/C 分级或 N×M 可视排布，均可导出 PNG |
-| 📥 | **数据导入** | Simkl、Steam、IGDB CSV、Trakt.tv、Kinorium、RetroAchievements、MyAnimeList、AniList、Hardcover，以及自有的 JSON / CSV |
+| 📥 | **数据导入** | Simkl、Steam、IGDB CSV、Trakt.tv、Kinorium、RetroAchievements、MyAnimeList、AniList、Hardcover、**PlayStation 登录**（读取已购游戏库）、**游戏名列表**（粘贴匹配入库），以及自有的 JSON / CSV |
 | 🎬 | **Kodi 同步** | 通过 JSON-RPC 拉取电影观看状态与评分 |
 | 🎧 | **Discord 状态** | 在 Discord 中显示当前正在玩的 / 看的 / 读的（桌面端） |
 | 👤 | **多用户档案** | 一次安装可供多人使用，各自独立收藏、画板与封面 |
