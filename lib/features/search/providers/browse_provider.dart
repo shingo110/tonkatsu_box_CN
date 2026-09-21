@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/api/api_error_extract.dart';
 import '../../../shared/constants/api_defaults.dart';
+import '../../../shared/constants/source_catalog.dart';
 import '../../settings/providers/settings_provider.dart';
 import '../models/common_filter.dart';
 import '../models/search_source.dart';
@@ -262,13 +263,19 @@ class BrowseNotifier extends Notifier<BrowseState> {
     final MediaType type = _restoreMediaType();
     return BrowseState(
       mediaType: type,
-      disabledSourceIds: _keylessSourceIds(type),
+      disabledSourceIds: _initiallyDisabledSourceIds(type),
     );
   }
 
   /// A source missing its mandatory key starts switched off (its chip stays
   /// toggleable). Reads prefs directly to avoid the whole settings graph.
-  Set<String> _keylessSourceIds(MediaType type) {
+  ///
+  /// Overseas providers start off too, but only where a domestic one can take
+  /// their place. A tab whose every provider is abroad keeps them all on:
+  /// region is a hint, not proof the route is down, and a tab that opens empty
+  /// explains nothing.
+  Set<String> _initiallyDisabledSourceIds(MediaType type) {
+    final List<SearchSource> sources = searchSourcesFor(type);
     final String? tvdbKey = _prefs.getString(SettingsKeys.tvdbApiKey);
     final bool hasTvdbKey =
         (tvdbKey != null && tvdbKey.isNotEmpty) || ApiDefaults.hasTvdbKey;
@@ -287,14 +294,20 @@ class BrowseNotifier extends Notifier<BrowseState> {
         hardcoverKey != null && hardcoverKey.isNotEmpty;
     // Douban is absent on purpose: the build ships its pair, so the source
     // always has something to sign with.
-    return <String>{
-      for (final SearchSource source in searchSourcesFor(type))
+    final Set<String> disabled = <String>{
+      for (final SearchSource source in sources)
         if ((source.dataSource == DataSource.tvdb && !hasTvdbKey) ||
             (source.dataSource == DataSource.hardcover && !hasHardcoverKey) ||
             (source.dataSource == DataSource.podcastIndex &&
                 !hasPodcastIndexKeys))
           source.id,
     };
+    if (sources.any((SearchSource s) => isDomesticSource(s.dataSource))) {
+      for (final SearchSource source in sources) {
+        if (!isDomesticSource(source.dataSource)) disabled.add(source.id);
+      }
+    }
+    return disabled;
   }
 
   MediaType _restoreMediaType() {
@@ -319,7 +332,7 @@ class BrowseNotifier extends Notifier<BrowseState> {
     state = BrowseState(
       mediaType: type,
       searchQuery: preservedQuery,
-      disabledSourceIds: _keylessSourceIds(type),
+      disabledSourceIds: _initiallyDisabledSourceIds(type),
     );
     _prefs.setString(BrowseSettingsKeys.mediaType, type.name);
     if (state.hasSearchQuery) _fetch();

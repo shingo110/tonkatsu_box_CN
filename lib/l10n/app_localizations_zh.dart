@@ -5700,4 +5700,45 @@ class SZh extends S {
 
   @override
   String get markAllListened => '全部标记为已收听';
+
+  @override
+  String get settingsReachability => '网络连通性自检';
+
+  @override
+  String get settingsReachabilitySubtitle => '查看当前网络能连通哪些数据源';
+
+  @override
+  String get reachabilityIntro => '向每个数据源发一次轻量探测，报告当前网络能否连通。';
+
+  @override
+  String get reachabilityNote => '返回 4xx / 5xx 仍算连通；本页不测试接口是否可用。';
+
+  @override
+  String get reachabilityRun => '开始检测';
+
+  @override
+  String get reachabilityRerun => '重新检测';
+
+  @override
+  String get reachabilityChecking => '检测中…';
+
+  @override
+  String reachabilitySummary(int reachable, int total) {
+    return '$total 个源中 $reachable 个可连通';
+  }
+
+  @override
+  String get reachabilityOutcomeReachable => '可连通';
+
+  @override
+  String get reachabilityOutcomeTimeout => '连接超时';
+
+  @override
+  String get reachabilityOutcomeFailed => '无法连接';
+
+  @override
+  String get reachabilityWebNote => 'Web 版所有请求都由服务端发出，本页自检不适用。';
+
+  @override
+  String get sourceNeedsIntlNetwork => '需国际网络';
 }

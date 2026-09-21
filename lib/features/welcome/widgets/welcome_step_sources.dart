@@ -111,6 +111,12 @@ class _SourceCard extends ConsumerWidget {
                   color: MediaTypeTheme.colorFor(mt),
                   icon: MediaTypeTheme.iconFor(mt),
                 ),
+              if (!info.isDomestic)
+                WelcomeChip(
+                  label: l.sourceNeedsIntlNetwork,
+                  color: AppColors.warning,
+                  icon: Icons.public,
+                ),
             ],
           ),
           if (info.keyRequirement != SourceKeyRequirement.none) ...<Widget>[

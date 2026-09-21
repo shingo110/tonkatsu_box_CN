@@ -6080,4 +6080,49 @@ class SEs extends S {
 
   @override
   String get markAllListened => 'Marcar todo como escuchado';
+
+  @override
+  String get settingsReachability => 'Comprobación de red';
+
+  @override
+  String get settingsReachabilitySubtitle =>
+      'Consulta a qué fuentes llega tu red';
+
+  @override
+  String get reachabilityIntro =>
+      'Envía una sonda ligera a cada fuente e indica si la red logró llegar.';
+
+  @override
+  String get reachabilityNote =>
+      'Una respuesta 4xx o 5xx cuenta como alcanzado; esta página no prueba si la API funciona.';
+
+  @override
+  String get reachabilityRun => 'Iniciar comprobación';
+
+  @override
+  String get reachabilityRerun => 'Comprobar de nuevo';
+
+  @override
+  String get reachabilityChecking => 'Comprobando…';
+
+  @override
+  String reachabilitySummary(int reachable, int total) {
+    return '$reachable de $total fuentes alcanzadas';
+  }
+
+  @override
+  String get reachabilityOutcomeReachable => 'Alcanzada';
+
+  @override
+  String get reachabilityOutcomeTimeout => 'Tiempo agotado';
+
+  @override
+  String get reachabilityOutcomeFailed => 'Sin conexión';
+
+  @override
+  String get reachabilityWebNote =>
+      'La versión web envía todo a través del servidor, así que esta comprobación no aplica.';
+
+  @override
+  String get sourceNeedsIntlNetwork => 'Requiere acceso internacional';
 }

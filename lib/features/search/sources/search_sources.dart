@@ -66,20 +66,17 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     KitsuMangaSource(),
     // VNDB
     VndbSource(),
-    // NeoDB — the Chinese catalogue. Its movie / TV endpoints only search, so
-    // they rank behind the browsable TMDB / TheTVDB sources instead of
-    // displacing them as primary.
-    NeoDBMovieSource(),
-    // Douban carries the deepest Chinese metadata for film and TV too, but it
-    // needs a key and bans a burst, so it follows the keyless NeoDB.
+    // Douban leads film and TV: it is the one provider here a mainland
+    // network reaches unproxied, and the build ships its key pair. NeoDB
+    // follows as the keyless Chinese catalogue — its movie / TV endpoints only
+    // search, so neither displaces the browsable TMDB / TheTVDB as primary.
     DoubanMovieSource(),
-    NeoDBTvSource(),
+    NeoDBMovieSource(),
     DoubanTvSource(),
-    // Books — NeoDB leads because it is the one answering in Chinese.
-    NeoDBBookSource(),
-    // Douban has the deepest Chinese metadata but needs a user-supplied
-    // key and secret, so it ranks behind the keyless NeoDB.
+    NeoDBTvSource(),
+    // Books — Douban leads for the same reason, NeoDB follows.
     DoubanBookSource(),
+    NeoDBBookSource(),
     WeReadBookSource(),
     OpenLibrarySource(),
     FantlabSource(),

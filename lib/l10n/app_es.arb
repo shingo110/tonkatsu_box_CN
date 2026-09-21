@@ -2580,5 +2580,24 @@
   "welcomeSourceDescPodcastIndex": "Catálogo abierto de pódcasts con seguimiento por episodios. Par clave/secreto gratuito.",
   "creditsPodcastIndexAttribution": "Datos de pódcasts de Podcast Index.",
   "credentialsApiSecret": "Secreto de API",
-  "markAllListened": "Marcar todo como escuchado"
+  "markAllListened": "Marcar todo como escuchado",
+  "settingsReachability": "Comprobación de red",
+  "settingsReachabilitySubtitle": "Consulta a qué fuentes llega tu red",
+  "reachabilityIntro": "Envía una sonda ligera a cada fuente e indica si la red logró llegar.",
+  "reachabilityNote": "Una respuesta 4xx o 5xx cuenta como alcanzado; esta página no prueba si la API funciona.",
+  "reachabilityRun": "Iniciar comprobación",
+  "reachabilityRerun": "Comprobar de nuevo",
+  "reachabilityChecking": "Comprobando…",
+  "reachabilitySummary": "{reachable} de {total} fuentes alcanzadas",
+  "@reachabilitySummary": {
+    "placeholders": {
+      "reachable": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "reachabilityOutcomeReachable": "Alcanzada",
+  "reachabilityOutcomeTimeout": "Tiempo agotado",
+  "reachabilityOutcomeFailed": "Sin conexión",
+  "reachabilityWebNote": "La versión web envía todo a través del servidor, así que esta comprobación no aplica.",
+  "sourceNeedsIntlNetwork": "Requiere acceso internacional"
 }

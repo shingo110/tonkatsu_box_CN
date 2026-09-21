@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../shared/constants/source_catalog.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/theme/app_typography.dart';
@@ -550,7 +551,9 @@ class _SourceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final S l = S.of(context);
     final bool on = selected && !blocked;
+    final bool needsIntl = !isDomesticSource(source.dataSource);
     final Widget chip = Material(
       color: on ? accent.withAlpha(38) : Colors.transparent,
       borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
@@ -581,13 +584,26 @@ class _SourceChip extends StatelessWidget {
                   fontWeight: on ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
+              if (needsIntl) ...<Widget>[
+                const SizedBox(width: AppSpacing.xs),
+                Icon(
+                  Icons.public,
+                  size: 11,
+                  color: on ? AppColors.textSecondary : AppColors.textTertiary,
+                ),
+              ],
             ],
           ),
         ),
       ),
     );
 
-    if (!blocked) return chip;
-    return Tooltip(message: S.of(context).searchSourceLacksValue, child: chip);
+    final String hint = blocked
+        ? l.searchSourceLacksValue
+        : needsIntl
+            ? l.sourceNeedsIntlNetwork
+            : '';
+    if (hint.isEmpty) return chip;
+    return Tooltip(message: hint, child: chip);
   }
 }

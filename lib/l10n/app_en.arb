@@ -2667,5 +2667,24 @@
   "welcomeSourceDescPodcastIndex": "Open podcast catalog with episode-level tracking. Free key/secret pair.",
   "creditsPodcastIndexAttribution": "Podcast data from Podcast Index.",
   "credentialsApiSecret": "API Secret",
-  "markAllListened": "Mark all listened"
+  "markAllListened": "Mark all listened",
+  "settingsReachability": "Network Check",
+  "settingsReachabilitySubtitle": "See which sources your network can reach",
+  "reachabilityIntro": "Sends one lightweight probe to each source and reports whether the network reached it.",
+  "reachabilityNote": "A 4xx or 5xx answer still counts as reached; this page does not test whether an API works.",
+  "reachabilityRun": "Run Check",
+  "reachabilityRerun": "Check Again",
+  "reachabilityChecking": "Checking…",
+  "reachabilitySummary": "{reachable} of {total} sources reached",
+  "@reachabilitySummary": {
+    "placeholders": {
+      "reachable": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "reachabilityOutcomeReachable": "Reached",
+  "reachabilityOutcomeTimeout": "Timed Out",
+  "reachabilityOutcomeFailed": "Unreachable",
+  "reachabilityWebNote": "The web build routes every request through the server, so this check does not apply.",
+  "sourceNeedsIntlNetwork": "Needs international access"
 }

@@ -6061,4 +6061,49 @@ class SPt extends S {
 
   @override
   String get markAllListened => 'Marcar tudo como ouvido';
+
+  @override
+  String get settingsReachability => 'Verificação de rede';
+
+  @override
+  String get settingsReachabilitySubtitle =>
+      'Veja quais fontes sua rede alcança';
+
+  @override
+  String get reachabilityIntro =>
+      'Envia uma sonda leve a cada fonte e informa se a rede a alcançou.';
+
+  @override
+  String get reachabilityNote =>
+      'Uma resposta 4xx ou 5xx conta como alcançado; esta página não testa se a API funciona.';
+
+  @override
+  String get reachabilityRun => 'Iniciar verificação';
+
+  @override
+  String get reachabilityRerun => 'Verificar novamente';
+
+  @override
+  String get reachabilityChecking => 'Verificando…';
+
+  @override
+  String reachabilitySummary(int reachable, int total) {
+    return '$reachable de $total fontes alcançadas';
+  }
+
+  @override
+  String get reachabilityOutcomeReachable => 'Alcançada';
+
+  @override
+  String get reachabilityOutcomeTimeout => 'Tempo esgotado';
+
+  @override
+  String get reachabilityOutcomeFailed => 'Inacessível';
+
+  @override
+  String get reachabilityWebNote =>
+      'A versão web envia tudo pelo servidor, então esta verificação não se aplica.';
+
+  @override
+  String get sourceNeedsIntlNetwork => 'Requer acesso internacional';
 }

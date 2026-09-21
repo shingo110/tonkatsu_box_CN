@@ -34,6 +34,7 @@ import '../widgets/settings_tile.dart';
 import '../../welcome/screens/welcome_screen.dart';
 import 'cache_screen.dart';
 import 'credentials_screen.dart';
+import 'reachability_screen.dart';
 import 'credits_screen.dart';
 import 'database_screen.dart';
 import '../../../core/services/backup_service.dart';
@@ -82,6 +83,7 @@ const Map<String, String> _kAppLanguageNames = <String, String>{
   'fr': 'Français',
 };
 const Color _kApiKeysColor = Color(0xFFEF5350);
+const Color _kReachabilityColor = Color(0xFF26A69A);
 const Color _kDiscordColor = Color(0xFF5865F2); // Discord blurple (used for RA-sync Icons.sync tile)
 const Color _kAboutColor = Color(0xFF8E8E93);
 const Color _kDebugColor = Color(0xFFAB47BC);
@@ -570,6 +572,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ? AppColors.success
                 : null,
             onTap: () => _pushScreen(const CredentialsScreen()),
+          ),
+          SettingsTile(
+            leadingIcon: Icons.network_check,
+            leadingColor: _kReachabilityColor,
+            title: l.settingsReachability,
+            subtitle: l.settingsReachabilitySubtitle,
+            onTap: () => _pushScreen(const ReachabilityScreen()),
           ),
         ],
       ),

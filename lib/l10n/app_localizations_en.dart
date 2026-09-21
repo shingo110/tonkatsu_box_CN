@@ -6005,4 +6005,49 @@ class SEn extends S {
 
   @override
   String get markAllListened => 'Mark all listened';
+
+  @override
+  String get settingsReachability => 'Network Check';
+
+  @override
+  String get settingsReachabilitySubtitle =>
+      'See which sources your network can reach';
+
+  @override
+  String get reachabilityIntro =>
+      'Sends one lightweight probe to each source and reports whether the network reached it.';
+
+  @override
+  String get reachabilityNote =>
+      'A 4xx or 5xx answer still counts as reached; this page does not test whether an API works.';
+
+  @override
+  String get reachabilityRun => 'Run Check';
+
+  @override
+  String get reachabilityRerun => 'Check Again';
+
+  @override
+  String get reachabilityChecking => 'Checking…';
+
+  @override
+  String reachabilitySummary(int reachable, int total) {
+    return '$reachable of $total sources reached';
+  }
+
+  @override
+  String get reachabilityOutcomeReachable => 'Reached';
+
+  @override
+  String get reachabilityOutcomeTimeout => 'Timed Out';
+
+  @override
+  String get reachabilityOutcomeFailed => 'Unreachable';
+
+  @override
+  String get reachabilityWebNote =>
+      'The web build routes every request through the server, so this check does not apply.';
+
+  @override
+  String get sourceNeedsIntlNetwork => 'Needs international access';
 }

@@ -2241,5 +2241,24 @@
   "welcomeSourceDescPodcastIndex": "Открытый каталог подкастов с трекингом по эпизодам. Бесплатная пара ключей.",
   "creditsPodcastIndexAttribution": "Данные о подкастах — Podcast Index.",
   "credentialsApiSecret": "API-секрет",
-  "markAllListened": "Отметить всё прослушанным"
+  "markAllListened": "Отметить всё прослушанным",
+  "settingsReachability": "Проверка сети",
+  "settingsReachabilitySubtitle": "Проверить, какие источники доступны вашей сети",
+  "reachabilityIntro": "Отправляет один лёгкий запрос к каждому источнику и сообщает, доступен ли он сети.",
+  "reachabilityNote": "Ответ 4xx или 5xx считается достигнутым; страница не проверяет работу API.",
+  "reachabilityRun": "Запустить проверку",
+  "reachabilityRerun": "Проверить снова",
+  "reachabilityChecking": "Проверка…",
+  "reachabilitySummary": "Достигнуто {reachable} из {total}",
+  "@reachabilitySummary": {
+    "placeholders": {
+      "reachable": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "reachabilityOutcomeReachable": "Доступен",
+  "reachabilityOutcomeTimeout": "Тайм-аут",
+  "reachabilityOutcomeFailed": "Недоступен",
+  "reachabilityWebNote": "Веб-версия отправляет все запросы через сервер, поэтому проверка неприменима.",
+  "sourceNeedsIntlNetwork": "Нужен международный доступ"
 }

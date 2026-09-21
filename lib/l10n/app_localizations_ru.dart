@@ -6106,4 +6106,49 @@ class SRu extends S {
 
   @override
   String get markAllListened => 'Отметить всё прослушанным';
+
+  @override
+  String get settingsReachability => 'Проверка сети';
+
+  @override
+  String get settingsReachabilitySubtitle =>
+      'Проверить, какие источники доступны вашей сети';
+
+  @override
+  String get reachabilityIntro =>
+      'Отправляет один лёгкий запрос к каждому источнику и сообщает, доступен ли он сети.';
+
+  @override
+  String get reachabilityNote =>
+      'Ответ 4xx или 5xx считается достигнутым; страница не проверяет работу API.';
+
+  @override
+  String get reachabilityRun => 'Запустить проверку';
+
+  @override
+  String get reachabilityRerun => 'Проверить снова';
+
+  @override
+  String get reachabilityChecking => 'Проверка…';
+
+  @override
+  String reachabilitySummary(int reachable, int total) {
+    return 'Достигнуто $reachable из $total';
+  }
+
+  @override
+  String get reachabilityOutcomeReachable => 'Доступен';
+
+  @override
+  String get reachabilityOutcomeTimeout => 'Тайм-аут';
+
+  @override
+  String get reachabilityOutcomeFailed => 'Недоступен';
+
+  @override
+  String get reachabilityWebNote =>
+      'Веб-версия отправляет все запросы через сервер, поэтому проверка неприменима.';
+
+  @override
+  String get sourceNeedsIntlNetwork => 'Нужен международный доступ';
 }

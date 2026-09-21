@@ -10591,6 +10591,84 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Mark all listened'**
   String get markAllListened;
+
+  /// No description provided for @settingsReachability.
+  ///
+  /// In en, this message translates to:
+  /// **'Network Check'**
+  String get settingsReachability;
+
+  /// No description provided for @settingsReachabilitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See which sources your network can reach'**
+  String get settingsReachabilitySubtitle;
+
+  /// No description provided for @reachabilityIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends one lightweight probe to each source and reports whether the network reached it.'**
+  String get reachabilityIntro;
+
+  /// No description provided for @reachabilityNote.
+  ///
+  /// In en, this message translates to:
+  /// **'A 4xx or 5xx answer still counts as reached; this page does not test whether an API works.'**
+  String get reachabilityNote;
+
+  /// No description provided for @reachabilityRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Run Check'**
+  String get reachabilityRun;
+
+  /// No description provided for @reachabilityRerun.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Again'**
+  String get reachabilityRerun;
+
+  /// No description provided for @reachabilityChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get reachabilityChecking;
+
+  /// No description provided for @reachabilitySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{reachable} of {total} sources reached'**
+  String reachabilitySummary(int reachable, int total);
+
+  /// No description provided for @reachabilityOutcomeReachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Reached'**
+  String get reachabilityOutcomeReachable;
+
+  /// No description provided for @reachabilityOutcomeTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Timed Out'**
+  String get reachabilityOutcomeTimeout;
+
+  /// No description provided for @reachabilityOutcomeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unreachable'**
+  String get reachabilityOutcomeFailed;
+
+  /// No description provided for @reachabilityWebNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The web build routes every request through the server, so this check does not apply.'**
+  String get reachabilityWebNote;
+
+  /// No description provided for @sourceNeedsIntlNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs international access'**
+  String get sourceNeedsIntlNetwork;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

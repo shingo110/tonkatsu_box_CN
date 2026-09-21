@@ -6098,4 +6098,49 @@ class SFr extends S {
 
   @override
   String get markAllListened => 'Tout marquer comme écouté';
+
+  @override
+  String get settingsReachability => 'Vérification réseau';
+
+  @override
+  String get settingsReachabilitySubtitle =>
+      'Voir quelles sources votre réseau peut joindre';
+
+  @override
+  String get reachabilityIntro =>
+      'Envoie une sonde légère à chaque source et indique si le réseau l\'a jointe.';
+
+  @override
+  String get reachabilityNote =>
+      'Une réponse 4xx ou 5xx compte comme jointe ; cette page ne teste pas le fonctionnement de l\'API.';
+
+  @override
+  String get reachabilityRun => 'Lancer la vérification';
+
+  @override
+  String get reachabilityRerun => 'Vérifier à nouveau';
+
+  @override
+  String get reachabilityChecking => 'Vérification…';
+
+  @override
+  String reachabilitySummary(int reachable, int total) {
+    return '$reachable sources sur $total jointes';
+  }
+
+  @override
+  String get reachabilityOutcomeReachable => 'Jointe';
+
+  @override
+  String get reachabilityOutcomeTimeout => 'Délai dépassé';
+
+  @override
+  String get reachabilityOutcomeFailed => 'Injoignable';
+
+  @override
+  String get reachabilityWebNote =>
+      'La version web passe par le serveur ; cette vérification ne s\'applique pas.';
+
+  @override
+  String get sourceNeedsIntlNetwork => 'Nécessite un accès international';
 }

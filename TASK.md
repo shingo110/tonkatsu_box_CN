@@ -356,6 +356,45 @@ NeoDB 是**境外托管的中文站**，**需要国际网络**。后续给人介
 
 **四关**：analyze 干净 · **5707 应用**（+1 护栏）/ 2380 core / 110 server · RPC 字节一致。
 
+### D15 · 源区域维度 + 连通性自检（2026-09-21，起源：少爷质疑「NeoDB 要梯子，还算本土化吗」）
+
+少爷这一问戳到了项目的命门。傲天把**全部 21 个 API 宿主**过了 DNS + ASN 归属，结论比 NeoDB
+单点严重得多：
+
+| 归属 | 数 | 具体 |
+|---|:-:|---|
+| **境内** ✅ | **2** | `frodo.douban.com`（腾讯云 AS45090）· `weread.qq.com`（腾讯） |
+| 境外 Cloudflare | 8 | NeoDB · Bangumi · AniList · MangaBaka · Kitsu · ComicVine · Podcast Index · SteamGridDB |
+| 境外 AWS | 3 | TMDB · TheTVDB · IGDB |
+| 境外其他 | 8 | MangaDex(ID) · VNDB(NL) · TVmaze(DE) · OpenLibrary(US) · Fantlab(RU) · Google Books(US) · Hardcover(US) · MusicBrainz(DE) |
+
+**真正的病**：**8 个媒体类型的默认主源 8/8 在境外** —— 而境内唯一可用的豆瓣在图书 / 影视里都**排在
+NeoDB 之后**。图书更惨：8 个图书源**全部** `supportsBrowse => false`，连浏览视图都没有。
+⇒ **「本土化」的判据改成「默认路径全境内可达」，不是「所有源都在境内」。**
+
+**D（连通性自检）**：`lib/core/api/source_reachability.dart` + `lib/features/settings/screens/reachability_screen.dart`
+- 逐源对 `apiHost` 发一次 `GET /`（`Range: bytes=0-0`、`validateStatus` 全收），`Future.wait` 并发。
+- **判据是「有没有 HTTP 响应」**：401 / 403 / 404 一律算**可达**，否则「没配密钥」会被误报成网络故障。
+  已用 4 条纯函数测试钉住映射（超时 / 拒绝 / 非 Dio 异常 / HTTP 错误码）。
+- Web 端跳过（浏览器侧结论其实描述服务端），UI 写明。
+- **活体验证**：20/20 可达、总耗时 2.0s；**豆瓣 222ms · 微信读书 741ms**，其余 1043–2025ms ——
+  区域分类在延迟上也看得出来。记录存 `probe/reachability_probe_live.txt`（冒烟脚本用完即删：
+  它要联网，不能进 CI）。
+
+**A（区域优先）**：`SourceInfo` 加**必填**的 `region` + `apiHost`（21 处标注）·
+`BrowseNotifier._initiallyDisabledSourceIds`（原 `_keylessSourceIds`）**有境内源时关掉境外源**，
+**全类型无境内源则一个不关**（动画 / 漫画 / 游戏 / 音乐 / 播客 —— 提示不等于证据，空标签页什么也说明不了）·
+`search_sources.dart` 图书 / 影视**豆瓣提到 NeoDB 之前** · 境外源在源开关带 `Icons.public`、
+向导卡片加「需国际网络」chip · 新增 13 个 l10n 键（**1747 → 1760**，六语言齐平）。
+
+**护栏**：新增 3 个测试文件 14 条 —— `source_catalog_region_test.dart`（4，钉死境内集合 +
+`apiHost` 唯一非空）· `source_region_default_test.dart`（5，钉死默认开启集合）·
+`source_reachability_test.dart`（4）· `reachability_screen_test.dart`（2）。顺手同步
+`search_sources_test.dart` 的 id 顺序表。**已证伪**：临时把微信读书标成 `overseas` → 3 条测试报红，
+指向明确，不是摆设。
+
+**四关**：analyze 干净 · **5722 应用**（+15）/ 2380 core / 110 server · RPC 字节一致 · **Web 构建通过**。
+
 ## 📋 候选（下一步从这里挑）
 
 > 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > Bangumi 漫画 ✅ > 优酷/爱奇艺**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
@@ -443,6 +482,8 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
   所以必须是 TUN/VPN 形态，填普通 HTTP 代理无效。
 - **待定**：是否需要「只让境外 host 走代理」的白名单开关（国内源绕开代理更快）。少爷风格是「越简单
   越好」，所以先做**全局开关**即可。
+- **D15 已交付度量的那一半**：设置页 → 数据源 → 「网络连通性自检」可**逐个源实测**当前网络能通到谁。
+  配上 D15 的 `region` 标注，用户已能自己判断该开哪些源；T6 补的是「开完之后怎么让它通」。
 
 ## 🔧 阻塞与长期债
 
@@ -465,4 +506,6 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
 8. `lib/core/api/episode_source/tv_episode_source.dart` —— **影视源必须给 `tvEpisodeSourceResolverProvider` 加一支**（它是 `_ => tmdb` 兜底）。漏了不报任何错，但 `TvShowCacheWarmer` 与 `_refreshedTvShow` 会拿新源的 id 去 TMDB 查，**可能把不相干的剧写进缓存**。
 9. **影视的 `CollectionItem.nativeId` 恒为 null**（该 getter 只对 book / audio 生效）—— 刷新与 `.xcoll` 导入一律用 `externalId`。
 10. `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导的**输入框数**与**"获取密钥"链接数**，**按 `kDataSourceCatalog` 派生**（需密钥源数，双字段源另加）。加**需密钥**源必炸；反过来，某源若漏在向导 `_KeyEditor` 的 switch 里，这条也会炸 —— D9 时代它硬编码数字，所以漏了豆瓣照样绿（D11 根治）。双字段源集合现为 **igdb / podcastIndex** 两个（豆瓣 D12 退出）。
+12. `test/shared/constants/source_catalog_region_test.dart` —— **钉死「境内源恰好是豆瓣 + 微信读书」**，并要求每行的 `apiHost` 非空且唯一。新源没分类或分类写反即炸（D15 加）。
+13. `test/features/search/providers/source_region_default_test.dart` —— 钉死**默认开启集合**：书 = `douban` + `weread`、影 = `douban_movie`、动画 3 个全开（无境内源则一个都不关）。动 `_initiallyDisabledSourceIds` 的规则即炸（D15 加）。
 11. `test/core/api/api_error_extract_test.dart` —— **遍历 `lib/core/api` 下所有 `implements Exception` 的类，缺一即炸**。加源的 `XxxApiException` 必须同时进 `extractApiError`（`lib/core/api/api_error_extract.dart`）的 switch，否则搜索错误条会显示类名与 `(status: null)`、且 `detail` 丢失。D13 补 9 个：本次新增的 NeoDB / Bangumi / WeRead ＋ 上游本就漏的 Kitsu / MangaDex / MusicBrainz / Podcast Index / TheTVDB / TVMaze。

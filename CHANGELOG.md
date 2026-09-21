@@ -12,6 +12,38 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — a region dimension, and a check that separates reachability from failure
+
+The fork exists so a mainland network can scrape Chinese metadata, yet the
+default path ran the other way. Of the 21 catalogued API hosts only two answer
+from the mainland — Douban on Tencent Cloud and WeRead on Tencent — and every
+media type was led by a provider hosted abroad: books opened on NeoDB, and
+Douban, the one provider that answers, came after it.
+
+- `SourceInfo.region` and `SourceInfo.apiHost`
+  (`lib/shared/constants/source_catalog.dart`) are required, so a new provider
+  cannot ship unclassified; `isDomesticSource` treats an uncatalogued source as
+  overseas. `probe/host_reachability_audit.py` is the audit behind each value.
+- `BrowseNotifier._initiallyDisabledSourceIds` (was `_keylessSourceIds`) sheds a
+  type's overseas providers, but only when a domestic one is there to take their
+  place. A tab whose every provider is abroad keeps them on: a region is a hint,
+  not proof the route is down, and a tab that opens empty explains nothing.
+- `search_sources.dart` leads books, films and TV with Douban, the provider a
+  mainland network reaches and the one whose key pair the build already ships.
+- Overseas providers are marked in the UI: `Icons.public` with a tooltip on the
+  source chips (`filter_sheet.dart`), and a chip on the wizard card
+  (`welcome_step_sources.dart`).
+- `SourceReachabilityProbe` (`lib/core/api/source_reachability.dart`) and
+  `ReachabilityScreen` (`lib/features/settings/screens/reachability_screen.dart`)
+  added under Settings → Data Sources: one probe per host, concurrent, reporting
+  reached / timed out / unreachable. Any HTTP answer counts as reached, so a
+  missing key is never reported as a network fault. Skipped on web, where the
+  browser's verdict would describe the server instead.
+- Guards: `source_catalog_region_test.dart` pins the domestic pair and the
+  hosts, `source_region_default_test.dart` pins which tabs open on what,
+  `source_reachability_test.dart` pins the outcome mapping, and
+  `reachability_screen_test.dart` the rendering.
+
 ## [cn] Fixed — the search strip shows a message, not a class name
 
 `extractApiError` unwraps typed API exceptions by hand, and nine classes under

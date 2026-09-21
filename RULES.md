@@ -32,7 +32,9 @@
 
 1. `packages/core/lib/models/data_source.dart` —— 枚举加值（颜色合规参考既有项）
 2. `lib/shared/constants/data_source_ui.dart` —— 图标 switch 加分支（穷尽性会让编译器盯住你）
-3. `lib/shared/constants/source_catalog.dart` —— `SourceInfo` 加行
+3. `lib/shared/constants/source_catalog.dart` —— `SourceInfo` 加行。**`region` 与 `apiHost` 都是必填**：
+   `apiHost` 是连通性自检要敲的主机（站点与 API 往往不同域），`region` 决定它是否默认开启、
+   界面是否标「需国际网络」。分类依据是 **DNS 归属**，不是印象 —— 跑 `probe/host_reachability_audit.py`
 4. `lib/features/search/sources/<源>_source.dart` —— 源实现（80–160 行，照 `bangumi_anime_source.dart` 抄壳）
 5. `lib/core/api/<源>/` —— 三件套 + facade（types / http_client / search_api / `<源>_api.dart`）
 6. `lib/features/search/sources/search_sources.dart` —— import + 实例；**列表顺序 = 主源/备源优先级**
@@ -62,6 +64,11 @@
 - `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导输入框数与"获取密钥"链接数，按目录派生（**加需密钥源必炸**；漏源同样炸）
 - `test/core/api/api_error_extract_test.dart` —— **遍历 `lib/core/api` 下所有 `implements Exception`
   的类，缺一即炸**（D13 加）。此前只有手写的用例表，所以 NeoDB / Bangumi 漏了照样绿。
+- `test/shared/constants/source_catalog_region_test.dart` —— **钉死「境内源恰好是豆瓣 + 微信读书」**，
+  并要求每行都有非空且**唯一**的 `apiHost`（D15 加）。新源没分类、或分类写反，即红。
+- `test/features/search/providers/source_region_default_test.dart` —— 钉死**默认开启集合**：有境内源的
+  类型只留境内源（书 = `douban` + `weread`，影 = `douban_movie`），无境内源的类型一个也不关
+  （动画 3 个全开）。动了 `_initiallyDisabledSourceIds` 的规则即红。
 - RPC 一致性（见 R7，无幸免）
 
 ## 四、Windows 环境坑（全部伪装成"项目坏了"）
@@ -243,6 +250,32 @@
   在哪"—— 先看 `keyRequirement`。**
 - **品牌图标**：新接入的国内源目前都吃 Material 兜底图标（豆瓣 `Icons.local_library`）；`AppAssets` 里
   有 igdb / tmdb / tvdb / anilist / comicvine 等的彩色 png，但**无豆瓣 / NeoDB / Bangumi / WeRead**。
+
+### 七之十一、数据源区域与连通性自检（2026-09-21，D15）
+
+**结论先行**：21 个 API 宿主里**境内只有 2 个**（`frodo.douban.com` 腾讯云 · `weread.qq.com` 腾讯），
+其余 19 个全在境外（Cloudflare 8 · AWS 3 · 其余 8）。更糟的是**8 个媒体类型的默认主源 100% 在境外** ——
+境内唯一能用的豆瓣反而排在 NeoDB 之后。**「本土化」的正确判据是「默认路径全境内可达」，而不是
+「所有源都在境内」**（中文元数据最强的 Bangumi / NeoDB 恰恰都托管在境外）。审计脚本：
+`probe/host_reachability_audit.py`（DNS + ip-api ASN，21 宿主逐一定性）。
+
+- **`SourceInfo.region` / `apiHost` 均为必填**（D15）。`region` 取 `domestic` / `overseas`；
+  `isDomesticSource(DataSource)` 对**不在目录里的源返回 `false`** —— 安全半边，不许假设可达。
+- **默认开启规则**（`BrowseNotifier._initiallyDisabledSourceIds`，原名 `_keylessSourceIds`）：缺密钥的
+  `mandatory` 源关；**且当该类型存在境内源时，境外源一并关**。若整个类型一个境内源都没有（动画 /
+  漫画 / 游戏 / 音乐 / 播客），**一个都不关** —— 区域只是提示、不是「它一定不通」的证据，而开一个
+  空标签页什么也说明不了。
+- **主源顺序**（`search_sources.dart`）：图书 / 影视里**豆瓣排在 NeoDB 之前**（D15）。
+- **连通性自检**（`lib/core/api/source_reachability.dart` + 设置页 → 数据源 → 网络连通性自检）：
+  逐源对 `apiHost` 发一次 `GET /`，带 `Range: bytes=0-0` 与 `validateStatus: (_) => true`，
+  `Future.wait` 并发（全程一次往返）。**判据是「有没有 HTTP 响应」，不是状态码** —— 401 / 403 / 404
+  一律算**可达**，否则「没配密钥」会被误报成「网络故障」。Web 端直接跳过：浏览器侧的结论描述的
+  其实是服务端，UI 里写明。**别把它做成 CI 测试** —— 它需要网络，且本机（TUN 代理）的结果
+  不代表用户手机。
+- **界面标注**：境外源在筛选面板的源开关上带 `Icons.public`（Tooltip = `sourceNeedsIntlNetwork`）、
+  在向导卡片上多一枚「需国际网络」chip。
+- **活体记录**：`probe/reachability_probe_live.txt`（20/20 可达，2.0s；豆瓣 222ms / 微信读书 741ms
+  与其余 1043–2025ms 泾渭分明，正好印证区域分类）。
 
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
