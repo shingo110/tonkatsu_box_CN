@@ -455,7 +455,7 @@
 - **别为"提高匹配率"松开这几条**：松开的直接后果是把 `烈火战神` 写进用户的收藏。宁可少匹配（落进愿望
   单，用户看得见），不可错匹配（静默污染）。要动，先跑 `probe/ps5_name_match_probe.py` 拿新数据。
 
-### 七之十九、PSN 登录导入：授权流、已购库与凭据纪律（2026-09-21，D22）
+### 七之十九、PSN 登录导入：授权流、已购库与凭据纪律（2026-09-21，D23）
 
 **索尼不提供第三方 OAuth 注册，也没有 PIN flow。** 本项目里 Simkl 走的 PIN 是 OAuth 变体中最省事的那种，
 PSN 只剩社区逆向出来的这一套：**NPSSO cookie → code → token**。以下全部是实测值，**照抄，别再猜**：
@@ -497,6 +497,22 @@ PSN 只剩社区逆向出来的这一套：**NPSSO cookie → code → token**�
 **匹配、阈值、预览、入库全部复用同一套实现**（即 七之十八 那套）。
 `lib/core/import/sources/psn/` 因此**不存在**，不是漏了；设计理由写在 `lib/core/api/psn/README.md`。
 
+**这条链路唯一会静默死掉的地方：无 body 的 GET 必须自己声明 `content-type`。**
+索尼的 Apollo 网关开着 CSRF 防护：请求若**压根没有** `content-type`，或它是
+`application/x-www-form-urlencoded` / `multipart/form-data` / `text/plain`，就直接回
+**400 "blocked as a potential Cross-Site Request Forgery"**——除非带 `x-apollo-operation-name`
+或 `apollo-require-preflight`。而 `getPurchasedGameList` 是 **GET + query string**，
+Dio 对无 body 的请求**一个 content-type 都不发** ⇒ 整条导入在这一步死掉（真机首发即中）。
+
+- 修法：`Options(contentType: 'application/json')`。这是**两选一里唯一三端都通的那个** ——
+  另一个 `x-apollo-operation-name` 会被 `/proxy` 丢掉（它只转发 `content-type` / `accept`，见七之十七）。
+- **真机复现判据（无需账号）**：CSRF 检查发生在**鉴权之前**，所以用假 token 直打该端点就能看到 400 CSRF；
+  补上该头后同一请求变 **200 + `invalid_psn_access_token`**（已进业务层，且顺带证明 hash / operationName 有效）。
+  **"本机没账号所以验不了" 是错的** —— 见 九之④ 的活体验证要求。
+- 教训：**「没有 body」≠「不需要声明类型」**。网关反问 CSRF 时先看自己发了什么头，别去翻 token。
+- 回归护栏：`psn_library_client_test.dart` 有一条**只断言 `options.contentType`** 的用例 ——
+  删掉这个头能让功能在真机上整体失效，而**其余所有单测照样全绿**（MockDio 不关心头）。
+
 **可达性判据（30 秒，必须在用户设备上跑）**：浏览器打开
 `https://m.np.playstation.com/api/trophy/v1/users/me/trophyTitles` —— 出 JSON **401** ⇒ 可达；
 转圈超时 ⇒ 该网络到不了 PSN。**本机测出来的不算数**（本机跑着 TUN 代理，见 七之十一）。
@@ -513,6 +529,6 @@ Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国
 4. **在线活体验证**通过（临时插真实 API；不允许"测试都过了"当完工）
 5. **新源在自托管 Web 形态下过一遍**：起真服务端，用「客户端会发的头」打 `/proxy/<slug>/…`，
    看**上游原样的响应** —— 前端能编译不等于浏览器能搜（详见七之十七）
-6. 护栏、ARB 键数（6×**1762** 全齐）、`TASK.md` 状态同步
+6. 护栏、ARB 键数（6×**1811** 全齐）、`TASK.md` 状态同步
 
 按此清单跑完，再回头补文档与记忆。

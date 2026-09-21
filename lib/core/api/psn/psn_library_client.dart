@@ -94,6 +94,16 @@ class PsnLibraryClient {
         queryParameters: query,
         options: Options(
           headers: <String, String>{'Authorization': 'Bearer $token'},
+          // Not cosmetic: this GET has no body, so Dio sends no Content-Type at
+          // all, and Sony's Apollo gateway then answers every call with
+          // "blocked as a potential Cross-Site Request Forgery" — the request
+          // never reaches the entitlement service. Declaring a non-form type is
+          // one of the two ways past that gate (the other, the
+          // x-apollo-operation-name header, is dropped by the web proxy, which
+          // only forwards content-type and accept). Verified against the live
+          // host: without it 400 CSRF, with it the call runs and reports
+          // invalid_psn_access_token for a bad token.
+          contentType: 'application/json',
           // GraphQL reports a rejected token as 200 with an `errors` array and
           // a refused one as 400; both need the body, not an exception.
           validateStatus: (int? status) => status != null && status < 500,

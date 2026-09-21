@@ -12,6 +12,37 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — PlayStation sign-in died on a CSRF rejection
+
+Signing in on a device failed before any request reached the account service.
+Sony's GraphQL host runs Apollo's CSRF prevention, which refuses a request that
+carries **no** `content-type` — or one of `application/x-www-form-urlencoded`,
+`multipart/form-data`, `text/plain` — unless the caller presents
+`x-apollo-operation-name` or `apollo-require-preflight`. The purchase list is a
+GET with its whole payload in the query string, so Dio had no body to infer a
+type from and sent no `content-type` at all; every call came back 400 "blocked
+as a potential Cross-Site Request Forgery".
+
+`PsnLibraryClient._fetchPage` now declares `application/json`, which is the only
+one of the two accepted escapes that survives the selfhost proxy: the
+`x-apollo-operation-name` alternative would be dropped by
+`_forwardedRequestHeaders`, which forwards just `content-type` and `accept`.
+
+Reproduced and re-verified against the live host **without an account** — the
+CSRF gate runs before authentication, so a fake token yields the 400 without the
+header and `200 + invalid_psn_access_token` with it. That second response also
+confirms the persisted-query hash and operation name are accepted.
+
+- `lib/core/api/psn/psn_library_client.dart`: `Options(contentType:)` on the
+  persisted-query GET, with the reason and both observed responses in a comment.
+- `psn_library_client_test.dart` asserts the option directly: dropping it
+  disables the feature on every platform while the rest of the suite stays green
+  (MockDio never inspects headers).
+- `lib/core/api/psn/README.md` and RULES 七之十九 record the gate, the two
+  accepted escapes and the account-free way to reproduce it.
+- RULES 七之十九's heading corrected to D23, and the completion checklist's ARB
+  count to 1811.
+
 ## [cn] Added — a PlayStation library can now be imported by signing in
 
 The paste-a-list importer shipped first, and it had a hole where the list was

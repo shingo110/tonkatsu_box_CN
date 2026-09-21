@@ -126,6 +126,26 @@ void main() {
       expect(options.headers?['Authorization'], 'Bearer jwt');
     });
 
+    test('declares a JSON content type on the body-less GET', () async {
+      // Sony's Apollo gateway answers a request that carries no Content-Type
+      // with "blocked as a potential Cross-Site Request Forgery" — and this GET
+      // puts its whole payload in the query string, so Dio sends no body and
+      // therefore no Content-Type unless it is declared here. Dropping it
+      // breaks the whole feature on device while every other test stays green.
+      stubPages(<Response<dynamic>>[
+        makeResponse(gamesPage(<String>['Solo'])),
+      ]);
+
+      await client.fetchPurchasedGames(accessToken: 'jwt');
+
+      final Options options = verify(() => mockDio.get<dynamic>(
+            any(),
+            queryParameters: any(named: 'queryParameters'),
+            options: captureAny(named: 'options'),
+          )).captured.single as Options;
+      expect(options.contentType, 'application/json');
+    });
+
     test('walks to the next page while a full one keeps arriving', () async {
       stubPages(<Response<dynamic>>[
         makeResponse(gamesPage(<String>[

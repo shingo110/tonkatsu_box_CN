@@ -36,6 +36,27 @@ per-device.
 The response is paged with `size`/`start` and has no total count, so the walk
 stops on the first short page, bounded by `kPsnPurchasedMaxPages`.
 
+### The `content-type` header is load-bearing, not cosmetic
+
+Sony's GraphQL host sits behind Apollo's CSRF prevention. A request that carries
+**no** `content-type` — or one of `application/x-www-form-urlencoded`,
+`multipart/form-data`, `text/plain` — is answered with **400 "blocked as a
+potential Cross-Site Request Forgery"** before any token is looked at, unless it
+presents `x-apollo-operation-name` or `apollo-require-preflight`.
+
+This call is a **GET with everything in the query string**, so Dio has no body
+to infer a type from and sends no `content-type` at all: the first device build
+failed here with exactly that 400. `Options(contentType: 'application/json')`
+is the fix, and it is the only one of the two accepted escapes that survives the
+web proxy — `x-apollo-operation-name` would be dropped, since
+`_forwardedRequestHeaders` forwards just `content-type` and `accept`.
+
+Removing that one line breaks the feature on every platform while leaving the
+rest of the unit suite green, so `psn_library_client_test.dart` asserts it
+directly. It can be reproduced without an account: the CSRF gate runs before
+authentication, so a **fake** token against the live endpoint shows the 400
+without the header and `200 + invalid_psn_access_token` with it.
+
 ## Credential handling
 
 - The **NPSSO is never persisted.** It is spent the moment it arrives and
