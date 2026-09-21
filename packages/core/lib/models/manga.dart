@@ -230,12 +230,20 @@ class Manga {
       return null;
     }
 
+    // Chinese first. A MangaDex record never carries a Chinese name in `title`
+    // — it sits in `altTitles` as `zh` (Simplified) or `zh-hk` (Traditional),
+    // and only about three records in five have one at all. Leading with it is
+    // the point of this fork: searching 海贼王 should show 航海王, not
+    // "One Piece". Records without one keep their romaji / English title.
+    final String? chinese = _firstNonEmpty(
+      <String?>[for (final String lang in _zhTitleKeys) pickTitle(lang)],
+    );
     final String? english = pickTitle('en');
     final String? romaji = pickTitle('ja-ro') ?? english;
-    final String? native =
-        pickTitle('ja') ?? pickTitle('ko') ?? pickTitle('zh');
+    final String? native = pickTitle('ja') ?? pickTitle('ko');
     final String title =
-        _firstNonEmpty(<String?>[romaji, english, native]) ?? 'Unknown';
+        _firstNonEmpty(<String?>[chinese, romaji, english, native]) ??
+            'Unknown';
 
     final List<dynamic> relationships =
         (json['relationships'] as List<dynamic>?) ?? const <dynamic>[];
@@ -465,7 +473,9 @@ class Manga {
   /// sharing a numeric id never collide.
   final DataSource source;
 
-  /// Romaji title (always present per AniList contract).
+  /// Display title, never empty. AniList fills it with romaji and Kitsu with
+  /// the canonical title; MangaDex leads with the Chinese name when the record
+  /// has one; a Chinese catalogue (Douban) puts the Chinese title here outright.
   final String title;
 
   final String? titleEnglish;
@@ -747,11 +757,28 @@ class Manga {
         _ => null,
       };
 
-  /// Picks the English (or first non-empty) value from a MangaDex localized
-  /// map (`{en: ..., ja: ...}`).
+  /// Chinese keys on a MangaDex localized map, most specific first: `zh` is
+  /// Simplified and `zh-hk` Traditional, and a record may carry either, both
+  /// or neither. Shared by the title picker and [_localized].
+  static const List<String> _zhTitleKeys = <String>[
+    'zh',
+    'zh-cn',
+    'zh-hans',
+    'zh-hk',
+    'zh-hant',
+  ];
+
+  /// Picks the Chinese value when the map has one, then English, then the
+  /// first non-empty value — from a MangaDex localized map (`{en: ..., ja: ...}`).
+  /// Tag names only ever ship `en`, so in practice this shifts the description,
+  /// and only for the ~7% of records that carry a Chinese one.
   static String? _localized(Object? map) {
     if (map is! Map<String, dynamic>) {
       return map is String ? _nonEmpty(map) : null;
+    }
+    for (final String lang in _zhTitleKeys) {
+      final Object? zh = map[lang];
+      if (zh is String && zh.isNotEmpty) return zh;
     }
     final Object? en = map['en'];
     if (en is String && en.isNotEmpty) return en;

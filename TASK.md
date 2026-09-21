@@ -408,10 +408,10 @@ NeoDB 之后**。图书更惨：8 个图书源**全部** `supportsBrowse => fals
   `/api/v2/tv/{id}` 详情 **73 字段**，含 `episodes_count` / `intro` / `genres` / `rating`（0–10）
   —— **数据比 Bangumi 还全**。⇒ **不必另找源，也不必背 bangumi-data 那 1.45MB 快照与 CC-BY 署名义务。**
 - `/api/v2/search/music` **也是通的**（200 / 中文专辑名 / `rating` 0–10 / `genres` / `pubdate` / `intro` / `discs`）
-  ⇒ 音乐线可照此另开一源（**D17 首选**）。`/api/v2/search/game` **404**（豆瓣无游戏入口）。
-- **漫画中文有零成本解法（未落地）**：**MangaDex 原生支持中文标题检索** —— `?title=进击的巨人` 命中
-  "Attack on Titan"，`altTitles` 带 `{'zh': '进击的巨人'}`；而 MangaDex **在少爷网络下本来就连得通**。
-  即「修既有源」而非「加新源」。
+  ⇒ 音乐线可照此另开一源（**D18**）。`/api/v2/search/game` **404**（豆瓣无游戏入口）。
+- **漫画中文已落地（→ D17）**：**MangaDex 原生支持中文标题检索** —— `?title=进击的巨人` 命中
+  "Attack on Titan"，`altTitles` 带 `{'zh': '进击的巨人'}`。修的是**既有源**，零新增；
+  本轮实测中文别名覆盖 **61%**（热门头部 83%）。
 - 候选替代源归属复核（`probe/audit_candidates.py`，DNS + ASN）：境内 = 豆瓣 / 微信读书 /
   `registry.npmmirror.com` / `www.ximalaya.com`（播客候选）/ `www.taptap.cn`（游戏候选）/ `api.bilibili.com`。
   **`api.mangabaka.dev` 已官方下线**（500 "deprecated and no longer serves traffic"）；项目用的是 `.org`，不受影响。
@@ -456,6 +456,57 @@ NeoDB 之后**。图书更惨：8 个图书源**全部** `supportsBrowse => fals
 `browse_provider_test.dart` 的 pre-0.41 迁移用例（`hasLength(3)` → `1`）。
 
 **四关**：analyze 干净 · **5741 应用**（+19）/ 2380 core / 110 server · RPC 字节一致。
+
+### D17 · 漫画中文元数据（2026-09-21，起源：D16 收尾时判定的「漫画是最后一个洞」· 零新增源）
+
+D16 之后，**漫画线是最后一个「中文查询只回罗马音」的类型**。缺口不在数据 —— MangaDex 一直带着中文名，
+只是解析器没去读它。
+
+**缺口定位（先探测、后写码）**：
+
+- MangaDex 的**检索本身跨全部标题**：`?title=海贼王` → 命中 `One Piece`，`?title=进击的巨人` →
+  命中 `Attack on Titan`。**搜索从来不是问题**。
+- 问题在**解析**：`Manga.fromMangaDex` 的 `title` 取 `ja-ro ?? en ?? native`，而 MangaDex 的中文名
+  **从不写在 `title` 里**，只存在于 `altTitles` 的 `zh` / `zh-hk` 键 ⇒ **搜中了也显示 `"One Piece"`**。
+- 实测（`probe/mangadex_zh_coverage.py`）：**5/5 中文关键词全部命中**，且**每一行都带中文标题**；
+  `zh` 是**简体**、`zh-hk` 是**繁体**；**中文标题覆盖 61%**（`followedCount` 排序 500 行采样；
+  **前 100 行 83%**）。原始 JSON 核对：「海贼王」那条 `altTitles` 有四个中文别名
+  （`海贼王` / `海盗路飞` / `航海王` / `zh-hk:海賊王`），`zh` 键取首位。
+- 附带实测（`probe/mangadex_desc_tag_probe.py`）：**描述中文仅 7%**（21/300；语言键 en 300 / ja 233 /
+  pt-br 202 …）；**77 个 tag 的名全部只有 `en`** ⇒ 筛选词表不受影响。
+- ⚠️ **MangaBaka 直连 403**（`series/search` 正确端点 + 带 UA 仍 403，传输层无特殊 header）——
+  属**服务端拒直连**，与中文标题无关，**单独记入 T5/待办**。
+
+**落地**（`packages/core/lib/models/manga.dart`，**零新源、零新枚举、零 l10n**）：
+
+- `Manga.fromMangaDex` 新增中文拾取 `_zhTitleKeys = ['zh', 'zh-cn', 'zh-hans', 'zh-hk', 'zh-hant']`，
+  **中文优先进 `title` 槽** ⇒ 默认标题语言（romaji）下显示中文；**无中文的记录行为完全不变**
+  （仍 `ja-ro ?? en ?? native`）。
+- `titleNative` **移出**原先的 `zh` 末位兜底，只留 `ja ?? ko`（原名语义干净化）；
+  `titleEnglish` 不动。三槽语义：**中文主标题 / 英文 / 日韩原名**。
+- `_localized` 同样中文优先（zh 系 → en → 首个非空），**影响描述**（7% 的记录）、**不影响 tag**
+  （tag 只有 en）。
+- `Manga.title` / `Anime.title` 的字段注释同步更正 —— 原文写「Romaji title (always present per
+  AniList contract)」，D16 之后这句已不成立。
+
+**活体实测**（真接口喂真解析器）：搜「海贼王」→ `title=海贼王 · en=One Piece · native=ワンピース`；
+「进击的巨人」→ `进击的巨人`；「鬼灭之刃」→ `鬼灭之刃`；「咒术回战」→ `咒术回战`。
+
+**未做（判断过、刻意不做）**：**不动 `search_sources` 的注册顺序**。注释虽写「order drives per-type
+primary」，但 `primarySearchSourceFor` 全仓**只有 `wishlist_screen` 一处调用**（判断该类型有无源），
+搜索结果本就是**并发打所有开启源做并集** ⇒ 挪动 MangaDex 到漫画组首位**不改变任何行为**，
+只会炸 `search_sources_test` 的 id 顺序表。漫画线 5 源全在境外（D15 规则：无境内源 ⇒ 一个都不关），
+MangaDex 本来就默认开启。
+
+**⚠️ 诚实的边界**：MangaDex **仍是境外源**（DNS 归属印尼），D15 的 `region` 标注**照实保留为
+`overseas`**。这一轮做到的是「**不挂代理也能拿到中文漫画元数据**」（它在少爷网络下可达，且**不在
+D15 手机自检的失败名单里**），**不是**「漫画线有了境内源」—— 那一条至今无解（B 站漫画 code 99 ·
+快看 404 · 动漫之家不可达 · copymanga 302）。
+
+**护栏**：`packages/core/test/models/manga_mangadex_kitsu_test.dart` 新增 5 条
+（中文优先进 `title` · `zh` 优先于 `zh-hk` · 仅繁体时兜底 · **无中文时行为不变** · 描述中文优先）。
+
+**四关**：analyze 干净 · **5741 应用** / **2385 core**（+5）/ 110 server · RPC 字节一致。
 
 ## 📋 候选（下一步从这里挑）
 

@@ -84,6 +84,72 @@ void main() {
       expect(m.title, 'Chainsaw Man');
     });
 
+    /// MangaDex never puts a Chinese name in `title`; it only ever appears in
+    /// `altTitles`, as `zh` (Simplified) or `zh-hk` (Traditional). Roughly
+    /// three records in five carry one — these pin the ones that do.
+    test('leads with the Chinese alt title when the record carries one', () {
+      final Map<String, dynamic> json = mangaDexJson();
+      (json['attributes'] as Map<String, dynamic>)['altTitles'] =
+          <Map<String, dynamic>>[
+        <String, dynamic>{'ja-ro': 'Chensō Man'},
+        <String, dynamic>{'ja': 'チェンソーマン'},
+        <String, dynamic>{'zh': '电锯人'},
+      ];
+      final Manga m = Manga.fromMangaDex(json);
+      expect(m.title, '电锯人');
+      expect(m.titleEnglish, 'Chainsaw Man');
+      // Chinese holds the leading slot now, so the native slot stops doubling
+      // as a Chinese fallback and keeps the Japanese original alone.
+      expect(m.titleNative, 'チェンソーマン');
+    });
+
+    test('prefers Simplified zh over Traditional zh-hk', () {
+      final Map<String, dynamic> json = mangaDexJson();
+      (json['attributes'] as Map<String, dynamic>)['title'] =
+          <String, dynamic>{'ja-ro': 'One Piece'};
+      (json['attributes'] as Map<String, dynamic>)['altTitles'] =
+          <Map<String, dynamic>>[
+        <String, dynamic>{'zh-hk': '海賊王'},
+        <String, dynamic>{'zh': '航海王'},
+      ];
+      expect(Manga.fromMangaDex(json).title, '航海王');
+    });
+
+    test('accepts Traditional zh-hk when it is the only Chinese title', () {
+      final Map<String, dynamic> json = mangaDexJson();
+      (json['attributes'] as Map<String, dynamic>)['altTitles'] =
+          <Map<String, dynamic>>[
+        <String, dynamic>{'zh-hk': '海賊王'},
+      ];
+      final Manga m = Manga.fromMangaDex(json);
+      expect(m.title, '海賊王');
+      // Nothing Japanese to fall back on — the leading slot is the Chinese
+      // name and the other two stay empty rather than repeating it.
+      expect(m.titleNative, isNull);
+    });
+
+    test('keeps the romaji / English title when no Chinese one exists', () {
+      final Map<String, dynamic> json = mangaDexJson();
+      (json['attributes'] as Map<String, dynamic>)['altTitles'] =
+          <Map<String, dynamic>>[
+        <String, dynamic>{'ja-ro': 'Chensō Man'},
+        <String, dynamic>{'ja': 'チェンソーマン'},
+      ];
+      final Manga m = Manga.fromMangaDex(json);
+      expect(m.title, 'Chensō Man');
+      expect(m.titleNative, 'チェンソーマン');
+    });
+
+    test('prefers a Chinese description when the record carries one', () {
+      final Map<String, dynamic> json = mangaDexJson();
+      (json['attributes'] as Map<String, dynamic>)['description'] =
+          <String, dynamic>{
+        'en': 'Denji is <b>poor</b>.',
+        'zh': '电次很<b>穷</b>。',
+      };
+      expect(Manga.fromMangaDex(json).description, '电次很穷。');
+    });
+
     test('infers manhwa / manhua from originalLanguage', () {
       final Map<String, dynamic> ko = mangaDexJson();
       (ko['attributes'] as Map<String, dynamic>)['originalLanguage'] = 'ko';

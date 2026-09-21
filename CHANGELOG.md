@@ -12,6 +12,33 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — MangaDex now keeps the Chinese name it was already returning
+
+The manga tab was the last one where a Chinese query still answered in romaji.
+The gap was never the data: MangaDex matches a Chinese query across every title
+it holds, so 海贼王 already returned One Piece. What it did not do was hand the
+Chinese name over — that lives only in `altTitles`, while the parser read
+`title` as romaji-or-English, and the hit came back as "One Piece".
+
+- `Manga.fromMangaDex` (`packages/core/lib/models/manga.dart`) picks a Chinese
+  title first — `zh`, then `zh-cn` / `zh-hans` / `zh-hk` / `zh-hant`, as a
+  record may carry either script or both — and gives it the `title` slot, so
+  the default title language shows Chinese. `titleNative` drops its old Chinese
+  fallback and holds the Japanese or Korean original alone; `titleEnglish` is
+  unchanged. A record without a Chinese name keeps the title it had.
+- `_localized` takes the same Chinese-first order, which shifts the description
+  for the ~7% of records that carry one. Tag names only ever ship `en`, so the
+  filter vocabulary is untouched.
+- `Manga.title` and `Anime.title` comments corrected: the slot is the display
+  title, and a Chinese catalogue fills it with Chinese.
+
+Measured live: 海贼王 / 进击的巨人 / 鬼灭之刃 / 咒术回战 each come back with
+their Chinese name and the Japanese original intact in `titleNative`. A Chinese
+alt title covers 61% of a 500-row popularity sample and 83% of the top hundred,
+so the no-Chinese path stays exercised by the records that have none.
+
+Gates: analyze clean; 5741 app / 2385 core / 110 server; RPC byte-identical.
+
 ## [cn] Added — the anime tab now opens on a Chinese catalogue a mainland network reaches
 
 The region work left one hole it could not close by reordering providers: no

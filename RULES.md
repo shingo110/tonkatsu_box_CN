@@ -277,6 +277,35 @@
 - **活体记录**：`probe/reachability_probe_live.txt`（20/20 可达，2.0s；豆瓣 222ms / 微信读书 741ms
   与其余 1043–2025ms 泾渭分明，正好印证区域分类）。
 
+### 七之十二、MangaDex 中文标题（2026-09-21，D17 · 既有源改造，零新增）
+
+**缺口不在数据，在解析。** MangaDex 的检索**本来就跨全部标题**（`?title=海贼王` 命中 `One Piece`、
+`?title=进击的巨人` 命中 `Attack on Titan`），中文名也一直在响应里 —— 只是 `Manga.fromMangaDex`
+的 `title` 取 `ja-ro ?? en ?? native`，而中文名**从不写在 `title`**，只藏在 `altTitles` 的
+`zh` / `zh-hk` 键 ⇒ **搜中了也显示英文**。
+
+- **中文键只有两个**：`zh` = **简体**、`zh-hk` = **繁体**（实测 500 行：`alt.zh` 248 · `alt.zh-hk` 205 ·
+  `alt.zh-ro` 17 罗马化，**后者无价值，不收**）。`title` map 里**没有** zh 键，所以 `pickTitle`
+  必须先查 `titleMap` 再扫 `altTitles`（现有实现已是如此）。
+- **覆盖 61%**（`followedCount` 排序 500 行；**前 100 行 83%**）⇒ 近四成条目无中文，
+  **必须保证无中文时行为完全不变**（`title` 仍 `ja-ro ?? en ?? native`）。
+- **槽位约定**：中文进 **`title`**（主标题槽）⇒ 默认设置 `romaji` 下就显示中文；
+  `titleEnglish` = `en`；**`titleNative` 只留 `ja ?? ko`** —— 原实现把 `zh` 当末位兜底，
+  中文移入 `title` 后必须**移除**，否则同一名字占两槽。
+- **`_localized` 同样中文优先**（zh 系 → en → 首个非空）：**描述**受影响（**仅 7%** 的记录有中文描述，
+  21/300）；**77 个 tag 的名只有 `en`**，故筛选词表**零影响**。
+- ⚠️ **MangaBaka 直连 403**（`series/search` 正确端点 + 带 UA 仍拒），传输层无特殊 header ⇒
+  服务端拒直连，与标题无关，**单独待办**。
+
+**不做（判断过）**：**不挪 `search_sources` 注册顺序**。注释虽写「order drives per-type primary」，
+但 `primarySearchSourceFor` 全仓**只有 `wishlist_screen` 一处调用**（问该类型有无源），
+搜索本就是**并发打所有开启源做并集** ⇒ 把 MangaDex 挪到漫画组首位**不改变任何行为**，
+只炸 `search_sources_test` 的 id 顺序表。漫画 5 源全境外（D15 规则 ⇒ 一个都不关），MangaDex 本就默认开。
+
+**诚实的边界**：MangaDex **仍是境外源**（DNS 归属印尼），`region` 照实标 `overseas`。
+本轮做到的是「**不挂代理也拿得到中文漫画元数据**」，**不是**「漫画线有了境内源」——
+后者至今无解（B 站漫画 code 99 · 快看 404 · 动漫之家不可达 · copymanga 302）。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。
@@ -287,6 +316,6 @@ Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国
 2. `flutter test` · `dart test`（packages/core）· `dart test`（server）**全绿**
 3. RPC 生成物 `git diff --exit-code -- packages/core/lib/rpc/generated` 为空
 4. **在线活体验证**通过（临时插真实 API；不允许"测试都过了"当完工）
-5. 护栏、ARB 键数（6×1745 全齐）、`TASK.md` 状态同步
+5. 护栏、ARB 键数（6×1760 全齐）、`TASK.md` 状态同步
 
 按此清单跑完，再回头补文档与记忆。

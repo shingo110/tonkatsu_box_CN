@@ -316,7 +316,8 @@ class Anime {
   /// Provider this record came from; part of the cache identity `(id, source)`.
   final DataSource source;
 
-  /// Romaji title (always present per AniList contract).
+  /// Display title, never empty. AniList fills it with romaji; Bangumi and
+  /// Douban — the Chinese catalogues — put the Chinese title here outright.
   final String title;
 
   final String? titleEnglish;
