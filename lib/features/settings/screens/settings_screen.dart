@@ -49,6 +49,7 @@ import 'anilist_import_screen.dart';
 import 'hardcover_import_screen.dart';
 import 'custom_cards_import_screen.dart';
 import 'igdb_list_import_screen.dart';
+import 'game_name_list_import_screen.dart';
 import 'mal_import_screen.dart';
 import 'ra_import_screen.dart';
 import 'kinorium_import_screen.dart';
@@ -82,6 +83,7 @@ const Map<String, String> _kAppLanguageNames = <String, String>{
   'pt': 'Português (Brasil)',
   'fr': 'Français',
 };
+const Color _kImportColor = Color(0xFF5C6BC0);
 const Color _kApiKeysColor = Color(0xFFEF5350);
 const Color _kReachabilityColor = Color(0xFF26A69A);
 const Color _kDiscordColor = Color(0xFF5865F2); // Discord blurple (used for RA-sync Icons.sync tile)
@@ -314,6 +316,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             title: l.settingsIgdbImport,
             subtitle: l.settingsIgdbImportSubtitle,
             onTap: () => _pushScreen(const IgdbListImportScreen()),
+          ),
+          SettingsTile(
+            leadingIcon: Icons.playlist_add,
+            leadingColor: _kImportColor,
+            title: l.settingsGameListImport,
+            subtitle: l.settingsGameListImportSubtitle,
+            onTap: () => _pushScreen(const GameNameListImportScreen()),
           ),
           SettingsTile(
             leadingAssetPath: AppAssets.iconRaColor,

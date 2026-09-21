@@ -2688,5 +2688,55 @@
   "reachabilityOutcomeTimeout": "Timed Out",
   "reachabilityOutcomeFailed": "Unreachable",
   "reachabilityWebNote": "The web build routes every request through the server, so this check does not apply.",
-  "sourceNeedsIntlNetwork": "Needs international access"
+  "sourceNeedsIntlNetwork": "Needs international access",
+  "settingsGameListImport": "Import from a game list",
+  "settingsGameListImportSubtitle": "Paste a library list and match entries automatically",
+  "gameListImportTitle": "Game name list",
+  "gameListImportDescription": "Paste your game library, one title per line. Copy it straight from the PS App, a trophy site or a note — leading numbers, bullets and trailing platform tags are cleaned up automatically.",
+  "gameListImportFieldHint": "One game name per line…",
+  "gameListImportParsed": "{count} game names recognized",
+  "@gameListImportParsed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportParsedEmpty": "No game names recognized yet",
+  "gameListImportStart": "Start matching",
+  "gameListImportMatching": "Matching…",
+  "gameListImportReviewTitle": "Confirm the matches",
+  "gameListImportSummary": "{matched} of {total} matched",
+  "@gameListImportSummary": {
+    "placeholders": {
+      "matched": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "gameListImportMatched": "Matches",
+  "gameListImportNotFound": "No match found",
+  "gameListImportSearchFailed": "Lookup failed",
+  "gameListImportSkip": "Do not import",
+  "gameListImportReview": "Review",
+  "gameListImportNoCandidates": "No candidates returned",
+  "gameListImportConfirm": "Import {count}",
+  "@gameListImportConfirm": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportReasonNotFound": "No match found in the game catalogues",
+  "gameListImportQualityExact": "Identical",
+  "gameListImportQualityStrong": "Exact match",
+  "gameListImportQualityFair": "Close match",
+  "gameListImportQualityWeak": "Possible match",
+  "gameListImportQualityNone": "Unmatched",
+  "gameListImportIgdbMissing": "IGDB is not connected: Chinese titles still match through TapTap, but Latin titles cannot be matched.",
+  "gameListImportPlatformHint": "Only affects the platform shown on each item",
+  "gameListImportUnmatchedNote": "{count} of them are unmatched and will go to the wishlist",
+  "@gameListImportUnmatchedNote": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportBackToInput": "Back to edit",
+  "gameListImportStatusLabel": "Status after import"
 }

@@ -5747,4 +5747,101 @@ class SZh extends S {
 
   @override
   String get sourceNeedsIntlNetwork => '需国际网络';
+
+  @override
+  String get settingsGameListImport => '从游戏名列表导入';
+
+  @override
+  String get settingsGameListImportSubtitle => '粘贴游戏库列表，自动匹配条目';
+
+  @override
+  String get gameListImportTitle => '游戏名列表';
+
+  @override
+  String get gameListImportDescription =>
+      '粘贴你的游戏库，每行一个游戏名。可直接从 PS App、奖杯网站或记事本复制——行首编号、项目符号与行尾平台标记会自动清理。';
+
+  @override
+  String get gameListImportFieldHint => '每行一个游戏名…';
+
+  @override
+  String gameListImportParsed(int count) {
+    return '已识别 $count 个游戏名';
+  }
+
+  @override
+  String get gameListImportParsedEmpty => '还没有识别到游戏名';
+
+  @override
+  String get gameListImportStart => '开始匹配';
+
+  @override
+  String get gameListImportMatching => '正在匹配…';
+
+  @override
+  String get gameListImportReviewTitle => '确认匹配结果';
+
+  @override
+  String gameListImportSummary(int matched, int total) {
+    return '$matched / $total 已匹配';
+  }
+
+  @override
+  String get gameListImportMatched => '匹配结果';
+
+  @override
+  String get gameListImportNotFound => '未找到匹配';
+
+  @override
+  String get gameListImportSearchFailed => '查询失败';
+
+  @override
+  String get gameListImportSkip => '不导入';
+
+  @override
+  String get gameListImportReview => '查看';
+
+  @override
+  String get gameListImportNoCandidates => '没有候选结果';
+
+  @override
+  String gameListImportConfirm(int count) {
+    return '导入 $count 个';
+  }
+
+  @override
+  String get gameListImportReasonNotFound => '在游戏目录中未找到匹配';
+
+  @override
+  String get gameListImportQualityExact => '完全一致';
+
+  @override
+  String get gameListImportQualityStrong => '精确匹配';
+
+  @override
+  String get gameListImportQualityFair => '高度相近';
+
+  @override
+  String get gameListImportQualityWeak => '可能相符';
+
+  @override
+  String get gameListImportQualityNone => '未匹配';
+
+  @override
+  String get gameListImportIgdbMissing =>
+      '未连接 IGDB：中文名仍可通过 TapTap 匹配，英文名将无法匹配。';
+
+  @override
+  String get gameListImportPlatformHint => '仅影响条目上显示的平台';
+
+  @override
+  String gameListImportUnmatchedNote(int count) {
+    return '其中 $count 个未匹配，将加入心愿单';
+  }
+
+  @override
+  String get gameListImportBackToInput => '返回修改';
+
+  @override
+  String get gameListImportStatusLabel => '导入后的状态';
 }

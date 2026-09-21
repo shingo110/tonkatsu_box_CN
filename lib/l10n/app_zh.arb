@@ -2596,5 +2596,55 @@
   "reachabilityOutcomeTimeout": "连接超时",
   "reachabilityOutcomeFailed": "无法连接",
   "reachabilityWebNote": "Web 版所有请求都由服务端发出，本页自检不适用。",
-  "sourceNeedsIntlNetwork": "需国际网络"
+  "sourceNeedsIntlNetwork": "需国际网络",
+  "settingsGameListImport": "从游戏名列表导入",
+  "settingsGameListImportSubtitle": "粘贴游戏库列表，自动匹配条目",
+  "gameListImportTitle": "游戏名列表",
+  "gameListImportDescription": "粘贴你的游戏库，每行一个游戏名。可直接从 PS App、奖杯网站或记事本复制——行首编号、项目符号与行尾平台标记会自动清理。",
+  "gameListImportFieldHint": "每行一个游戏名…",
+  "gameListImportParsed": "已识别 {count} 个游戏名",
+  "@gameListImportParsed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportParsedEmpty": "还没有识别到游戏名",
+  "gameListImportStart": "开始匹配",
+  "gameListImportMatching": "正在匹配…",
+  "gameListImportReviewTitle": "确认匹配结果",
+  "gameListImportSummary": "{matched} / {total} 已匹配",
+  "@gameListImportSummary": {
+    "placeholders": {
+      "matched": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "gameListImportMatched": "匹配结果",
+  "gameListImportNotFound": "未找到匹配",
+  "gameListImportSearchFailed": "查询失败",
+  "gameListImportSkip": "不导入",
+  "gameListImportReview": "查看",
+  "gameListImportNoCandidates": "没有候选结果",
+  "gameListImportConfirm": "导入 {count} 个",
+  "@gameListImportConfirm": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportReasonNotFound": "在游戏目录中未找到匹配",
+  "gameListImportQualityExact": "完全一致",
+  "gameListImportQualityStrong": "精确匹配",
+  "gameListImportQualityFair": "高度相近",
+  "gameListImportQualityWeak": "可能相符",
+  "gameListImportQualityNone": "未匹配",
+  "gameListImportIgdbMissing": "未连接 IGDB：中文名仍可通过 TapTap 匹配，英文名将无法匹配。",
+  "gameListImportPlatformHint": "仅影响条目上显示的平台",
+  "gameListImportUnmatchedNote": "其中 {count} 个未匹配，将加入心愿单",
+  "@gameListImportUnmatchedNote": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportBackToInput": "返回修改",
+  "gameListImportStatusLabel": "导入后的状态"
 }

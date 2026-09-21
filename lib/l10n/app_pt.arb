@@ -3029,5 +3029,55 @@
   "reachabilityOutcomeTimeout": "Tempo esgotado",
   "reachabilityOutcomeFailed": "Inacessível",
   "reachabilityWebNote": "A versão web envia tudo pelo servidor, então esta verificação não se aplica.",
-  "sourceNeedsIntlNetwork": "Requer acesso internacional"
+  "sourceNeedsIntlNetwork": "Requer acesso internacional",
+  "settingsGameListImport": "Importar de uma lista de jogos",
+  "settingsGameListImportSubtitle": "Cole uma lista da sua biblioteca e associe as entradas automaticamente",
+  "gameListImportTitle": "Lista de nomes de jogos",
+  "gameListImportDescription": "Cole a sua biblioteca de jogos, um título por linha. Pode copiá-la diretamente do PS App, de um site de troféus ou de uma nota — a numeração inicial, os marcadores e as etiquetas de plataforma no fim da linha são removidos automaticamente.",
+  "gameListImportFieldHint": "Um nome de jogo por linha…",
+  "gameListImportParsed": "{count} nomes de jogos reconhecidos",
+  "@gameListImportParsed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportParsedEmpty": "Ainda não foi reconhecido nenhum nome de jogo",
+  "gameListImportStart": "Começar a associar",
+  "gameListImportMatching": "A associar…",
+  "gameListImportReviewTitle": "Confirme as correspondências",
+  "gameListImportSummary": "{matched} de {total} associados",
+  "@gameListImportSummary": {
+    "placeholders": {
+      "matched": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "gameListImportMatched": "Correspondências",
+  "gameListImportNotFound": "Nenhuma correspondência",
+  "gameListImportSearchFailed": "Falha na consulta",
+  "gameListImportSkip": "Não importar",
+  "gameListImportReview": "Ver",
+  "gameListImportNoCandidates": "Nenhum candidato devolvido",
+  "gameListImportConfirm": "Importar {count}",
+  "@gameListImportConfirm": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportReasonNotFound": "Nenhuma correspondência encontrada nos catálogos de jogos",
+  "gameListImportQualityExact": "Idêntico",
+  "gameListImportQualityStrong": "Correspondência exata",
+  "gameListImportQualityFair": "Correspondência próxima",
+  "gameListImportQualityWeak": "Correspondência possível",
+  "gameListImportQualityNone": "Sem correspondência",
+  "gameListImportIgdbMissing": "O IGDB não está conectado: os títulos em chinês continuam a ser associados pelo TapTap, mas os títulos em alfabeto latino não poderão ser.",
+  "gameListImportPlatformHint": "Afeta apenas a plataforma exibida em cada entrada",
+  "gameListImportUnmatchedNote": "{count} deles estão sem correspondência e vão para a lista de desejos",
+  "@gameListImportUnmatchedNote": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportBackToInput": "Voltar a editar",
+  "gameListImportStatusLabel": "Estado após a importação"
 }

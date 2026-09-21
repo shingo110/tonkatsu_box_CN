@@ -6159,4 +6159,104 @@ class SRu extends S {
 
   @override
   String get sourceNeedsIntlNetwork => 'Нужен международный доступ';
+
+  @override
+  String get settingsGameListImport => 'Импорт из списка игр';
+
+  @override
+  String get settingsGameListImportSubtitle =>
+      'Вставьте список своей библиотеки — совпадения подберутся автоматически';
+
+  @override
+  String get gameListImportTitle => 'Список названий игр';
+
+  @override
+  String get gameListImportDescription =>
+      'Вставьте свою библиотеку игр, по одному названию в строке. Можно скопировать прямо из PS App, с сайта трофеев или из заметок — нумерация в начале строки, маркеры и метки платформы в конце удаляются автоматически.';
+
+  @override
+  String get gameListImportFieldHint => 'По одному названию игры в строке…';
+
+  @override
+  String gameListImportParsed(int count) {
+    return 'Распознано названий игр: $count';
+  }
+
+  @override
+  String get gameListImportParsedEmpty => 'Названия игр пока не распознаны';
+
+  @override
+  String get gameListImportStart => 'Начать сопоставление';
+
+  @override
+  String get gameListImportMatching => 'Сопоставление…';
+
+  @override
+  String get gameListImportReviewTitle => 'Подтвердите совпадения';
+
+  @override
+  String gameListImportSummary(int matched, int total) {
+    return 'Совпадений: $matched из $total';
+  }
+
+  @override
+  String get gameListImportMatched => 'Совпадения';
+
+  @override
+  String get gameListImportNotFound => 'Совпадений не найдено';
+
+  @override
+  String get gameListImportSearchFailed => 'Ошибка запроса';
+
+  @override
+  String get gameListImportSkip => 'Не импортировать';
+
+  @override
+  String get gameListImportReview => 'Просмотреть';
+
+  @override
+  String get gameListImportNoCandidates => 'Кандидатов не найдено';
+
+  @override
+  String gameListImportConfirm(int count) {
+    return 'Импортировать $count';
+  }
+
+  @override
+  String get gameListImportReasonNotFound =>
+      'В каталогах игр совпадений не найдено';
+
+  @override
+  String get gameListImportQualityExact => 'Полное совпадение';
+
+  @override
+  String get gameListImportQualityStrong => 'Точное совпадение';
+
+  @override
+  String get gameListImportQualityFair => 'Близкое совпадение';
+
+  @override
+  String get gameListImportQualityWeak => 'Возможное совпадение';
+
+  @override
+  String get gameListImportQualityNone => 'Без совпадения';
+
+  @override
+  String get gameListImportIgdbMissing =>
+      'IGDB не подключён: китайские названия по-прежнему сопоставляются через TapTap, а названия латиницей — нет.';
+
+  @override
+  String get gameListImportPlatformHint =>
+      'Влияет только на платформу, отображаемую у записи';
+
+  @override
+  String gameListImportUnmatchedNote(int count) {
+    return '$count из них без совпадения попадут в список желаний';
+  }
+
+  @override
+  String get gameListImportBackToInput => 'Вернуться к правке';
+
+  @override
+  String get gameListImportStatusLabel => 'Статус после импорта';
 }

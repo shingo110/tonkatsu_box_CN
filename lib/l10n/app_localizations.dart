@@ -10681,6 +10681,180 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Needs international access'**
   String get sourceNeedsIntlNetwork;
+
+  /// No description provided for @settingsGameListImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import from a game list'**
+  String get settingsGameListImport;
+
+  /// No description provided for @settingsGameListImportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste a library list and match entries automatically'**
+  String get settingsGameListImportSubtitle;
+
+  /// No description provided for @gameListImportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Game name list'**
+  String get gameListImportTitle;
+
+  /// No description provided for @gameListImportDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste your game library, one title per line. Copy it straight from the PS App, a trophy site or a note — leading numbers, bullets and trailing platform tags are cleaned up automatically.'**
+  String get gameListImportDescription;
+
+  /// No description provided for @gameListImportFieldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'One game name per line…'**
+  String get gameListImportFieldHint;
+
+  /// No description provided for @gameListImportParsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} game names recognized'**
+  String gameListImportParsed(int count);
+
+  /// No description provided for @gameListImportParsedEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No game names recognized yet'**
+  String get gameListImportParsedEmpty;
+
+  /// No description provided for @gameListImportStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start matching'**
+  String get gameListImportStart;
+
+  /// No description provided for @gameListImportMatching.
+  ///
+  /// In en, this message translates to:
+  /// **'Matching…'**
+  String get gameListImportMatching;
+
+  /// No description provided for @gameListImportReviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm the matches'**
+  String get gameListImportReviewTitle;
+
+  /// No description provided for @gameListImportSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{matched} of {total} matched'**
+  String gameListImportSummary(int matched, int total);
+
+  /// No description provided for @gameListImportMatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get gameListImportMatched;
+
+  /// No description provided for @gameListImportNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No match found'**
+  String get gameListImportNotFound;
+
+  /// No description provided for @gameListImportSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Lookup failed'**
+  String get gameListImportSearchFailed;
+
+  /// No description provided for @gameListImportSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Do not import'**
+  String get gameListImportSkip;
+
+  /// No description provided for @gameListImportReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get gameListImportReview;
+
+  /// No description provided for @gameListImportNoCandidates.
+  ///
+  /// In en, this message translates to:
+  /// **'No candidates returned'**
+  String get gameListImportNoCandidates;
+
+  /// No description provided for @gameListImportConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Import {count}'**
+  String gameListImportConfirm(int count);
+
+  /// No description provided for @gameListImportReasonNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No match found in the game catalogues'**
+  String get gameListImportReasonNotFound;
+
+  /// No description provided for @gameListImportQualityExact.
+  ///
+  /// In en, this message translates to:
+  /// **'Identical'**
+  String get gameListImportQualityExact;
+
+  /// No description provided for @gameListImportQualityStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Exact match'**
+  String get gameListImportQualityStrong;
+
+  /// No description provided for @gameListImportQualityFair.
+  ///
+  /// In en, this message translates to:
+  /// **'Close match'**
+  String get gameListImportQualityFair;
+
+  /// No description provided for @gameListImportQualityWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'Possible match'**
+  String get gameListImportQualityWeak;
+
+  /// No description provided for @gameListImportQualityNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmatched'**
+  String get gameListImportQualityNone;
+
+  /// No description provided for @gameListImportIgdbMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'IGDB is not connected: Chinese titles still match through TapTap, but Latin titles cannot be matched.'**
+  String get gameListImportIgdbMissing;
+
+  /// No description provided for @gameListImportPlatformHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only affects the platform shown on each item'**
+  String get gameListImportPlatformHint;
+
+  /// No description provided for @gameListImportUnmatchedNote.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of them are unmatched and will go to the wishlist'**
+  String gameListImportUnmatchedNote(int count);
+
+  /// No description provided for @gameListImportBackToInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to edit'**
+  String get gameListImportBackToInput;
+
+  /// No description provided for @gameListImportStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status after import'**
+  String get gameListImportStatusLabel;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

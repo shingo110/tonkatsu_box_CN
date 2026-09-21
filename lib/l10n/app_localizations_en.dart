@@ -6058,4 +6058,104 @@ class SEn extends S {
 
   @override
   String get sourceNeedsIntlNetwork => 'Needs international access';
+
+  @override
+  String get settingsGameListImport => 'Import from a game list';
+
+  @override
+  String get settingsGameListImportSubtitle =>
+      'Paste a library list and match entries automatically';
+
+  @override
+  String get gameListImportTitle => 'Game name list';
+
+  @override
+  String get gameListImportDescription =>
+      'Paste your game library, one title per line. Copy it straight from the PS App, a trophy site or a note — leading numbers, bullets and trailing platform tags are cleaned up automatically.';
+
+  @override
+  String get gameListImportFieldHint => 'One game name per line…';
+
+  @override
+  String gameListImportParsed(int count) {
+    return '$count game names recognized';
+  }
+
+  @override
+  String get gameListImportParsedEmpty => 'No game names recognized yet';
+
+  @override
+  String get gameListImportStart => 'Start matching';
+
+  @override
+  String get gameListImportMatching => 'Matching…';
+
+  @override
+  String get gameListImportReviewTitle => 'Confirm the matches';
+
+  @override
+  String gameListImportSummary(int matched, int total) {
+    return '$matched of $total matched';
+  }
+
+  @override
+  String get gameListImportMatched => 'Matches';
+
+  @override
+  String get gameListImportNotFound => 'No match found';
+
+  @override
+  String get gameListImportSearchFailed => 'Lookup failed';
+
+  @override
+  String get gameListImportSkip => 'Do not import';
+
+  @override
+  String get gameListImportReview => 'Review';
+
+  @override
+  String get gameListImportNoCandidates => 'No candidates returned';
+
+  @override
+  String gameListImportConfirm(int count) {
+    return 'Import $count';
+  }
+
+  @override
+  String get gameListImportReasonNotFound =>
+      'No match found in the game catalogues';
+
+  @override
+  String get gameListImportQualityExact => 'Identical';
+
+  @override
+  String get gameListImportQualityStrong => 'Exact match';
+
+  @override
+  String get gameListImportQualityFair => 'Close match';
+
+  @override
+  String get gameListImportQualityWeak => 'Possible match';
+
+  @override
+  String get gameListImportQualityNone => 'Unmatched';
+
+  @override
+  String get gameListImportIgdbMissing =>
+      'IGDB is not connected: Chinese titles still match through TapTap, but Latin titles cannot be matched.';
+
+  @override
+  String get gameListImportPlatformHint =>
+      'Only affects the platform shown on each item';
+
+  @override
+  String gameListImportUnmatchedNote(int count) {
+    return '$count of them are unmatched and will go to the wishlist';
+  }
+
+  @override
+  String get gameListImportBackToInput => 'Back to edit';
+
+  @override
+  String get gameListImportStatusLabel => 'Status after import';
 }

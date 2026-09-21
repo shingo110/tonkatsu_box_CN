@@ -2601,5 +2601,55 @@
   "reachabilityOutcomeTimeout": "Tiempo agotado",
   "reachabilityOutcomeFailed": "Sin conexión",
   "reachabilityWebNote": "La versión web envía todo a través del servidor, así que esta comprobación no aplica.",
-  "sourceNeedsIntlNetwork": "Requiere acceso internacional"
+  "sourceNeedsIntlNetwork": "Requiere acceso internacional",
+  "settingsGameListImport": "Importar desde una lista de juegos",
+  "settingsGameListImportSubtitle": "Pega una lista de tu biblioteca y empareja las entradas automáticamente",
+  "gameListImportTitle": "Lista de nombres de juegos",
+  "gameListImportDescription": "Pega tu biblioteca de juegos, un título por línea. Puedes copiarla directamente desde la PS App, un sitio de trofeos o una nota: la numeración inicial, las viñetas y las etiquetas de plataforma finales se limpian automáticamente.",
+  "gameListImportFieldHint": "Un nombre de juego por línea…",
+  "gameListImportParsed": "Se reconocieron {count} nombres de juegos",
+  "@gameListImportParsed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportParsedEmpty": "Aún no se reconoce ningún nombre de juego",
+  "gameListImportStart": "Empezar a emparejar",
+  "gameListImportMatching": "Emparejando…",
+  "gameListImportReviewTitle": "Confirma las coincidencias",
+  "gameListImportSummary": "{matched} de {total} emparejados",
+  "@gameListImportSummary": {
+    "placeholders": {
+      "matched": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "gameListImportMatched": "Coincidencias",
+  "gameListImportNotFound": "Sin coincidencias",
+  "gameListImportSearchFailed": "Error de consulta",
+  "gameListImportSkip": "No importar",
+  "gameListImportReview": "Revisar",
+  "gameListImportNoCandidates": "No se devolvió ningún candidato",
+  "gameListImportConfirm": "Importar {count}",
+  "@gameListImportConfirm": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportReasonNotFound": "No se encontró coincidencia en los catálogos de juegos",
+  "gameListImportQualityExact": "Idéntico",
+  "gameListImportQualityStrong": "Coincidencia exacta",
+  "gameListImportQualityFair": "Coincidencia cercana",
+  "gameListImportQualityWeak": "Posible coincidencia",
+  "gameListImportQualityNone": "Sin emparejar",
+  "gameListImportIgdbMissing": "IGDB no está conectado: los títulos en chino siguen emparejándose con TapTap, pero los títulos en alfabeto latino no podrán emparejarse.",
+  "gameListImportPlatformHint": "Solo afecta a la plataforma mostrada en cada entrada",
+  "gameListImportUnmatchedNote": "{count} de ellos no tienen coincidencia y se añadirán a la lista de deseos",
+  "@gameListImportUnmatchedNote": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportBackToInput": "Volver a editar",
+  "gameListImportStatusLabel": "Estado tras la importación"
 }

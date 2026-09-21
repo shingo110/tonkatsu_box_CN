@@ -2601,5 +2601,55 @@
   "reachabilityOutcomeTimeout": "Délai dépassé",
   "reachabilityOutcomeFailed": "Injoignable",
   "reachabilityWebNote": "La version web passe par le serveur ; cette vérification ne s'applique pas.",
-  "sourceNeedsIntlNetwork": "Nécessite un accès international"
+  "sourceNeedsIntlNetwork": "Nécessite un accès international",
+  "settingsGameListImport": "Importer depuis une liste de jeux",
+  "settingsGameListImportSubtitle": "Collez une liste de votre bibliothèque et associez les entrées automatiquement",
+  "gameListImportTitle": "Liste de noms de jeux",
+  "gameListImportDescription": "Collez votre bibliothèque de jeux, un titre par ligne. Vous pouvez la copier directement depuis la PS App, un site de trophées ou une note : la numérotation en début de ligne, les puces et les balises de plateforme en fin de ligne sont nettoyées automatiquement.",
+  "gameListImportFieldHint": "Un nom de jeu par ligne…",
+  "gameListImportParsed": "{count} noms de jeux reconnus",
+  "@gameListImportParsed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportParsedEmpty": "Aucun nom de jeu reconnu pour l'instant",
+  "gameListImportStart": "Lancer l'association",
+  "gameListImportMatching": "Association en cours…",
+  "gameListImportReviewTitle": "Confirmer les correspondances",
+  "gameListImportSummary": "{matched} sur {total} associés",
+  "@gameListImportSummary": {
+    "placeholders": {
+      "matched": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "gameListImportMatched": "Correspondances",
+  "gameListImportNotFound": "Aucune correspondance",
+  "gameListImportSearchFailed": "Échec de la recherche",
+  "gameListImportSkip": "Ne pas importer",
+  "gameListImportReview": "Vérifier",
+  "gameListImportNoCandidates": "Aucun candidat renvoyé",
+  "gameListImportConfirm": "Importer {count}",
+  "@gameListImportConfirm": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportReasonNotFound": "Aucune correspondance trouvée dans les catalogues de jeux",
+  "gameListImportQualityExact": "Identique",
+  "gameListImportQualityStrong": "Correspondance exacte",
+  "gameListImportQualityFair": "Correspondance proche",
+  "gameListImportQualityWeak": "Correspondance possible",
+  "gameListImportQualityNone": "Non associé",
+  "gameListImportIgdbMissing": "IGDB n'est pas connecté : les titres chinois restent associés via TapTap, mais les titres en alphabet latin ne pourront pas l'être.",
+  "gameListImportPlatformHint": "N'affecte que la plateforme affichée sur chaque entrée",
+  "gameListImportUnmatchedNote": "{count} d'entre eux sont sans correspondance et iront dans la liste de souhaits",
+  "@gameListImportUnmatchedNote": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportBackToInput": "Revenir modifier",
+  "gameListImportStatusLabel": "Statut après l'importation"
 }

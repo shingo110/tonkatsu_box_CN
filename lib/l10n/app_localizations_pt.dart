@@ -6114,4 +6114,105 @@ class SPt extends S {
 
   @override
   String get sourceNeedsIntlNetwork => 'Requer acesso internacional';
+
+  @override
+  String get settingsGameListImport => 'Importar de uma lista de jogos';
+
+  @override
+  String get settingsGameListImportSubtitle =>
+      'Cole uma lista da sua biblioteca e associe as entradas automaticamente';
+
+  @override
+  String get gameListImportTitle => 'Lista de nomes de jogos';
+
+  @override
+  String get gameListImportDescription =>
+      'Cole a sua biblioteca de jogos, um título por linha. Pode copiá-la diretamente do PS App, de um site de troféus ou de uma nota — a numeração inicial, os marcadores e as etiquetas de plataforma no fim da linha são removidos automaticamente.';
+
+  @override
+  String get gameListImportFieldHint => 'Um nome de jogo por linha…';
+
+  @override
+  String gameListImportParsed(int count) {
+    return '$count nomes de jogos reconhecidos';
+  }
+
+  @override
+  String get gameListImportParsedEmpty =>
+      'Ainda não foi reconhecido nenhum nome de jogo';
+
+  @override
+  String get gameListImportStart => 'Começar a associar';
+
+  @override
+  String get gameListImportMatching => 'A associar…';
+
+  @override
+  String get gameListImportReviewTitle => 'Confirme as correspondências';
+
+  @override
+  String gameListImportSummary(int matched, int total) {
+    return '$matched de $total associados';
+  }
+
+  @override
+  String get gameListImportMatched => 'Correspondências';
+
+  @override
+  String get gameListImportNotFound => 'Nenhuma correspondência';
+
+  @override
+  String get gameListImportSearchFailed => 'Falha na consulta';
+
+  @override
+  String get gameListImportSkip => 'Não importar';
+
+  @override
+  String get gameListImportReview => 'Ver';
+
+  @override
+  String get gameListImportNoCandidates => 'Nenhum candidato devolvido';
+
+  @override
+  String gameListImportConfirm(int count) {
+    return 'Importar $count';
+  }
+
+  @override
+  String get gameListImportReasonNotFound =>
+      'Nenhuma correspondência encontrada nos catálogos de jogos';
+
+  @override
+  String get gameListImportQualityExact => 'Idêntico';
+
+  @override
+  String get gameListImportQualityStrong => 'Correspondência exata';
+
+  @override
+  String get gameListImportQualityFair => 'Correspondência próxima';
+
+  @override
+  String get gameListImportQualityWeak => 'Correspondência possível';
+
+  @override
+  String get gameListImportQualityNone => 'Sem correspondência';
+
+  @override
+  String get gameListImportIgdbMissing =>
+      'O IGDB não está conectado: os títulos em chinês continuam a ser associados pelo TapTap, mas os títulos em alfabeto latino não poderão ser.';
+
+  @override
+  String get gameListImportPlatformHint =>
+      'Afeta apenas a plataforma exibida em cada entrada';
+
+  @override
+  String gameListImportUnmatchedNote(int count) {
+    return '$count deles estão sem correspondência e vão para a lista de desejos';
+  }
+
+  @override
+  String get gameListImportBackToInput => 'Voltar a editar';
+
+  @override
+  String get gameListImportStatusLabel => 'Estado após a importação';
 }

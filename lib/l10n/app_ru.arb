@@ -2262,5 +2262,55 @@
   "reachabilityOutcomeTimeout": "Тайм-аут",
   "reachabilityOutcomeFailed": "Недоступен",
   "reachabilityWebNote": "Веб-версия отправляет все запросы через сервер, поэтому проверка неприменима.",
-  "sourceNeedsIntlNetwork": "Нужен международный доступ"
+  "sourceNeedsIntlNetwork": "Нужен международный доступ",
+  "settingsGameListImport": "Импорт из списка игр",
+  "settingsGameListImportSubtitle": "Вставьте список своей библиотеки — совпадения подберутся автоматически",
+  "gameListImportTitle": "Список названий игр",
+  "gameListImportDescription": "Вставьте свою библиотеку игр, по одному названию в строке. Можно скопировать прямо из PS App, с сайта трофеев или из заметок — нумерация в начале строки, маркеры и метки платформы в конце удаляются автоматически.",
+  "gameListImportFieldHint": "По одному названию игры в строке…",
+  "gameListImportParsed": "Распознано названий игр: {count}",
+  "@gameListImportParsed": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportParsedEmpty": "Названия игр пока не распознаны",
+  "gameListImportStart": "Начать сопоставление",
+  "gameListImportMatching": "Сопоставление…",
+  "gameListImportReviewTitle": "Подтвердите совпадения",
+  "gameListImportSummary": "Совпадений: {matched} из {total}",
+  "@gameListImportSummary": {
+    "placeholders": {
+      "matched": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "gameListImportMatched": "Совпадения",
+  "gameListImportNotFound": "Совпадений не найдено",
+  "gameListImportSearchFailed": "Ошибка запроса",
+  "gameListImportSkip": "Не импортировать",
+  "gameListImportReview": "Просмотреть",
+  "gameListImportNoCandidates": "Кандидатов не найдено",
+  "gameListImportConfirm": "Импортировать {count}",
+  "@gameListImportConfirm": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportReasonNotFound": "В каталогах игр совпадений не найдено",
+  "gameListImportQualityExact": "Полное совпадение",
+  "gameListImportQualityStrong": "Точное совпадение",
+  "gameListImportQualityFair": "Близкое совпадение",
+  "gameListImportQualityWeak": "Возможное совпадение",
+  "gameListImportQualityNone": "Без совпадения",
+  "gameListImportIgdbMissing": "IGDB не подключён: китайские названия по-прежнему сопоставляются через TapTap, а названия латиницей — нет.",
+  "gameListImportPlatformHint": "Влияет только на платформу, отображаемую у записи",
+  "gameListImportUnmatchedNote": "{count} из них без совпадения попадут в список желаний",
+  "@gameListImportUnmatchedNote": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "gameListImportBackToInput": "Вернуться к правке",
+  "gameListImportStatusLabel": "Статус после импорта"
 }

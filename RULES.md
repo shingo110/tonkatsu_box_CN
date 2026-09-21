@@ -431,6 +431,30 @@
   逐条对照；若源依赖某个头，就补一条**服务端**测试（"这个头被送出"+"调用方自带的同名头被覆盖"）。
   另见 `tonkatsu-selfhost-proxy-verify` 技能的三层验证法。
 
+### 七之十八、名称匹配的阈值是实测出来的，不是拍的（2026-09-21，D21）
+
+`lib/core/import/sources/name_list/` 的「游戏名列表导入」把一份纯文本游戏名列表匹配成条目。匹配是启发
+式的，**阈值一松就静默写错游戏**，所以三条判据锁在 `GameTitleMatcher` 里，每条都有活体数据背书
+（`probe/ps5_name_match_probe.py` 可复跑）：
+
+| 情形 | 例子（均为 TapTap 真实返回） | 分数 | 预选？ |
+|------|------|:---:|:---:|
+| 完全相同 / 去符号后相同 | `地平线 西之绝境` ↔ `地平线：西之绝境` | 95 | ✅ |
+| **查询词是候选标题的前缀** | `最后生还者` → `最后生还者 第二部` | 85 | ✅ |
+| 查询词埋在更长标题里 | `血源诅咒` → `樱花女校：血源诅咒` | 55（封顶） | ❌ |
+| 只共享一个词 | `战神` → `烈火战神` | 46 | ❌ |
+| 仅 bigram 重合（Dice） | `God of War Ragnarok` → `Sticky Man : The God of War` | ≤61（封顶） | ❌ |
+
+- **`confidentScore = 62` 是预选线**，`nestedCeilingScore`(55) 与 `diceFloor + diceSpan`(61) **必须低于它**，
+  这是**故意**的：它们只配当"候选"让用户挑，绝不替用户做决定。有一条测试专门钉住这个不等式。
+- **前缀对齐才算续作**：`第二部` / `导演剪辑版` / `重制版` 都是**后缀**扩展（同系列）；手游仿冒则是
+  **前缀**借用（`樱花女校：血源诅咒`）。同一段 `contains`，只差一个 `startsWith`。
+- **两个目录的分工不是猜的**：中文名 → TapTap（20 个真实 PS5 中文名里 13+ 真命中）；英文名 → IGDB。
+  TapTap 的英文名结果是**垃圾场**——`Elden Ring` 返回 `Elden Shell: Mortal Ring (RPG)`、`Ghost of
+  Tsushima` 返回 `Ghost of Kyiv`——所以它只当**兜底**，靠上面的封顶拦住这些行。
+- **别为"提高匹配率"松开这几条**：松开的直接后果是把 `烈火战神` 写进用户的收藏。宁可少匹配（落进愿望
+  单，用户看得见），不可错匹配（静默污染）。要动，先跑 `probe/ps5_name_match_probe.py` 拿新数据。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。

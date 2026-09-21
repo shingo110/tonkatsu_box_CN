@@ -50,6 +50,7 @@ import 'package:tonkatsu_box/core/api/ra_api.dart';
 import 'package:tonkatsu_box/core/api/simkl_api.dart';
 import 'package:tonkatsu_box/core/api/steam_api.dart';
 import 'package:tonkatsu_box/core/api/steamgriddb_api.dart';
+import 'package:tonkatsu_box/core/api/taptap_api.dart';
 import 'package:tonkatsu_box/core/api/tmdb_api.dart';
 import 'package:tonkatsu_box/core/api/tvdb_api.dart';
 import 'package:tonkatsu_box/core/api/tvmaze_api.dart';
@@ -154,6 +155,8 @@ class MockTrackerDao extends Mock implements TrackerDao {}
 class MockGlobalTagDao extends Mock implements GlobalTagDao {}
 
 class MockIgdbApi extends Mock implements IgdbApi {}
+
+class MockTapTapApi extends Mock implements TapTapApi {}
 
 class MockTmdbApi extends Mock implements TmdbApi {}
 
