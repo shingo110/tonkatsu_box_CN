@@ -2573,6 +2573,8 @@
   "welcomeApiPodcastIndexDesc": "播客搜索与单集追踪。使用 api.podcastindex.org 的免费密钥对。",
   "welcomeSourceDescMusicBrainz": "开放的音乐百科：专辑、艺术家与版本。无需密钥。",
   "welcomeSourceDescPodcastIndex": "开放的播客目录，支持按单集追踪。免费密钥对。",
+  "welcomeSourceDescTapTap": "国内游戏商店与社区：中文名称、标签与简介。无需密钥。",
+  "welcomeSourceDescXimalaya": "国内音频平台：中文播客与有声剧。无需密钥。",
   "creditsPodcastIndexAttribution": "播客数据来自 Podcast Index。",
   "credentialsApiSecret": "API 密文",
   "markAllListened": "全部标记为已收听",

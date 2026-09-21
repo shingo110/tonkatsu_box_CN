@@ -6072,6 +6072,14 @@ class SEs extends S {
       'Catálogo abierto de pódcasts con seguimiento por episodios. Par clave/secreto gratuito.';
 
   @override
+  String get welcomeSourceDescTapTap =>
+      'Tienda y comunidad de juegos de China continental: títulos, etiquetas y descripciones en chino. No requiere clave.';
+
+  @override
+  String get welcomeSourceDescXimalaya =>
+      'Plataforma de audio de China continental: pódcasts y audiodramas en chino. No requiere clave.';
+
+  @override
   String get creditsPodcastIndexAttribution =>
       'Datos de pódcasts de Podcast Index.';
 

@@ -195,7 +195,7 @@ void main() {
         const BrowseState many = BrowseState(mediaType: MediaType.manga);
         expect(many.canSort, isFalse);
 
-        const BrowseState one = BrowseState(mediaType: MediaType.game);
+        const BrowseState one = BrowseState(mediaType: MediaType.visualNovel);
         expect(one.canSort, isTrue);
       });
 

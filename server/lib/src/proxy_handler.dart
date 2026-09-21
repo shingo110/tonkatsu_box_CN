@@ -251,9 +251,11 @@ class ApiProxy {
       case ProxyTarget.neodb:
       case ProxyTarget.openlibrary:
       case ProxyTarget.steam:
+      case ProxyTarget.taptap:
       case ProxyTarget.tvmaze:
       case ProxyTarget.vndb:
       case ProxyTarget.weread:
+      case ProxyTarget.ximalaya:
         break;
     }
     return body;

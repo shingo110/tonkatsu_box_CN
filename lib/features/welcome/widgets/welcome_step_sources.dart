@@ -133,6 +133,7 @@ class _SourceCard extends ConsumerWidget {
         DataSource.tvmaze => l.welcomeSourceDescTvMaze,
         DataSource.tvdb => l.welcomeSourceDescTvdb,
         DataSource.igdb => l.welcomeSourceDescIgdb,
+        DataSource.taptap => l.welcomeSourceDescTapTap,
         DataSource.anilist => l.welcomeSourceDescAniList,
         DataSource.bangumi => l.welcomeSourceDescBangumi,
         DataSource.mangabaka => l.welcomeSourceDescMangaBaka,
@@ -149,6 +150,7 @@ class _SourceCard extends ConsumerWidget {
         DataSource.douban => l.welcomeSourceDescDouban,
         DataSource.musicBrainz => l.welcomeSourceDescMusicBrainz,
         DataSource.podcastIndex => l.welcomeSourceDescPodcastIndex,
+        DataSource.ximalaya => l.welcomeSourceDescXimalaya,
         _ => '',
       };
 }

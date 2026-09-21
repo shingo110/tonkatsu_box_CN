@@ -37,6 +37,7 @@ import '../widgets/podcast_index_sheet.dart';
 import '../widgets/musicbrainz_album_sheet.dart';
 import '../widgets/douban_music_sheet.dart';
 import '../widgets/google_books_more_by_author_section.dart';
+import '../widgets/ximalaya_podcast_sheet.dart';
 import '../../../shared/navigation/search_providers.dart';
 import '../helpers/studio_search.dart';
 import '../widgets/item_details_sheet.dart';
@@ -250,6 +251,12 @@ class MediaHandlers {
       sourceOf: (AudioItem a) => a.source,
       sheetBuilder: (AudioItem a, VoidCallback onAdd) {
         if (a.isPodcast) {
+          // Ximalaya keeps its episode list behind a signed-in web token, so
+          // it gets a sheet that carries the record alone instead of one that
+          // would spin on a request that cannot succeed.
+          if (a.source == DataSource.ximalaya) {
+            return XimalayaPodcastSheet(podcast: a, onAddToCollection: onAdd);
+          }
           return PodcastIndexSheet(podcast: a, onAddToCollection: onAdd);
         }
         // A Douban subject is one release, not a group with editions to pick
@@ -273,6 +280,10 @@ class MediaHandlers {
       // On add: lookup extras plus the track/episode list, cached so the
       // collection tracker works offline.
       enrich: (AudioItem a) {
+        // Nothing to look up: the show's detail door is closed, and the search
+        // row already holds every field this model carries. Asking Podcast
+        // Index with a Ximalaya id would return an unrelated feed.
+        if (a.source == DataSource.ximalaya) return Future<AudioItem>.value(a);
         if (a.isPodcast) return _enrichPodcast(ref, a);
         if (a.source == DataSource.douban) return _enrichDoubanMusic(ref, a);
         final _PendingAlbumRelease? pending = pendingAlbumRelease;

@@ -1,3 +1,4 @@
+import 'package:core/models/data_source.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tonkatsu_box/core/api/source_reachability.dart';
@@ -17,9 +18,11 @@ class _FakeProbe extends SourceReachabilityProbe {
       results;
 }
 
-SourceReachability _result(int index, ReachabilityOutcome outcome) =>
+/// Resolves by source id rather than a positional index, so inserting a
+/// provider into the catalog cannot silently re-point these canned rows.
+SourceReachability _result(DataSource source, ReachabilityOutcome outcome) =>
     SourceReachability(
-      info: kDataSourceCatalog[index],
+      info: sourceInfoFor(source)!,
       outcome: outcome,
       statusCode: outcome == ReachabilityOutcome.reached ? 200 : null,
       elapsed: const Duration(milliseconds: 120),
@@ -50,10 +53,10 @@ void main() {
   testWidgets('reports a mix of reached and unreachable providers',
       (WidgetTester tester) async {
     final List<SourceReachability> results = <SourceReachability>[
-      _result(0, ReachabilityOutcome.reached),
-      _result(10, ReachabilityOutcome.reached),
-      _result(14, ReachabilityOutcome.timedOut),
-      _result(2, ReachabilityOutcome.unreachable),
+      _result(DataSource.tmdb, ReachabilityOutcome.reached),
+      _result(DataSource.neodb, ReachabilityOutcome.reached),
+      _result(DataSource.fantlab, ReachabilityOutcome.timedOut),
+      _result(DataSource.tvdb, ReachabilityOutcome.unreachable),
     ];
     await _pump(tester, _FakeProbe(results));
 

@@ -5997,6 +5997,14 @@ class SEn extends S {
       'Open podcast catalog with episode-level tracking. Free key/secret pair.';
 
   @override
+  String get welcomeSourceDescTapTap =>
+      'Mainland-China games store and community: Chinese titles, tags and descriptions. No key needed.';
+
+  @override
+  String get welcomeSourceDescXimalaya =>
+      'Mainland-China audio platform: podcasts and audio dramas in Chinese. No key needed.';
+
+  @override
   String get creditsPodcastIndexAttribution =>
       'Podcast data from Podcast Index.';
 

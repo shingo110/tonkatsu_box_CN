@@ -22,11 +22,13 @@ enum ProxyTarget {
   simkl('api.simkl.com'),
   steam('api.steampowered.com'),
   steamgriddb('www.steamgriddb.com'),
+  taptap('www.taptap.cn'),
   tmdb('api.themoviedb.org'),
   tvdb('api4.thetvdb.com'),
   tvmaze('api.tvmaze.com'),
   vndb('api.vndb.org'),
-  weread('weread.qq.com');
+  weread('weread.qq.com'),
+  ximalaya('www.ximalaya.com');
 
   const ProxyTarget(this.host);
 

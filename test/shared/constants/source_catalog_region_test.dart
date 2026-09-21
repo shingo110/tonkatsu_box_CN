@@ -4,7 +4,7 @@ import 'package:tonkatsu_box/shared/constants/source_catalog.dart';
 
 void main() {
   group('SourceInfo region', () {
-    test('only Douban and WeRead answer a mainland network unproxied', () {
+    test('the domestic set is Douban, WeRead, TapTap and Ximalaya', () {
       // Pinned on purpose: adding a provider must be classified by hand, and
       // this set is where that decision becomes visible in review.
       expect(
@@ -12,7 +12,12 @@ void main() {
             .where((SourceInfo info) => info.isDomestic)
             .map((SourceInfo info) => info.source)
             .toSet(),
-        <DataSource>{DataSource.douban, DataSource.weread},
+        <DataSource>{
+          DataSource.douban,
+          DataSource.weread,
+          DataSource.taptap,
+          DataSource.ximalaya,
+        },
       );
     });
 

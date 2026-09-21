@@ -2239,6 +2239,8 @@
   "welcomeApiPodcastIndexDesc": "Поиск подкастов и трекинг эпизодов. Бесплатная пара ключей с api.podcastindex.org.",
   "welcomeSourceDescMusicBrainz": "Открытая музыкальная энциклопедия: альбомы, исполнители, издания. Ключ не нужен.",
   "welcomeSourceDescPodcastIndex": "Открытый каталог подкастов с трекингом по эпизодам. Бесплатная пара ключей.",
+  "welcomeSourceDescTapTap": "Китайский игровой магазин и сообщество: китайские названия, теги и описания. Ключ не нужен.",
+  "welcomeSourceDescXimalaya": "Китайская аудиоплатформа: подкасты и аудиоспектакли на китайском. Ключ не нужен.",
   "creditsPodcastIndexAttribution": "Данные о подкастах — Podcast Index.",
   "credentialsApiSecret": "API-секрет",
   "markAllListened": "Отметить всё прослушанным",

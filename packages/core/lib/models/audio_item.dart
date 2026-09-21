@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import '../api/ximalaya_constants.dart';
 import '../utils/douban_json.dart';
 import '../utils/html_text.dart';
 import '../utils/json_list.dart';
 import '../utils/stable_id.dart';
+import '../utils/ximalaya_json.dart';
 import 'audio_kind.dart';
 import 'data_source.dart';
 
@@ -176,6 +178,44 @@ class AudioItem {
       discCount: doubanMusicDiscCount(json),
       coverUrl: doubanItemCoverUrl(json),
       externalUrl: doubanMusicUrl(json),
+    );
+  }
+
+  /// From an Ximalaya album row (`/revision/search/seo?core=album`). The album
+  /// detail endpoint answers a blacklist page to an anonymous client, so a
+  /// search row is the whole record this source ever sees, and a stored album
+  /// is recovered by searching its title again.
+  ///
+  /// Ximalaya publishes no score on these rows, so [rating] stays null rather
+  /// than being borrowed from anywhere else.
+  factory AudioItem.fromXimalaya(Map<String, dynamic> json) {
+    final int albumId = ximalayaAlbumId(json);
+    final DateTime? createdAt = ximalayaCreatedAt(json);
+    // `createdAt` is when the album went up, the only date this API gives.
+    final String? releasedOn = createdAt == null
+        ? null
+        : '${createdAt.year.toString().padLeft(4, '0')}-'
+            '${createdAt.month.toString().padLeft(2, '0')}-'
+            '${createdAt.day.toString().padLeft(2, '0')}';
+    return AudioItem(
+      // Shifted so the id cannot collide with a Douban subject id — see
+      // [kXimalayaIdOffset].
+      id: albumId + kXimalayaIdOffset,
+      source: DataSource.ximalaya,
+      kind: AudioKind.podcast,
+      // The album id is the handle the refresh path re-searches by title for.
+      nativeId: albumId.toString(),
+      title: ximalayaTitle(json) ?? 'Unknown',
+      artists: <String>[
+        if (ximalayaAnchor(json) case final String anchor) anchor,
+      ],
+      description: ximalayaIntro(json),
+      releaseYear: createdAt?.year,
+      firstReleaseDate: releasedOn,
+      trackCount: ximalayaEpisodeCount(json),
+      listenCount: ximalayaPlayCount(json),
+      coverUrl: ximalayaCoverUrl(json),
+      externalUrl: ximalayaAlbumUrl(albumId),
     );
   }
 

@@ -18,6 +18,11 @@ const Map<String, Duration> kHostMinRequestGap = <String, Duration>{
   // Douban bans after ten back-to-back calls, so the gap is the one lever that
   // also slows a legitimate walk down a list of ISBNs.
   'douban.com': Duration(milliseconds: 800),
+  // TapTap answered fifteen back-to-back searches without complaint, and its
+  // search runs while the user types, so this only smooths the keystrokes.
+  'taptap.cn': Duration(milliseconds: 200),
+  // Ximalaya answered twelve in a row; same reason, same light touch.
+  'ximalaya.com': Duration(milliseconds: 200),
 };
 
 /// A host that answers a burst by banning the caller needs a breaker in front

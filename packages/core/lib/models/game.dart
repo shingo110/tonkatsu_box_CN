@@ -1,3 +1,5 @@
+import '../api/taptap_constants.dart';
+import '../utils/taptap_json.dart';
 import 'game_time_to_beat.dart';
 
 class Game {
@@ -80,6 +82,33 @@ class Game {
     );
   }
 
+  /// From a TapTap app record — `/webapiv2/app-search/v1/by-keyword` rows and
+  /// `/webapiv2/app/v4/detail` records share every key read here.
+  ///
+  /// TapTap has no platform table and no English name: a mainland app store
+  /// lists one Android / iOS build, so `platformIds` stays null and the picker
+  /// adds the game straight away. The title slot takes TapTap's Chinese name,
+  /// which is the only name it carries.
+  factory Game.fromTapTap(Map<String, dynamic> json) {
+    final int appId = taptapAppId(json);
+    return Game(
+      // Shifted so the id cannot collide with an IGDB id — see
+      // [kTapTapIdOffset]; the refresh path shifts it back.
+      id: appId + kTapTapIdOffset,
+      name: taptapTitle(json) ?? 'Unknown',
+      summary: taptapDescription(json),
+      coverUrl: taptapIconUrl(json),
+      releaseDate: taptapReleaseDate(json),
+      rating: taptapRating(json),
+      ratingCount: taptapRatingCount(json),
+      genres: taptapGenres(json),
+      platformIds: null,
+      externalUrl: tapTapAppUrl(appId),
+      cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      artworkUrl: taptapArtworkUrl(json),
+    );
+  }
+
   factory Game.fromDb(Map<String, dynamic> row) {
     List<String>? genres;
     if (row['genres'] != null && (row['genres'] as String).isNotEmpty) {
@@ -149,6 +178,14 @@ class Game {
   final GameTimeToBeat? timeToBeat;
 
   int? get releaseYear => releaseDate?.year;
+
+  /// True when this record came from TapTap. The model carries no source
+  /// column, but TapTap ids are shifted out of IGDB's range, so the id itself
+  /// says which catalogue minted it — see [kTapTapIdOffset].
+  bool get isFromTapTap => id >= kTapTapIdOffset;
+
+  /// The bare TapTap app id, or null for an IGDB record.
+  int? get tapTapAppId => isFromTapTap ? id - kTapTapIdOffset : null;
 
   String? get formattedRating {
     if (rating == null) return null;

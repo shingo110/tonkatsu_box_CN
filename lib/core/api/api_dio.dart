@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import '../../shared/constants/platform_features.dart';
@@ -43,6 +45,23 @@ Dio createApiDio({
 
 Duration _atLeastFloor(Duration value) =>
     value < _kWebTimeoutFloor ? _kWebTimeoutFloor : value;
+
+/// Reads a body that Dio handed back as a raw String because the provider's
+/// `Content-Type` defeats its JSON sniffing — Fantlab sends a trailing `;`,
+/// Ximalaya answers `text/plain` for a perfectly good JSON document. Tolerates
+/// an already-parsed object (mocks, other transport modes) and returns null
+/// for a blank or malformed body.
+Object? decodeJsonBody(Object? data) {
+  if (data is String) {
+    if (data.trim().isEmpty) return null;
+    try {
+      return jsonDecode(data);
+    } on FormatException {
+      return null;
+    }
+  }
+  return data;
+}
 
 Map<String, String>? _withoutUserAgent(Map<String, String>? headers) {
   if (headers == null) return null;

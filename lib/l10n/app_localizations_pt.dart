@@ -6053,6 +6053,14 @@ class SPt extends S {
       'Catálogo aberto de podcasts com acompanhamento por episódio. Par chave/segredo gratuito.';
 
   @override
+  String get welcomeSourceDescTapTap =>
+      'Loja e comunidade de jogos da China continental: títulos, etiquetas e descrições em chinês. Não requer chave.';
+
+  @override
+  String get welcomeSourceDescXimalaya =>
+      'Plataforma de áudio da China continental: podcasts e audiodramas em chinês. Não requer chave.';
+
+  @override
   String get creditsPodcastIndexAttribution =>
       'Dados de podcasts do Podcast Index.';
 

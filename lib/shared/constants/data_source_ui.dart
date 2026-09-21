@@ -12,6 +12,7 @@ extension DataSourceUi on DataSource {
   /// Path to the color PNG logo (null when there is no brand asset).
   String? get iconAsset => switch (this) {
         DataSource.igdb => AppAssets.iconIgdbColor,
+        DataSource.taptap => null,
         DataSource.tmdb => AppAssets.iconTmdbColor,
         DataSource.tvmaze => AppAssets.iconTvMazeColor,
         DataSource.steamGridDb => AppAssets.iconSteamGridDbColor,
@@ -32,6 +33,7 @@ extension DataSourceUi on DataSource {
         DataSource.tvdb => AppAssets.iconTvdbColor,
         DataSource.musicBrainz => AppAssets.iconMusicBrainzColor,
         DataSource.podcastIndex => AppAssets.iconPodcastIndexColor,
+        DataSource.ximalaya => null,
         DataSource.vgMaps => null,
         DataSource.local => null,
       };

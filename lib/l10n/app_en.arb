@@ -2665,6 +2665,8 @@
   "welcomeApiPodcastIndexDesc": "Podcast search and episode tracking. Uses a free key/secret pair from api.podcastindex.org.",
   "welcomeSourceDescMusicBrainz": "Open music encyclopedia: albums, artists and editions. No key needed.",
   "welcomeSourceDescPodcastIndex": "Open podcast catalog with episode-level tracking. Free key/secret pair.",
+  "welcomeSourceDescTapTap": "Mainland-China games store and community: Chinese titles, tags and descriptions. No key needed.",
+  "welcomeSourceDescXimalaya": "Mainland-China audio platform: podcasts and audio dramas in Chinese. No key needed.",
   "creditsPodcastIndexAttribution": "Podcast data from Podcast Index.",
   "credentialsApiSecret": "API Secret",
   "markAllListened": "Mark all listened",

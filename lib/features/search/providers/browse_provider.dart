@@ -305,22 +305,15 @@ class BrowseNotifier extends Notifier<BrowseState> {
     if (sources.any((SearchSource s) => isDomesticSource(s.dataSource))) {
       for (final SearchSource source in sources) {
         if (isDomesticSource(source.dataSource)) continue;
-        if (_isAloneInItsCatalogue(source)) continue;
+        // Every corner of every media type now has a domestic source — the
+        // audio type's podcast half gained Ximalaya, which is the exemption
+        // this loop used to carry for Podcast Index — so the rule applies
+        // whole. A hand-toggled chip still overrides it.
         disabled.add(source.id);
       }
     }
     return disabled;
   }
-
-  /// True when a source is the only provider of its own corner of a media type
-  /// that holds more than one catalogue. `.audio` carries albums *and*
-  /// podcasts; only the album half gained a domestic source, and the podcast
-  /// half has no domestic substitute at all, so switching Podcast Index off
-  /// would blank podcasts rather than point anyone at a domestic alternative.
-  /// Region is a hint about a route, and there is no alternative route here.
-  bool _isAloneInItsCatalogue(SearchSource source) =>
-      source.outputMediaType == MediaType.audio &&
-      source.dataSource == DataSource.podcastIndex;
 
   MediaType _restoreMediaType() {
     final String? saved = _prefs.getString(BrowseSettingsKeys.mediaType);

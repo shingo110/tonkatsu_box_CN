@@ -3006,6 +3006,8 @@
   "welcomeApiPodcastIndexDesc": "Busca de podcasts e acompanhamento de episódios. Par chave/segredo gratuito em api.podcastindex.org.",
   "welcomeSourceDescMusicBrainz": "Enciclopédia musical aberta: álbuns, artistas e edições. Não requer chave.",
   "welcomeSourceDescPodcastIndex": "Catálogo aberto de podcasts com acompanhamento por episódio. Par chave/segredo gratuito.",
+  "welcomeSourceDescTapTap": "Loja e comunidade de jogos da China continental: títulos, etiquetas e descrições em chinês. Não requer chave.",
+  "welcomeSourceDescXimalaya": "Plataforma de áudio da China continental: podcasts e audiodramas em chinês. Não requer chave.",
   "creditsPodcastIndexAttribution": "Dados de podcasts do Podcast Index.",
   "credentialsApiSecret": "Segredo da API",
   "markAllListened": "Marcar tudo como ouvido",

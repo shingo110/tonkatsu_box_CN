@@ -31,6 +31,7 @@ void main() {
         'tvdb_movies',
         'tvdb_series',
         'games',
+        'taptap_games',
         'anilist_anime',
         'manga',
         'douban_anime',
@@ -56,6 +57,7 @@ void main() {
         'douban_music',
         'musicbrainz',
         'podcastindex',
+        'ximalaya_podcast',
       ]);
     });
   });

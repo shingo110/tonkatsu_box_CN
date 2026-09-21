@@ -10,11 +10,12 @@ import 'package:tonkatsu_box/features/settings/providers/settings_provider.dart'
 import 'package:tonkatsu_box/shared/constants/source_catalog.dart';
 
 /// A tab must open on what this network can reach: wherever a domestic
-/// provider exists, the overseas ones start switched off. Comics and games
-/// have no domestic provider at all, so switching anything off there would
-/// only produce a blank tab — an unreachable chip the user can see beats
-/// nothing to see at all. Audio is the mixed case: its album half has a
-/// domestic provider while its podcast half never will.
+/// provider exists, the overseas ones start switched off. Comics and visual
+/// novels are the two left with no domestic provider at all, so switching
+/// anything off there would only produce a blank tab — an unreachable chip the
+/// user can see beats nothing to see at all. Games and audio are the mixed
+/// cases: each now has a domestic provider, so their browsable overseas
+/// catalogue starts off and the user can switch it back on.
 void main() {
   Future<ProviderContainer> containerFor(
     String mediaType, {
@@ -71,7 +72,7 @@ void main() {
     expect(container.read(browseProvider).disabledSourceIds, isEmpty);
   });
 
-  test('audio opens on Douban for albums and keeps Podcast Index on', () async {
+  test('audio opens on the two domestic providers', () async {
     // A configured Podcast Index key, so the keyless rule is not what the
     // assertion below is measuring — the region rule is.
     final ProviderContainer container = await containerFor(
@@ -82,14 +83,27 @@ void main() {
       },
     );
 
-    // MusicBrainz is what the domestic album catalogue stands in for, so it
-    // starts off. Podcast Index is the only podcast provider there is and has
-    // no domestic substitute, so it stays on — region has nothing to say about
-    // a corner of the type that has no alternative route.
-    expect(activeIds(container), <String>{'douban_music', 'podcastindex'});
+    // Both halves of the type have a domestic catalogue now: Douban for albums,
+    // Ximalaya for podcasts. MusicBrainz and Podcast Index are what those two
+    // stand in for, so both start off — the exemption that used to keep
+    // Podcast Index on ended with the podcast half gaining its own route.
+    expect(
+      activeIds(container),
+      <String>{'douban_music', 'ximalaya_podcast'},
+    );
     expect(
       container.read(browseProvider).disabledSourceIds,
-      <String>{'musicbrainz'},
+      <String>{'musicbrainz', 'podcastindex'},
+    );
+  });
+
+  test('games open on TapTap, the only domestic provider', () async {
+    final ProviderContainer container = await containerFor('game');
+
+    expect(activeIds(container), <String>{'taptap_games'});
+    expect(
+      container.read(browseProvider).disabledSourceIds,
+      <String>{'games'},
     );
   });
 

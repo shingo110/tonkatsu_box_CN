@@ -54,9 +54,9 @@
   `XxxApiException: … (status: null)`（内部类名 + 内部字段）而不是一句人话，且 `detail` 一并丢失、
   Tooltip 空白。D13 一次补齐 9 个（新源 NeoDB / Bangumi / WeRead + 上游本就漏的 6 个）。
 
-**五个「加了必炸」护栏**：
+**「加了必炸」护栏速查**（不写条数 —— 数字会烂，这份清单不会）：
 
-- `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（19→20）
+- `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 **25**）
 - `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码（anime 2→3）
 - `test/features/search/sources/search_sources_test.dart` —— 注册表 id 顺序表
 - `test/features/search/sources/source_output_media_type_test.dart` —— 输出媒体类型断言
@@ -64,11 +64,15 @@
 - `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导输入框数与"获取密钥"链接数，按目录派生（**加需密钥源必炸**；漏源同样炸）
 - `test/core/api/api_error_extract_test.dart` —— **遍历 `lib/core/api` 下所有 `implements Exception`
   的类，缺一即炸**（D13 加）。此前只有手写的用例表，所以 NeoDB / Bangumi 漏了照样绿。
-- `test/shared/constants/source_catalog_region_test.dart` —— **钉死「境内源恰好是豆瓣 + 微信读书」**，
-  并要求每行都有非空且**唯一**的 `apiHost`（D15 加）。新源没分类、或分类写反，即红。
+- `test/shared/constants/source_catalog_region_test.dart` —— **钉死「境内源恰好是豆瓣 + 微信读书 +
+  TapTap + 喜马拉雅」**，并要求每行都有非空且**唯一**的 `apiHost`（D15 加）。新源没分类、或分类写反，即红。
 - `test/features/search/providers/source_region_default_test.dart` —— 钉死**默认开启集合**：有境内源的
-  类型只留境内源（书 = `douban` + `weread`，影 = `douban_movie`，动画 = `douban_anime`），
-  无境内源的类型一个也不关（漫画 / 游戏 / 音乐 / 播客）。动了 `_initiallyDisabledSourceIds` 的规则即红。
+  类型只留境内源（书 = `douban` + `weread`，影 = `douban_movie`，动画 = `douban_anime`，
+  音频 = `douban_music` + `ximalaya_podcast`，游戏 = `taptap_games`），无境内源的类型一个也不关
+  （D19 起**只剩漫画与视觉小说**）。动了 `_initiallyDisabledSourceIds` 的规则即红。
+- ⚠️ **按位置下标取目录的测试是隐性护栏**：`reachability_screen_test` 原用 `kDataSourceCatalog[i]`
+  挑罐头数据，TapTap 插在 igdb 之后把 `neodb` 从下标 10 挪到 11 ⇒ 断言以毫不相干的方式变红。
+  D19 已改为按 `DataSource` 经 `sourceInfoFor` 取。**写新测试不要按目录下标取源。**
 - RPC 一致性（见 R7，无幸免）
 
 ## 四、Windows 环境坑（全部伪装成"项目坏了"）
@@ -262,9 +266,10 @@
 - **`SourceInfo.region` / `apiHost` 均为必填**（D15）。`region` 取 `domestic` / `overseas`；
   `isDomesticSource(DataSource)` 对**不在目录里的源返回 `false`** —— 安全半边，不许假设可达。
 - **默认开启规则**（`BrowseNotifier._initiallyDisabledSourceIds`，原名 `_keylessSourceIds`）：缺密钥的
-  `mandatory` 源关；**且当该类型存在境内源时，境外源一并关**。若整个类型一个境内源都没有（动画 /
-  漫画 / 游戏 / 音乐 / 播客），**一个都不关** —— 区域只是提示、不是「它一定不通」的证据，而开一个
-  空标签页什么也说明不了。
+  `mandatory` 源关；**且当该类型存在境内源时，境外源一并关**。若整个类型一个境内源都没有
+  （**只剩漫画与视觉小说**），**一个都不关** —— 区域只是提示、不是「它一定不通」的证据，而开一个
+  空标签页什么也说明不了。D18 曾为音频的播客半边留过一个「该目录独占」豁免（`_isAloneInItsCatalogue`）；
+  D19 喜马拉雅补上了境内播客源，**豁免与其方法一并删除**，规则对全类型整类生效。
 - **主源顺序**（`search_sources.dart`）：图书 / 影视里**豆瓣排在 NeoDB 之前**（D15）。
 - **连通性自检**（`lib/core/api/source_reachability.dart` + 设置页 → 数据源 → 网络连通性自检）：
   逐源对 `apiHost` 发一次 `GET /`，带 `Range: bytes=0-0` 与 `validateStatus: (_) => true`，
@@ -332,6 +337,67 @@
   · `search_sources` 注册（会炸 `search_sources_test` 的 id 顺序表）。
 - **豆瓣一条 subject 就是一张专辑**，没有 MusicBrainz 那种版本选择 ⇒ 走 `DoubanMusicSheet`
   （仿 `PodcastIndexSheet`），不进 `MusicBrainzAlbumSheet`（它按 `nativeId` 当 MBID 查 release，会静默失败）。
+
+### 七之十四、TapTap 游戏源（2026-09-21，D19，`taptap`）
+
+**游戏线要的不是「中文」，是「免梯子」。** IGDB 的中文支持一向够用，但它和其余七个类型的默认主源一样
+在境外（D15 审计）。TapTap 是境内唯一能给游戏元数据的中文目录，于是它同时解决两件事：路由不出境 +
+标题本来就是中文。
+
+- **端点**：搜索 `/webapiv2/app-search/v1/by-keyword`（旧文档里的 `/mix-search/v1/by-keyword` **已死**，
+  404/405）；详情 `/webapiv2/app/v4/detail?id=<appId>`。**必带 `X-UA`**，否则一律 `400 INVALID_XUA`
+  —— 它是契约不是装饰，故它写在 BaseOptions 的 headers 里（`kTapTapXUa`）。
+- **分页参数叫 `from`，是偏移不是页码**（`from = (page - 1) * 10`）。**`total` 不可信**：第二页调用时它
+  直接消失而数据照出 ⇒ 判尾靠「空页」+ `kTapTapMaxOffset` 封顶。
+- **评分是字符串 `"7.9"`、0–10 标度** ⇒ `taptapRating` 乘 10 存进 0–100 的 `Game.rating`；未发布应用
+  没有 `score`，读到非数字（如 `"—"`）必须返 null，**不许当 0**。总票数在 `vote_info` 的五个桶里，
+  `taptapRatingCount` 求和（`vote_info` 全 0 视同没有评分）。
+- **id 空间必须偏移**：TapTap app id 与 IGDB game id 同为整数，而 `collection_items` 的 game 唯一索引
+  **不含 `source`** ⇒ 会撞车。`kTapTapIdOffset = 1e9`，`Game.id = appId + offset`、`Game.externalUrl`
+  用裸 appId 拼。**刷新路径靠 `collection_items.source` 分流**：`game_handler` 必须按
+  `game.isFromTapTap ? DataSource.taptap : DataSource.igdb` 写入 source，否则刷新会拿 TapTap id 去问 IGDB。
+- ⚠️ **`getGameById(id)` 收的是「偏移后的模型 id」，不是裸 appId**。传裸 appId 会被 `appId <= 0` 的
+  保护挡掉、**静默返回 null**（作者本轮就在这里被自己的活体测试骗过一次）。facade 的文档已写明。
+- **无平台表**：一个境内商店只列 Android / iOS 一份 ⇒ `platformIds = null`，选择器不该等平台解析。
+  搜索行与详情记录**键位相同**，一套 reader 服务两种形状。
+- 连带必改：枚举 + 图标分支（`data_source_ui` 返 null）+ `source_catalog`（`domestic`）+
+  `proxy_targets` + `proxy_handler` 的 keyless 组 + `welcome_step_sources._description` + 6 语言 ARB
+  + 刷新臂 + `import_service` 的 `tapTapIds` 分流 + `extractApiError` + `host_rate_limiter`（`taptap.cn` 200ms）
+  + `source_output_media_type_test` + `search_sources_test` 顺序表 + 两个区域测试。
+
+### 七之十五、喜马拉雅播客源（2026-09-21，D19，`ximalaya`）
+
+- **端点**：`/revision/search/seo`（**不是** `/revision/search/main` —— 后者对无会话客户端答
+  `{"ret":200,"reason":"risk invalid","riskLevel":5}`）。必带 `Referer`（前端总有），参数
+  `core=album` 把单集挡在结果外 —— 本源收的是节目不是单集。**专辑详情端点在黑名单后**，故本源
+  **search-only**：刷新走「标题重搜 + 按 albumId 匹配」（与微信读书同范式），导出无标题即降级为 null。
+- ⚠️⚠️ **最贵的一口咬痕：它用 `Content-Type: text/plain` 送 JSON。** Dio 的 JSON 嗅探因此拒绝解析，
+  `resp.data` 是 **String**，而解析器第一道 `if (data is! Map<String, dynamic>) return const []` 会
+  **静默返回空表** —— 表现为「搜索永远 0 条、无异常、无报错」。仓库里 Fantlab 早就踩过同类坑
+  （它的 Content-Type 尾部多个 `;`）。D19 把解码统一提到 `api_dio.dart`：
+  **传输层 `responseType: ResponseType.plain` + 解析前 `decodeJsonBody(resp.data)`**
+  （`FantlabHttpClient.decodeBody` 已改为委托它）。**教训：新源一定要写一条「响应体是 String」的
+  解析测试** —— 这口咬痕是活体验证抓到的，夹具测试若不喂 String 就抓不到。
+- **`ret != 200` 必须抛异常并带上 `msg`**（`no such search word` / `risk invalid`）：否则又被上面的
+  空表逻辑吞成「没有结果」。`_parseAlbums` 收到非 Map 才返回空表。
+- **id 空间同样要偏移**：albumId 是 8 位整数，与豆瓣 subject id 会在 `collection_items.external_id`
+  的 audio 唯一索引（**不含 `source`**）上撞车 ⇒ `kXimalayaIdOffset = 2e9`；`nativeId` 存裸 albumId 字符串。
+- **封面是裸 `storages/...` 路径** ⇒ `ximalayaCoverUrlFor` 拼 `https://imagev2.xmcdn.com/`。
+  **`createdAt` 是毫秒**（与 `released_time` 的秒不同），`tracksCount` / `playCount` 的 0 含义不同：
+  前者 0 = 未填写（转 null），后者 0 = 真没人听过（保留 0）。
+- **无评分字段** ⇒ `rating` 留 null，不编造。`kind = podcast`，与豆瓣音乐（`album`）共用 `.audio`。
+- 与 TapTap 同一批的连带走一遍；**额外**：`media_handlers` 的 `sheetBuilder` 要走
+  `XimalayaPodcastSheet`（记录展示，无单集预览 —— 单集列表在登录态 `webtk` 之后）。
+
+### 七之十六、D19 的收口：区域规则整类生效 + 测试别再按下标取目录
+
+- **音频半边也有境内源了** ⇒ `BrowseNotifier._isAloneInItsCatalogue` 及其调用点**删除**，
+  「有境内源 ⇒ 关境外源」不再有任何豁免；**游戏同理**：TapTap 一进来，IGDB 默认由开转关
+  （`source_region_default_test` 的 game 用例从「一个都不关」翻成 `active={taptap_games}`）。
+- **`reachability_screen_test` 踩了位置下标**（见护栏速查最后一条）。已改为
+  `sourceInfoFor(DataSource.x)`，**这类改动以后是新源 SOP 的一部分**。
+- **两个新源都补齐了 `test/core/api/<source>_api_test.dart`**（仓库惯例：每个源一份）。它们同时覆盖
+  字段 reader 的边界（空串 / 0 / 非数字）、HTTP 错误映射、坏行丢弃、以及喜马拉雅那条 String 体回归。
 
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 

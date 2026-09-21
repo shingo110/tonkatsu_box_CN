@@ -18,8 +18,10 @@ import 'package:tonkatsu_box/features/search/sources/openlibrary_source.dart';
 import 'package:tonkatsu_box/features/search/sources/tmdb_anime_source.dart';
 import 'package:tonkatsu_box/features/search/sources/tmdb_movies_source.dart';
 import 'package:tonkatsu_box/features/search/sources/tmdb_tv_source.dart';
+import 'package:tonkatsu_box/features/search/sources/taptap_games_source.dart';
 import 'package:tonkatsu_box/features/search/sources/vndb_source.dart';
 import 'package:tonkatsu_box/features/search/sources/weread_book_source.dart';
+import 'package:tonkatsu_box/features/search/sources/ximalaya_podcast_source.dart';
 
 void main() {
   group('SearchSource.outputMediaType', () {
@@ -37,6 +39,10 @@ void main() {
 
     test('IgdbGamesSource → MediaType.game', () {
       expect(IgdbGamesSource().outputMediaType, MediaType.game);
+    });
+
+    test('TapTapGamesSource → MediaType.game', () {
+      expect(TapTapGamesSource().outputMediaType, MediaType.game);
     });
 
     test('AniListAnimeSource → MediaType.anime', () {
@@ -101,6 +107,10 @@ void main() {
 
     test('DoubanMusicSource → MediaType.audio', () {
       expect(DoubanMusicSource().outputMediaType, MediaType.audio);
+    });
+
+    test('XimalayaPodcastSource → MediaType.audio', () {
+      expect(XimalayaPodcastSource().outputMediaType, MediaType.audio);
     });
   });
 }

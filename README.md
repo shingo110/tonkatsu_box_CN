@@ -74,11 +74,12 @@
 
 ## 支持的数据源
 
-本分支共 **30 个搜索源、覆盖 20 个目录服务**（上游基线 21 源 / 16 服务 + 本分支新增的 Bangumi 动画与漫画两个源、NeoDB 的图书 / 电影 / 剧集三个源，微信读书，以及豆瓣的图书 / 电影 / 剧集三个源）。**"国内直连"一列仅标注本分支实测过的结论**，未评估的留空 —— 上游源的海外可达性随网络环境而异，本仓库不做保证。
+本分支共 **34 个搜索源、覆盖 22 个目录服务**（上游基线 21 源 / 16 服务 + 本分支新增的 Bangumi 动画与漫画两个源、NeoDB 的图书 / 电影 / 剧集三个源，微信读书，豆瓣的图书 / 电影 / 剧集 / 动画 / 音乐五个源，TapTap 游戏源，以及喜马拉雅播客源）。**"国内直连"一列仅标注本分支实测过的结论**，未评估的留空 —— 上游源的海外可达性随网络环境而异，本仓库不做保证。
 
 | 类型 | 目录服务 | 密钥 | 国内直连 |
 |------|---------|------|:--------:|
 | 游戏 | [IGDB](https://www.igdb.com/) | 内置 | |
+| **游戏** | **[TapTap](https://www.taptap.cn/)** | **免密钥** | **✅ 已实测** |
 | 电影 / 剧集 | [TMDB](https://www.themoviedb.org/) | 内置 | |
 | 剧集 | [TVmaze](https://www.tvmaze.com/) | 免密钥 | |
 | 剧集 / 电影 | [TheTVDB](https://thetvdb.com/) | 需密钥 | |
@@ -99,6 +100,7 @@
 | 漫画 | [ComicVine](https://comicvine.gamespot.com/) | 需免费密钥 | |
 | 音乐 | [MusicBrainz](https://musicbrainz.org/) | 免密钥 | |
 | 播客 | [Podcast Index](https://podcastindex.org/) | 内置 | |
+| **播客** | **[喜马拉雅](https://www.ximalaya.com/)** | **免密钥** | **✅ 已实测** |
 
 另有三个非搜索用途的服务：封面用的 [SteamGridDB](https://www.steamgriddb.com/)（内置密钥）、复古媒体图库 [ScreenScraper](https://www.screenscraper.fr/)（需账号）、成就同步 [RetroAchievements](https://retroachievements.org/)（需账号）。
 
@@ -251,7 +253,7 @@ CI**：要外网、会碰上游限流。
 
 本分支的全部功能来自 [`hacan359/tonkatsu_box`](https://github.com/hacan359/tonkatsu_box)，在此致谢原作者与上游贡献者。上游仓库同时提供[使用文档 Wiki](https://github.com/hacan359/tonkatsu_box/wiki)（英文）与[现成收藏库](https://github.com/hacan359/tonkatsu-collections)（25 000+ 游戏，23 个平台）。
 
-目录服务：IGDB · TMDB · TVmaze · TheTVDB · VNDB · AniList · **Bangumi** · MangaBaka · MangaDex · Kitsu · **NeoDB** · **微信读书** · **豆瓣** · OpenLibrary · Fantlab · Google Books · Hardcover · ComicVine · MusicBrainz · Podcast Index
+目录服务：IGDB · **TapTap** · TMDB · TVmaze · TheTVDB · VNDB · AniList · **Bangumi** · MangaBaka · MangaDex · Kitsu · **NeoDB** · **微信读书** · **豆瓣** · OpenLibrary · Fantlab · Google Books · Hardcover · ComicVine · MusicBrainz · Podcast Index · **喜马拉雅**
 
 导入与扩展：Simkl · Trakt.tv · Steam · Kinorium · MyAnimeList · RetroAchievements · SteamGridDB · ScreenScraper · Kodi
 

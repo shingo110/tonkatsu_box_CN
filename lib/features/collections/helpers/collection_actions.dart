@@ -1,3 +1,4 @@
+import 'package:core/api/taptap_constants.dart';
 import 'package:core/models/audio_item.dart';
 import 'package:core/models/audio_track.dart';
 import 'package:core/models/anime.dart';
@@ -37,6 +38,8 @@ import '../../../core/api/podcast_index_api.dart';
 import '../../../core/api/openlibrary_api.dart';
 import '../../../core/api/tmdb_api.dart';
 import '../../../core/api/tvdb_api.dart';
+import '../../../core/api/taptap_api.dart';
+import '../../../core/api/ximalaya_api.dart';
 import '../../../core/api/vndb_api.dart';
 import '../../../core/api/weread_api.dart';
 import '../../../core/database/database_service.dart';
@@ -627,8 +630,11 @@ class CollectionActions {
 
       switch (item.mediaType) {
         case MediaType.game:
-          final Game? game =
-              await ref.read(igdbApiProvider).getGameById(item.externalId);
+          // The shifted id space tells the two catalogues apart — a TapTap id
+          // means nothing to IGDB, and vice versa. See kTapTapIdOffset.
+          final Game? game = item.externalId >= kTapTapIdOffset
+              ? await ref.read(tapTapApiProvider).getGameById(item.externalId)
+              : await ref.read(igdbApiProvider).getGameById(item.externalId);
           if (game == null) return _RefreshOutcome.notFound();
           await db.gameDao.upsertGame(game);
         case MediaType.movie:
@@ -698,7 +704,18 @@ class CollectionActions {
         case MediaType.audio:
           final AudioItem? cached = item.audioItem;
           if (cached == null) return _RefreshOutcome.unsupported();
-          if (cached.source == DataSource.douban) {
+          if (cached.source == DataSource.ximalaya) {
+            // Ximalaya's album door is closed to anonymous clients, so the
+            // record is found again by searching its title and matching the
+            // album id — the same recovery WeRead's books use.
+            final AudioItem? full =
+                await ref.read(ximalayaApiProvider).findByNativeId(
+                      title: cached.title,
+                      nativeId: cached.nativeId,
+                    );
+            if (full == null) return _RefreshOutcome.notFound();
+            await db.audioDao.upsertAudioItem(full);
+          } else if (cached.source == DataSource.douban) {
             // One call answers the record and its track list, and the detail
             // is complete where the cached row is thin, so it replaces it.
             final (AudioItem?, List<AudioTrack>) fetched = await ref

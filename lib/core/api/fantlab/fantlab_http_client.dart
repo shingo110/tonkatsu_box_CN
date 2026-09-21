@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:core/models/data_source.dart';
 import 'package:dio/dio.dart';
 
@@ -37,17 +35,7 @@ class FantlabHttpClient {
 
   /// Tolerates both an already-parsed object (mocks) and the raw JSON String
   /// the plain transport returns. A blank or malformed body → null.
-  static Object? decodeBody(Object? data) {
-    if (data is String) {
-      if (data.trim().isEmpty) return null;
-      try {
-        return jsonDecode(data);
-      } on FormatException {
-        return null;
-      }
-    }
-    return data;
-  }
+  static Object? decodeBody(Object? data) => decodeJsonBody(data);
 
   /// Maps Dio errors to user-facing messages; 429 = rate limit.
   FantlabApiException handleDioException(

@@ -10574,6 +10574,18 @@ abstract class S {
   /// **'Open podcast catalog with episode-level tracking. Free key/secret pair.'**
   String get welcomeSourceDescPodcastIndex;
 
+  /// No description provided for @welcomeSourceDescTapTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Mainland-China games store and community: Chinese titles, tags and descriptions. No key needed.'**
+  String get welcomeSourceDescTapTap;
+
+  /// No description provided for @welcomeSourceDescXimalaya.
+  ///
+  /// In en, this message translates to:
+  /// **'Mainland-China audio platform: podcasts and audio dramas in Chinese. No key needed.'**
+  String get welcomeSourceDescXimalaya;
+
   /// No description provided for @creditsPodcastIndexAttribution.
   ///
   /// In en, this message translates to:

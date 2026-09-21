@@ -25,6 +25,8 @@ import 'tvdb_api.dart';
 import 'tvmaze_api.dart';
 import 'vndb_api.dart';
 import 'weread_api.dart';
+import 'taptap_api.dart';
+import 'ximalaya_api.dart';
 
 typedef ApiError = ({String message, String? detail});
 
@@ -83,6 +85,10 @@ ApiError extractApiError(Exception e) {
     TvMazeApiException(:final String message, :final String? detail) =>
       (message: message, detail: detail),
     WeReadApiException(:final String message, :final String? detail) =>
+      (message: message, detail: detail),
+    TapTapApiException(:final String message, :final String? detail) =>
+      (message: message, detail: detail),
+    XimalayaApiException(:final String message, :final String? detail) =>
       (message: message, detail: detail),
     // Raised by our own limiter rather than by a source, so it is the one error
     // here with no per-API wrapper to be unwrapped from.

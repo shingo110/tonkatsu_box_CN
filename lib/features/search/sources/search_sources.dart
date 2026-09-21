@@ -30,11 +30,13 @@ import 'openlibrary_source.dart';
 import 'tmdb_anime_source.dart';
 import 'tmdb_movies_source.dart';
 import 'tmdb_tv_source.dart';
+import 'taptap_games_source.dart';
 import 'tvdb_movies_source.dart';
 import 'tvdb_series_source.dart';
 import 'tvmaze_tv_source.dart';
 import 'vndb_source.dart';
 import 'weread_book_source.dart';
+import 'ximalaya_podcast_source.dart';
 
 /// All registered search sources. List order drives per-type primary /
 /// fallback resolution below; register a new source next to its provider.
@@ -49,8 +51,11 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     // TheTVDB
     TvdbMoviesSource(),
     TvdbSeriesSource(),
-    // IGDB
+    // IGDB leads the game tab because it can browse; TapTap follows with the
+    // Chinese catalogue a mainland network reaches without a proxy. A
+    // search-only source at the head would open the tab empty.
     IgdbGamesSource(),
+    TapTapGamesSource(),
     // AniList
     AniListAnimeSource(),
     AniListMangaSource(),
@@ -95,6 +100,9 @@ final List<SearchSource> searchSources = List<SearchSource>.unmodifiable(
     DoubanMusicSource(),
     MusicBrainzAlbumsSource(),
     PodcastIndexSource(),
+    // The podcast half's mainland catalogue, following the browsable Podcast
+    // Index for the same reason TapTap follows IGDB.
+    XimalayaPodcastSource(),
   ],
 );
 

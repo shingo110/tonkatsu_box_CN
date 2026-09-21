@@ -57,6 +57,7 @@ import '../api/tmdb_api.dart';
 import '../api/tvdb_api.dart';
 import '../api/tvmaze_api.dart';
 import '../api/vndb_api.dart';
+import '../api/taptap_api.dart';
 import '../database/database_service.dart';
 import '../import/import_progress.dart';
 import 'collection_hero_service.dart';
@@ -71,6 +72,7 @@ final Provider<ImportService> importServiceProvider =
   return ImportService(
     repository: ref.watch(collectionRepositoryProvider),
     igdbApi: ref.watch(igdbApiProvider),
+    tapTapApi: ref.watch(tapTapApiProvider),
     tmdbApi: ref.watch(tmdbApiProvider),
     vndbApi: ref.watch(vndbApiProvider),
     aniListApi: ref.watch(aniListApiProvider),
@@ -162,6 +164,7 @@ class ImportService {
     DoubanApi? doubanApi,
     MusicBrainzApi? musicBrainzApi,
     PodcastIndexApi? podcastIndexApi,
+    TapTapApi? tapTapApi,
     CanvasRepository? canvasRepository,
     ImageCacheService? imageCacheService,
     TrackerDao? trackerDao,
@@ -187,6 +190,7 @@ class ImportService {
         _doubanApi = doubanApi,
         _musicBrainzApi = musicBrainzApi,
         _podcastIndexApi = podcastIndexApi,
+        _tapTapApi = tapTapApi,
         _database = database,
         _canvasRepository = canvasRepository,
         _imageCacheService = imageCacheService,
@@ -213,6 +217,7 @@ class ImportService {
   final DoubanApi? _doubanApi;
   final MusicBrainzApi? _musicBrainzApi;
   final PodcastIndexApi? _podcastIndexApi;
+  final TapTapApi? _tapTapApi;
   final DatabaseService _database;
   final CanvasRepository? _canvasRepository;
   final ImageCacheService? _imageCacheService;
@@ -912,6 +917,9 @@ class ImportService {
     ImportProgressCallback? onProgress,
   }) async {
     final List<int> gameIds = <int>[];
+    // TapTap ids arrive shifted out of IGDB's range; they go to their own
+    // batch because neither API knows the other's ids.
+    final List<int> tapTapIds = <int>[];
     final List<_MediaRef> movieRefs = <_MediaRef>[];
     final List<String> vnIds = <String>[];
     final List<_MediaRef> tvRefs = <_MediaRef>[];
@@ -937,7 +945,14 @@ class ImportService {
 
       switch (mediaType) {
         case MediaType.game:
-          gameIds.add(externalId);
+          // One integer column, two catalogues: TapTap ids are shifted out of
+          // IGDB's range, so the source decides which batch they join. See
+          // kTapTapIdOffset.
+          if (ref.source == DataSource.taptap) {
+            tapTapIds.add(externalId);
+          } else {
+            gameIds.add(externalId);
+          }
         case MediaType.movie:
           movieRefs.add(ref);
         case MediaType.tvShow:
@@ -974,6 +989,12 @@ class ImportService {
     List<Game> games = <Game>[];
     if (gameIds.isNotEmpty) {
       games = await _igdbApi.getGamesByIds(gameIds);
+    }
+    // TapTap has no batch lookup, and an export rarely carries many of its
+    // shifted ids, so they resolve one at a time.
+    for (final int id in tapTapIds) {
+      final Game? game = await _tapTapApi?.getGameById(id);
+      if (game != null) games.add(game);
     }
 
     final List<Movie> movies = <Movie>[];
@@ -1137,19 +1158,26 @@ class ImportService {
     final List<AudioItem> result = <AudioItem>[];
     for (final _MediaRef ref in refs) {
       try {
-        // Podcast feed ids are the external id itself; Douban mints numeric
-        // subject ids, so its export keeps a usable one too; a MusicBrainz
-        // album resolves by MBID because the fnv hash cannot be reversed.
-        final AudioItem? item = ref.source == DataSource.podcastIndex
-            ? await _podcastIndexApi?.getPodcast(ref.externalId)
-            : ref.source == DataSource.douban
-                ? (await _doubanApi?.getMusicWithTracks(
-                      ref.externalId.toString(),
-                    ))
-                    ?.$1
-                : ref.nativeId != null
-                    ? await _musicBrainzApi?.getReleaseGroup(ref.nativeId!)
-                    : null;
+        // Podcast feed ids and Douban subject ids survive the export as
+        // external ids; a MusicBrainz album resolves by MBID because the fnv
+        // hash cannot be reversed. Ximalaya's album door is closed and its rows
+        // would need a title the export does not keep, so they stay unresolved
+        // — the same dead end WeRead's books hit.
+        final AudioItem? item;
+        if (ref.source == DataSource.ximalaya) {
+          item = null;
+        } else if (ref.source == DataSource.podcastIndex) {
+          item = await _podcastIndexApi?.getPodcast(ref.externalId);
+        } else if (ref.source == DataSource.douban) {
+          item = (await _doubanApi?.getMusicWithTracks(
+            ref.externalId.toString(),
+          ))
+              ?.$1;
+        } else if (ref.nativeId != null) {
+          item = await _musicBrainzApi?.getReleaseGroup(ref.nativeId!);
+        } else {
+          item = null;
+        }
         if (item != null) result.add(item);
       } on Exception catch (e) {
         _log.warning('Failed to fetch audio item ${ref.externalId}: $e');

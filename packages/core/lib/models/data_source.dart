@@ -3,6 +3,11 @@ enum DataSource {
   /// IGDB — game database.
   igdb('IGDB', 0xFF9147FF),
 
+  /// TapTap (taptap.cn) — mainland-China app store and games community. The one
+  /// games catalogue a mainland network reaches without a proxy, with Chinese
+  /// titles, tags and descriptions as published.
+  taptap('TapTap', 0xFF00C8C8),
+
   /// TMDB — movie and TV database.
   tmdb('TMDB', 0xFF01D277),
 
@@ -77,6 +82,11 @@ enum DataSource {
   /// Podcast Index — open podcast catalog (RSS feeds + episodes). Feeds the
   /// `audio` media type with `AudioKind.podcast` records.
   podcastIndex('Podcast Index', 0xFFF04438),
+
+  /// Ximalaya (ximalaya.com) — the mainland audio platform. The podcast half of
+  /// the audio type reaches Chinese metadata and audio drama here without a
+  /// proxy, alongside books and radio plays no RSS catalogue indexes.
+  ximalaya('Ximalaya', 0xFFF86442),
 
   /// Local source (custom items).
   local('Custom', 0xFF26A69A);

@@ -6098,6 +6098,14 @@ class SRu extends S {
       'Открытый каталог подкастов с трекингом по эпизодам. Бесплатная пара ключей.';
 
   @override
+  String get welcomeSourceDescTapTap =>
+      'Китайский игровой магазин и сообщество: китайские названия, теги и описания. Ключ не нужен.';
+
+  @override
+  String get welcomeSourceDescXimalaya =>
+      'Китайская аудиоплатформа: подкасты и аудиоспектакли на китайском. Ключ не нужен.';
+
+  @override
   String get creditsPodcastIndexAttribution =>
       'Данные о подкастах — Podcast Index.';
 

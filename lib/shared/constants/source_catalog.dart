@@ -87,6 +87,15 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
     region: SourceRegion.overseas,
     keyRequirement: SourceKeyRequirement.recommended,
   ),
+  // Chinese games with no key and no route to arrange: the one games
+  // catalogue a mainland network reaches.
+  SourceInfo(
+    source: DataSource.taptap,
+    mediaTypes: <MediaType>[MediaType.game],
+    url: 'https://www.taptap.cn/',
+    apiHost: 'www.taptap.cn',
+    region: SourceRegion.domestic,
+  ),
   SourceInfo(
     source: DataSource.anilist,
     mediaTypes: <MediaType>[
@@ -227,6 +236,16 @@ const List<SourceInfo> kDataSourceCatalog = <SourceInfo>[
     apiHost: 'api.podcastindex.org',
     region: SourceRegion.overseas,
     keyRequirement: SourceKeyRequirement.recommended,
+  ),
+  // The podcast half of the audio type, in Chinese, with no key and no route
+  // to arrange. Podcast Index loses its "only route there is" exemption to
+  // this entry — see `BrowseNotifier._isAloneInItsCatalogue`.
+  SourceInfo(
+    source: DataSource.ximalaya,
+    mediaTypes: <MediaType>[MediaType.audio],
+    url: 'https://www.ximalaya.com/',
+    apiHost: 'www.ximalaya.com',
+    region: SourceRegion.domestic,
   ),
 ];
 

@@ -6090,6 +6090,14 @@ class SFr extends S {
       'Catalogue ouvert de podcasts avec suivi par épisode. Paire clé/secret gratuite.';
 
   @override
+  String get welcomeSourceDescTapTap =>
+      'Boutique et communauté de jeux de Chine continentale : titres, étiquettes et descriptions en chinois. Aucune clé requise.';
+
+  @override
+  String get welcomeSourceDescXimalaya =>
+      'Plateforme audio de Chine continentale : podcasts et fictions audio en chinois. Aucune clé requise.';
+
+  @override
   String get creditsPodcastIndexAttribution =>
       'Données de podcasts fournies par Podcast Index.';
 

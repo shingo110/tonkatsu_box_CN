@@ -1,4 +1,5 @@
 import 'package:core/models/collected_item_info.dart';
+import 'package:core/models/data_source.dart';
 import 'package:core/models/game.dart';
 import 'package:core/models/media_type.dart';
 import 'package:core/models/platform.dart';
@@ -89,6 +90,9 @@ class GameHandler implements MediaActionHandler {
       collectionId: picked.id,
       collectionName: picked.name,
       mediaType: MediaType.game,
+      // The row records where it came from, so a refresh knows which catalogue
+      // to ask. The id's high half says TapTap — see kTapTapIdOffset.
+      source: game.isFromTapTap ? DataSource.taptap : DataSource.igdb,
       externalId: game.id,
       platformId: platformId,
       title: game.name,
@@ -141,6 +145,9 @@ class GameHandler implements MediaActionHandler {
       context: context,
       collectionIds: collectionIds,
       mediaType: MediaType.game,
+      // Same as the single add: the row keeps its catalogue. See
+      // kTapTapIdOffset.
+      source: game.isFromTapTap ? DataSource.taptap : DataSource.igdb,
       externalId: game.id,
       platformId: platformId,
       title: game.name,

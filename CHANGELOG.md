@@ -12,6 +12,89 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — the games and podcast tabs gain a mainland catalogue
+
+Games and podcasts were the last two media types whose default route left the
+mainland. TapTap is a games catalogue hosted in China, Ximalaya is the podcast
+platform hosted in China, so each tab now opens on a provider this network
+reaches with no proxy — and both are Chinese by construction rather than by
+translation. With the audio type's podcast half covered, the region rule loses
+its last exemption and applies to every media type whole.
+
+- `TapTapGamesSource` (`lib/features/search/sources/taptap_games_source.dart`),
+  id `taptap_games`, output `MediaType.game`, label `collectionFilterGames`.
+  Keyless and search-only: the endpoint takes a keyword, and an empty one is a
+  400. `TapTapApi` (`lib/core/api/taptap_api.dart`) fronts `TapTapSearchApi`
+  (`searchGames`, `getGameById`) over `TapTapHttpClient`
+  (`lib/core/api/taptap/taptap_http_client.dart`), whose base options carry the
+  `X-UA` header TapTap insists on (`kTapTapXUa`) — without it every call is
+  `400 INVALID_XUA`.
+- `Game.fromTapTap` (`packages/core/lib/models/game.dart`) maps the app record,
+  reading it through `packages/core/lib/utils/taptap_json.dart`
+  (`taptapAppId`, `taptapTitle`, `taptapDescription`, `taptapIconUrl`,
+  `taptapArtworkUrl`, `taptapRating`, `taptapRatingCount`, `taptapGenres`,
+  `taptapStudio`, `taptapReleaseDate`). The Chinese title goes in the `title`
+  slot, which is the only name TapTap carries; the community score arrives as
+  the string `"7.9"` on a 0–10 scale and is stored ×10 like IGDB's; a missing
+  score reads null rather than zero; `platformIds` stays null because a
+  mainland store lists one build per platform.
+  `Game.isFromTapTap` / `Game.tapTapAppId` decode the shifted id.
+- `XimalayaPodcastSource` (`lib/features/search/sources/ximalaya_podcast_source.dart`),
+  id `ximalaya_podcast`, output `MediaType.audio`. `XimalayaApi`
+  (`lib/core/api/ximalaya_api.dart`) fronts `XimalayaSearchApi`
+  (`searchPodcasts`, `findByNativeId`) over `XimalayaHttpClient`
+  (`lib/core/api/ximalaya/ximalaya_http_client.dart`), which asks
+  `/revision/search/seo` with `core=album` and a `Referer` — the
+  obvious-looking `/revision/search/main` answers `risk invalid` to a client
+  with no browser session. The album detail endpoint sits behind a blacklist,
+  so the source is search-only: `findByNativeId` re-searches the stored title
+  and matches on album id, and an export without a title degrades to null.
+- `AudioItem.fromXimalaya` (`packages/core/lib/models/audio_item.dart`) reads
+  the album row through `packages/core/lib/utils/ximalaya_json.dart`
+  (`ximalayaAlbumId`, `ximalayaTitle`, `ximalayaIntro`, `ximalayaAnchor`,
+  `ximalayaCoverUrl`, `ximalayaEpisodeCount`, `ximalayaPlayCount`,
+  `ximalayaCreatedAt`), on `AudioKind.podcast` with no rating — this catalogue
+  publishes none. `createdAt` is Unix **milliseconds** here; a cover is a bare
+  `storages/…` path, completed by `ximalayaCoverUrlFor`.
+- `decodeJsonBody` (`lib/core/api/api_dio.dart`) decodes a body Dio handed back
+  as a raw String, and `XimalayaHttpClient` reads text for it. Ximalaya serves
+  JSON under `Content-Type: text/plain`, so the JSON sniffing that every other
+  client relies on refuses it — the parse then bailed on the type and answered
+  an empty page, silently, for every query. `FantlabHttpClient.decodeBody`
+  (which hit the same wall via a trailing `;`) now delegates to this one.
+- `DataSource.taptap` / `DataSource.ximalaya`
+  (`packages/core/lib/models/data_source.dart`), with null entries in
+  `data_source_ui.dart`, `SourceInfo` rows in `source_catalog.dart` marked
+  `domestic`, `ProxyTarget.taptap` / `ProxyTarget.ximalaya` in
+  `proxy_targets.dart` and the matching keyless arms in
+  `server/lib/src/proxy_handler.dart`, so the web build forwards both with no
+  credential step. `kHostMinRequestGap` gains `taptap.cn` and `ximalaya.com`.
+- `game_handler` writes `DataSource.taptap` into `collection_items.source` for a
+  TapTap row, which is what lets the refresh arm pick the right catalogue:
+  `collection_actions` sends `tapTapApiProvider.getGameById` an id at or above
+  `kTapTapIdOffset` and `igdbApiProvider.getGameById` everything below it.
+  Both ids are shifted (1e9 for games, 2e9 for albums) because the unique
+  indexes on `collection_items` for those types carry no `source` column, so a
+  TapTap app id and an IGDB game id, or an album id and a Douban subject id,
+  would otherwise collide. `import_service` splits `tapTapIds` the same way.
+- `BrowseNotifier._isAloneInItsCatalogue` is deleted. The exemption existed
+  because audio carried two catalogues and only one had a domestic provider;
+  Ximalaya ends that, so overseas providers start off for every media type that
+  has a domestic one. `welcomeSourceDescTapTap` / `welcomeSourceDescXimalaya`
+  in all six `.arb` files, and `searchSourcePodcasts` labels the new source.
+- Guardrails: `source_badge_test` (25 enum values), `source_catalog_region_test`
+  (`{douban, weread, taptap, ximalaya}`), `search_sources_test` (id order),
+  `source_output_media_type_test`, `source_region_default_test` (the game case
+  flips to `active={taptap_games}`, and the audio case loses its exemption
+  note), and `browse_provider_test` (two games sources, so `game` is no longer
+  a single-source type). `reachability_screen_test` stops picking catalogue
+  entries by positional index — inserting TapTap after IGDB moved `neodb` from
+  index 10 to 11 and broke an assertion that has nothing to do with games — and
+  resolves through `sourceInfoFor` instead. New
+  `test/core/api/taptap_api_test.dart` and `test/core/api/ximalaya_api_test.dart`
+  cover the field readers, the error mapping, the dropped-row path and the
+  String-body regression above.
+
 ## [cn] Added — the music tab gains a Chinese album catalogue
 
 Audio was the last media type whose albums only ever came from abroad. Douban

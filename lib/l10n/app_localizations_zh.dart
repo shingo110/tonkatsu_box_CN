@@ -5693,6 +5693,12 @@ class SZh extends S {
   String get welcomeSourceDescPodcastIndex => '开放的播客目录，支持按单集追踪。免费密钥对。';
 
   @override
+  String get welcomeSourceDescTapTap => '国内游戏商店与社区：中文名称、标签与简介。无需密钥。';
+
+  @override
+  String get welcomeSourceDescXimalaya => '国内音频平台：中文播客与有声剧。无需密钥。';
+
+  @override
   String get creditsPodcastIndexAttribution => '播客数据来自 Podcast Index。';
 
   @override

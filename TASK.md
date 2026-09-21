@@ -685,11 +685,11 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
 | B1 | Windows 桌面运行 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 → `flutter run -d windows` 不可用 | 无法桌面预览；写码/分析/测试不受影响 |
 | B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` / `neodb.social` / `weread.qq.com` / `frodo.douban.com`，✅ **2026-09-20 闭环（→ D10）**。真实自托管实测 7/7：Bangumi GET / POST、NeoDB 搜索经代理返回与直连**逐字节相同**；豆瓣无密钥 503、非白名单目标 404 均在服务端拦下。护栏两条：`server/test/proxy_serve_integration_test.dart`、`test/core/api/proxy_round_trip_test.dart` | ✅ 已闭环 |
 | B3 | 上游同步 | fork 基线 0.44.0；上游以周为节奏发版 | 每次同步人造裁决冲突清单见 PROJECT.md §3 |
-| B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB / **豆瓣**）；漫画 ✅（**Bangumi 书籍类型**） | **已闭环** —— 四类媒体均有免密钥中文源 |
+| B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB / **豆瓣**）；漫画 ✅（**Bangumi 书籍类型**）；**游戏 ✅（TapTap）；音乐 ✅（豆瓣音乐）；播客 ✅（喜马拉雅）** | **已闭环** —— 七类媒体均有免密钥中文源；仅漫画仍全境外托管（中文元数据可用，但路由需出境） |
 
 ## 护栏速查（改代码前看一眼，防炸）
 
-1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 **23**），加枚举即炸。
+1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 **25**），加枚举即炸。
 2. `test/features/search/providers/browse_provider_test.dart` —— 该媒体可浏览源数硬编码，加源即炸（**仅可浏览类型**；图书走 `textQueryOnly`，无此断言）。漫画现 **5** 个（AniList / Bangumi / MangaBaka / MangaDex / Kitsu）；该文件的 `unsupportedSourceIds` 与 `seedLoaded` 的 `disabledSourceIds` 也各随源数变动。
 3. `test/features/search/sources/search_sources_test.dart` —— 注册表 id 顺序表，加源须补序。
 4. `test/shared/constants/source_catalog_test.dart` —— **「哪些源要密钥」的集合写死**（断言 `keyRequirement != none` 的源**恰好等于**那组枚举，现 **7** 个：igdb / tmdb / tvdb / comicVine / googleBooks / hardcover / podcastIndex）。加任何**需密钥**的源即炸；D7 才把它编入护栏。**豆瓣已于 D12 退出该集合**（改用内置公用密钥），同文件新增 `Douban asks the user for nothing` 反向钉住。
