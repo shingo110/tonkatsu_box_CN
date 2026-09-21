@@ -24,7 +24,7 @@
 >
 > 上游的数据源以海外服务为主（TMDB、IGDB、AniList、Google Books…），在国内网络下要么不可达，要么只提供英文元数据。本分支的目标是**接入国内可直连、带中文元数据的数据源**，让搜索与入库真正可用。
 >
-> 本分支**尚未发布任何构建产物**。需要可用版本请先从源码构建，或使用上游的[官方 Release](https://github.com/hacan359/tonkatsu_box/releases/latest)（不含本分支的国内源）。
+> 本分支**尚未发布任何构建产物** —— 发布流水线（`.github/workflows/release-cn.yml`，推 `cn-v*` 标签触发）已就位，但首个 Release 尚未推送。需要可用版本请先从源码构建，或使用上游的[官方 Release](https://github.com/hacan359/tonkatsu_box/releases/latest)（不含本分支的国内源）。
 
 ---
 
@@ -35,12 +35,18 @@
 | 媒体类型 | 数据源 | 状态 | 备注 |
 |---------|--------|:----:|------|
 | 动画 | [Bangumi](https://bgm.tv/) | ✅ **已接入** | 免密钥直连；中文标题与标签；分类 / 年份 / 评分 / 排名四类筛选；详情含制作公司与简介 |
+| 动画 | [豆瓣](https://movie.douban.com/) | ✅ **已接入** | 复用豆瓣影视接口，动画条目自带中文名与评分，无需另找源 |
 | 电影 / 剧集 / 图书 | [NeoDB](https://neodb.social/) | ✅ **已接入** | 免密钥；中文标题与简介，每条挂豆瓣外链；**剧集以「季」为粒度**，仅搜索、不支持空关键词浏览 |
 | 电影 / 剧集 | [豆瓣](https://movie.douban.com/) | ✅ **已接入** | 元数据最全；走 HMAC-SHA1 签名的 Frodo 接口，**需自备 API Key / Secret**；**同一搜索端点混出电影与剧集，按行的 `target_type` 分流**；受 403 断路器保护（连打 9 次即冷却 5 分钟） |
 | 电影 / 剧集 | [优酷](https://www.youku.com/) / [爱奇艺](https://www.iqiyi.com/) | 📋 计划中 | 搜索接口免密钥可用，字段偏少，适合做列表与海报 |
 | 图书 | [微信读书](https://weread.qq.com/) | ✅ **已接入** | 免密钥；中文电子书与网文覆盖面最广；推荐值 0–1000 换算到 0–10；**仅搜索**（官方无 by-id 详情接口） |
 | 图书 | [豆瓣](https://book.douban.com/) | ✅ **已接入** | 元数据最全；走 HMAC-SHA1 签名的 Frodo 接口，**需自备 API Key / Secret**；输入 ISBN 时自动改走 by-ISBN 端点；受 403 断路器保护（连打 9 次即冷却 5 分钟） |
 | 漫画 | [Bangumi](https://bgm.tv/) | ✅ **已接入** | 免密钥直连；走 Bangumi 的书籍类型（`type=1`）并叠加「漫画」meta 标签，中文标题；分类 / 年份 / 评分 / 排名四类筛选 |
+| 漫画 | [MangaDex](https://mangadex.org/) | ✅ **已接入** | 境外托管，但 `altTitles` 里本就有 `zh` / `zh-hk` 中文名（覆盖率 61%，头部作品 83%），让标题默认显示中文即可 |
+| 游戏 | [TapTap](https://www.taptap.cn/) | ✅ **已接入** | 免密钥直连；社区评分 0–10 换算到 0–100；**必须带 `X-UA`**，Web 端由自托管服务端补齐 |
+| 音乐 | [豆瓣](https://music.douban.com/) | ✅ **已接入** | 免密钥；中文专辑名与曲目表，评分已是 0–10 |
+| 播客 | [喜马拉雅](https://www.ximalaya.com/) | ✅ **已接入** | 免密钥直连；中文节目名与主播、集数；**专辑详情接口在黑名单后，仅搜索**，刷新按标题重搜 |
+| 视觉小说 | — | 🔍 无境内源 | 上游的 VNDB 保留未删，但路由需出境 |
 
 > 状态图例：✅ 已并入主线并通过全部关卡 · 📋 已选型待实现 · 🔍 尚未确定可行路径。
 > 接入一个源需要改动的准确清单与验收口径见 [`RULES.md`](RULES.md) 与 [`TASK.md`](TASK.md)。
@@ -174,6 +180,19 @@ flutter run -d windows   # 或 linux / android / chrome
 ### Android 发布版
 
 调试构建开箱可用。打**发布** APK 需要自己的签名密钥（`android/key.properties`），过程见 [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md)。
+
+### 三端发布包
+
+| 平台 | 命令 | 备注 |
+|------|------|------|
+| Android | `flutter build apk --release` | 产物 `build/app/outputs/flutter-apk/app-release.apk`；**必须自备签名密钥** —— 仓库只带一份一次性验证密钥，且不入库 |
+| Web | `flutter build web --release` | 产物 `build/web/`；交付时要**连服务端一起给** —— 浏览器里所有外部请求都经 `/proxy`，光有前端只能渲染、不能搜索 |
+| Windows | `flutter build windows --release` | **本机不可用**：缺 Visual Studio C++ 工作负载。装上它即可本地构建，CI 侧由 `windows-2022` 运行器代劳 |
+
+三者由 [`.github/workflows/release-cn.yml`](.github/workflows/release-cn.yml) 打包并发成 GitHub Release，推一个 `cn-v*` 标签即触发；Android 作业需要仓库配置 `KEYSTORE_BASE64` / `KEYSTORE_PASSWORD` / `KEY_ALIAS` 三个 secret。
+
+> [!NOTE]
+> **为什么标签前缀是 `cn-`**：上游自带的 `release.yml` 在 `v*` 上触发，会构建五个本分支并不发布的桌面目标，并创建一个不属于本分支的 Release。`cn-v0.44.0` 不匹配 `v*`，两套流水线因此永不一起点火 —— 这也是这份流水线单独立一个文件、而不往 `release.yml` 里塞作业的原因。
 
 ## 自托管 Web 版
 

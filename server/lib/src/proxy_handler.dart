@@ -5,6 +5,7 @@ import 'package:core/api/douban_constants.dart';
 import 'package:core/api/douban_signature.dart';
 import 'package:core/api/podcast_index_signature.dart';
 import 'package:core/api/proxy_targets.dart';
+import 'package:core/api/taptap_constants.dart';
 import 'package:shelf/shelf.dart';
 
 import 'api_credentials.dart';
@@ -239,6 +240,12 @@ class ApiProxy {
             case final String sspassword) {
           query['sspassword'] = <String>[sspassword];
         }
+      case ProxyTarget.taptap:
+        // TapTap answers 400 INVALID_XUA to any call without this header. A
+        // browser cannot be relied on to send it — it is not on the forwarded
+        // list, and the header is part of the contract — so the server sends
+        // the one kTapTapXUa names, exactly as it does TapTap's own client.
+        headers['X-UA'] = kTapTapXUa;
       // Keyless: the proxy is still the only way there from a browser.
       case ProxyTarget.anilist:
       case ProxyTarget.bangumi:
@@ -251,7 +258,6 @@ class ApiProxy {
       case ProxyTarget.neodb:
       case ProxyTarget.openlibrary:
       case ProxyTarget.steam:
-      case ProxyTarget.taptap:
       case ProxyTarget.tvmaze:
       case ProxyTarget.vndb:
       case ProxyTarget.weread:

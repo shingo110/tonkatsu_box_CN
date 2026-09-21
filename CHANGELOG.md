@@ -12,6 +12,35 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — TapTap answered 400 INVALID_XUA on the web build
+
+The web client reaches every external API through the server's `/proxy`, and
+that proxy forwards only `content-type` and `accept`: everything else is the
+server's, so a crafted request cannot borrow the server's credentials. `X-UA`
+is neither of those, and TapTap rejects any call without it — so every TapTap
+request from a browser got `400 INVALID_XUA` and the games tab opened empty,
+silently, on a build where the same search worked on desktop.
+
+- `ApiProxy._authorize` (`server/lib/src/proxy_handler.dart`): `ProxyTarget.taptap`
+  leaves the keyless arm and sets `X-UA` from `kTapTapXUa`, the same way the
+  Douban arm already wears its client's User-Agent.
+- `server/test/proxy_handler_test.dart`: two cases — the header is sent, and a
+  caller-supplied `X-UA` is replaced rather than forwarded.
+
+Ximalaya needs no equivalent and got none: its `Referer` is a browser-forbidden
+header, so a browser never sends one, and the live self-host check answered
+`ret: 200` without it. The two sources differing here is precisely why both
+were probed through a running server rather than reasoned about.
+
+## [cn] Added — a release pipeline for the three platforms this fork ships
+
+`.github/workflows/release-cn.yml` builds Windows, Android and the self-hosted
+web bundle, then publishes the three as a GitHub Release. It lives in its own
+file and triggers on `cn-v*` rather than `v*`, because the inherited
+`release.yml` fires on `v*`: a fork tag matching that pattern would build five
+targets this fork does not ship and create a Release it does not own.
+`cn-v0.44.0` does not match `v*`, so the two workflows can never both run.
+
 ## [cn] Added — the games and podcast tabs gain a mainland catalogue
 
 Games and podcasts were the last two media types whose default route left the

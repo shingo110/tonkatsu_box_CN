@@ -4,9 +4,9 @@
 
 ## 状态
 
-- **已完成**：D1–D10 全部收口 —— M0 开工就绪度核验，Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 七个国内源，以及自托管 `/proxy` 全链路验证（B2 闭环）
+- **已完成**：D1–D20 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**
 - **进行中**：无
-- **进行中（阻塞）**：Windows 桌面构建可用性（缺 VS C++ 工作负载）
+- **进行中（阻塞）**：Windows 桌面**本地**构建（缺 VS C++ 工作负载）—— 但发布走 CI 的 `windows-2022` 运行器，不阻塞出包
 
 ---
 
@@ -558,6 +558,57 @@ D15 手机自检的失败名单里**），**不是**「漫画线有了境内源�
 `source_region_default_test.dart`（新增 audio 三态用例：`douban_music` + `podcastindex` 开、`musicbrainz` 关）。
 
 **四关**：analyze 干净 · **5759 应用**（+18）/ 2385 core / 110 server · RPC 字节一致。
+
+### D19 · 游戏与播客两条媒体线（2026-09-21，起源：少爷「继续，全都做，一次性做完」）
+
+**TapTap 游戏源（`taptap`）+ 喜马拉雅播客源（`ximalaya`）** —— 8 个媒体类型至此全线「不挂代理 + 中文」。
+接口实证、契约细节与踩坑见 [`RULES.md`](RULES.md) 七之十四 / 七之十五 / 七之十六；本条只记验收。
+
+**活体实测**（真接口喂真解析器）：TapTap 搜「原神」→ 10 条 / 评分 `79.0` / `app/168332` /
+`getGameById` 回环通；喜马拉雅搜「三体」→ **30 条中文节目名** / `album/56974128` / 标题重搜回环通。
+
+**活体验证抓到三条夹具测试抓不到的问题**：
+
+1. **喜马拉雅用 `Content-Type: text/plain` 送 JSON** ⇒ Dio 把 body 留成 String ⇒ 解析器首道
+   `is! Map` **静默返回空表**（搜索永远 0 条、无异常）。修法：解码提到共享层 `api_dio.dart` 的
+   `decodeJsonBody()`，传输层声明 `ResponseType.plain`；Fantlab 同款先例改为委托。
+2. `getGameById` 收的是**偏移后的模型 id**，我的活体测试喂了裸 appId ⇒ 落进 `appId <= 0` 保护而返 null。
+   **链路本身是自洽的，错在测试**；facade 文档已写死这一点。
+3. `reachability_screen_test` 按**数组下标**取目录条目，TapTap 插在 `igdb` 之后把 `neodb` 从 10 挤到 11 ——
+   一个与游戏毫不相干的断言被炸红。已改为按 `DataSource` 经 `sourceInfoFor` 取。
+
+**区域规则收口**：音频半边也有境内源 ⇒ `BrowseNotifier._isAloneInItsCatalogue` 豁免**删除**，
+「有境内源 ⇒ 关境外源」对全类型整类生效（游戏页的 IGDB 随之由默认开转默认关，**预期行为**）。
+
+**护栏**：新增 `test/core/api/taptap_api_test.dart` / `ximalaya_api_test.dart` 共 **36** 条；同步
+`source_badge_test`（25 个枚举值）、`source_catalog_region_test`、`search_sources_test`、
+`source_output_media_type_test`、`source_region_default_test`、`browse_provider_test`。
+
+**四关**：analyze 干净 · **5800 应用**（+36）/ 2385 core / 110 server · RPC 字节一致。
+**提交**：`cd10c3e0`（59 文件，+1986 −78），已推送。
+
+### D20 · M7 三端打包与发布（2026-09-21，起源：M7 里程碑）
+
+三端的打包面与分发机制落地 —— 过程中**逮到一处只在 Web 形态下发作的真缺陷**。
+
+- **Web（本轮主战场）**：`flutter build web --release` → `build/web/`（57MB / 192 项）；起**真自托管服务端**
+  （`dart run server/bin/server.dart --web-root build/web`）实测：`/health`、`/rpc`、`/proxy/keys`、
+  canvaskit 与 assets 全 200，非白名单 slug 404，未知路径 SPA 回退 200。
+- ⚠️ **逮到的真缺陷**：TapTap 在 Web 上必得 `400 INVALID_XUA`。服务端 `/proxy` 的
+  `_forwardedRequestHeaders` **只放行 `content-type` 与 `accept`**，`X-UA` 被丢弃 ⇒ 游戏页**静默空白**。
+  修法：`ApiProxy._authorize` 把 `ProxyTarget.taptap` 移出免密钥组，由服务端补 `kTapTapXUa`
+  （与 Douban 自持 UA 同法），并补两条服务端护栏。**喜马拉雅经实测不需要补 `Referer`**（`ret: 200`）——
+  假设被推翻，故未动手。详见 [`RULES.md`](RULES.md) 七之十七。
+- **Android**：`flutter build apk --release`（94.0MB）。本地产物**仅供真机验收** —— 仓库里的
+  `android/app/verify-release.jks` 是一次性验证密钥（`**/*.jks` 已 gitignore），不是发布密钥；
+  CI 发布需 `KEYSTORE_BASE64` / `KEYSTORE_PASSWORD` / `KEY_ALIAS` 三个 secret。
+- **Windows**：**本机不可用** —— `flutter doctor` 报 `[X] Visual Studio not installed`（B1 属实）。
+  发布走 CI 的 `windows-2022` 运行器（该 pin 的理由见流水线注释）。
+- **分发**：新增 `.github/workflows/release-cn.yml`（fork 专属、**零改动上游文件**），推 `cn-v*` 标签触发，
+  构建 Windows / Android / Web 并发成 GitHub Release。**标签前缀必须是 `cn-`** —— 上游 `release.yml`
+  在 `v*` 上触发，`v0.44.0-cn` 会把它一并点着。详见 [`PROJECT.md`](PROJECT.md) ADR-15。
+
+**四关**：analyze 干净 · 5800 应用 / 2385 core / **112 server**（+2）/ RPC 字节一致。
 
 ## 📋 候选（下一步从这里挑）
 

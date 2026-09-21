@@ -1,0 +1,229 @@
+name: Release (CN fork)
+
+# This fork ships Windows, Android and a self-hosted Web build. The inherited
+# release.yml fires on `v*` and builds five targets this fork does not ship
+# (plus a GitHub Release we do not own), so the two must never fire together.
+#
+# A `cn-` tag prefix is what keeps them apart: `cn-v0.44.0` does not match the
+# `v*` pattern, so pushing a fork release tag leaves release.yml asleep. That is
+# also why this lives in its own file rather than as a job inside release.yml —
+# an upstream merge cannot conflict with a file upstream does not have.
+
+on:
+  push:
+    tags:
+      - 'cn-v*'
+
+jobs:
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # packages/core and server resolve separately: the root package_config has
+      # no `test` entry, so without this their test/ files fail to analyze.
+      - name: Install dependencies
+        run: |
+          flutter pub get
+          dart pub get --directory packages/core
+          dart pub get --directory server
+
+      # Catches the one drift no compiler can: a model field added without
+      # regenerating, which the stubs would silently drop on the wire.
+      - name: Check the RPC layer is up to date
+        working-directory: packages/core
+        run: |
+          dart run tool/generate_rpc.dart
+          git diff --exit-code -- lib/rpc/generated
+
+      - name: Analyze code
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Run core package tests
+        run: dart test
+        working-directory: packages/core
+
+      - name: Run server tests
+        run: dart test
+        working-directory: server
+
+      - name: Run tests
+        run: flutter test
+
+  build-windows:
+    name: Build Windows
+    # Pin to VS 2022: windows-latest moved to VS 2026 in June 2026, whose MSVC
+    # 14.51 toolchain dropped <experimental/coroutine>, which gal and
+    # webview_windows still need. The same pin note lives in release.yml.
+    runs-on: windows-2022
+    needs: quality-gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      - name: Archive Windows build
+        run: |
+          $version = "${{ github.ref_name }}"
+          Compress-Archive -Path build\windows\x64\runner\Release\* `
+            -DestinationPath "tonkatsu-box-cn-${version}-windows.zip"
+        shell: powershell
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: tonkatsu-box-cn-${{ github.ref_name }}-windows.zip
+          retention-days: 1
+
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # The release build reads its keystore from KEYSTORE_PATH and friends
+      # (android/app/build.gradle.kts), and the checkout has neither a keystore
+      # nor key.properties — both are gitignored — so the secret has to be
+      # written out here. No secret, no signed APK.
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/tonkatsu-box-release.jks"
+
+      # One universal APK: the point of this artifact is a single file someone
+      # can install straight from the release page.
+      - name: Build Android APK
+        env:
+          KEYSTORE_PATH: ${{ runner.temp }}/tonkatsu-box-release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: flutter build apk --release
+
+      - name: Rename APK
+        run: |
+          VERSION="${{ github.ref_name }}"
+          mv build/app/outputs/flutter-apk/app-release.apk \
+             "tonkatsu-box-cn-${VERSION}-android.apk"
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build
+          path: tonkatsu-box-cn-${{ github.ref_name }}-android.apk
+          retention-days: 1
+
+  build-web:
+    name: Build Web
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      # The bundle is only half of a working install: in a browser every
+      # external request goes out through the server's `/proxy`, so this
+      # artifact is meant to be served by the server build from the same tag
+      # (see server/README.md and the Docker path in README.md).
+      - name: Build Web release
+        run: flutter build web --release
+
+      - name: Archive Web bundle
+        run: |
+          VERSION="${{ github.ref_name }}"
+          tar czf "tonkatsu-box-cn-${VERSION}-web.tar.gz" -C build/web .
+
+      - name: Upload Web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: tonkatsu-box-cn-${{ github.ref_name }}-web.tar.gz
+          retention-days: 1
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-windows, build-android, build-web]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch annotated tag object
+        run: |
+          VERSION="${{ github.ref_name }}"
+          git fetch origin "refs/tags/${VERSION}:refs/tags/${VERSION}" --force
+
+      - name: Extract release notes from tag
+        run: |
+          VERSION="${{ github.ref_name }}"
+          git for-each-ref "refs/tags/${VERSION}" --format='%(contents)' > release_notes.md
+          if [ ! -s release_notes.md ]; then
+            echo "Release ${VERSION}" > release_notes.md
+          fi
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+
+      - name: Download Android artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-build
+
+      - name: Download Web artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ github.ref_name }}"
+          gh release create "$VERSION" \
+            --title "Tonkatsu Box CN $VERSION" \
+            --notes-file release_notes.md \
+            "tonkatsu-box-cn-${VERSION}-windows.zip" \
+            "tonkatsu-box-cn-${VERSION}-android.apk" \
+            "tonkatsu-box-cn-${VERSION}-web.tar.gz"

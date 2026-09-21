@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:core/api/douban_constants.dart';
+import 'package:core/api/taptap_constants.dart';
 import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 import 'package:tonkatsu_server/src/api_credentials.dart';
@@ -105,6 +106,29 @@ void main() {
         upstream.sent.single.headers[HttpHeaders.userAgentHeader],
         kProxyUserAgent,
       );
+    });
+
+    test('should send TapTap the X-UA header the contract names', () async {
+      // X-UA is not on the forwarded list, so without this the upstream gets
+      // 400 INVALID_XUA and the games tab opens empty on the web build.
+      final Handler handler = handlerWith(<String, String>{});
+
+      await get(handler, '/proxy/taptap/webapiv2/app-search/v1/by-keyword?kw=x');
+
+      expect(upstream.sent.single.headers['X-UA'], kTapTapXUa);
+    });
+
+    test('should ignore a caller-supplied X-UA in favour of the contract one',
+        () async {
+      final Handler handler = handlerWith(<String, String>{});
+
+      await handler(Request(
+        'GET',
+        Uri.parse('http://localhost/proxy/taptap/webapiv2/app/v4/detail?id=1'),
+        headers: <String, String>{'X-UA': 'V=1&PN=SomebodyElse'},
+      ));
+
+      expect(upstream.sent.single.headers['X-UA'], kTapTapXUa);
     });
 
     test('should refuse a host that is not on the allowlist', () async {

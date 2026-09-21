@@ -399,6 +399,33 @@
 - **两个新源都补齐了 `test/core/api/<source>_api_test.dart`**（仓库惯例：每个源一份）。它们同时覆盖
   字段 reader 的边界（空串 / 0 / 非数字）、HTTP 错误映射、坏行丢弃、以及喜马拉雅那条 String 体回归。
 
+### 七之十七、源要的自定义头，Web 端必须由服务端补（2026-09-21，D20）
+
+**Web 形态下所有外部请求都经服务端 `/proxy/<slug>/…`**，而 `proxy_handler` 的
+`_forwardedRequestHeaders` **只放行 `content-type` 与 `accept`** —— 其余一律丢弃（这是防"构造请求
+借用服务端凭据"的设计，不是疏漏）。于是源的 http_client 里 `headers:` 写了什么，**客户端设了也白设**。
+漏一个，就是 Web 端一个**静默空白**：桌面搜索正常，浏览器里那一页什么都没有。
+
+两类情形要分清，处置完全不同：
+
+| 情形 | 例子 | 浏览器能设？ | 服务端收得到？ | 处置 |
+|------|------|:---:|:---:|------|
+| **自定义头** | TapTap 的 `X-UA` | 能（同源自定义头合法） | **收得到但会被丢** | 必须在 `_authorize` 里补 |
+| **禁止头** | `Referer` / `User-Agent` / `Origin` / `Host` | **不能**（Fetch 规范的 forbidden header names，静默忽略） | 收不到 | 只能服务端补 |
+
+- **D19 就漏了第一类**：TapTap 源在客户端侧带 `X-UA` 是对的，但服务端没补 ⇒ 浏览器发出的请求到了
+  上游就成 `400 INVALID_XUA`，游戏页空白。修法是在 `ApiProxy._authorize` 里把 `ProxyTarget.taptap`
+  移出 keyless 组、由服务端写 `kTapTapXUa`（与 Douban 自持 UA、Bangumi 由服务端补 UA 同一范式）。
+- **但「需要禁止头」不等于「一定要补」**：喜马拉雅客户端侧带 `Referer`，服务端并未补，活体实测
+  `/revision/search/seo` 仍答 `ret: 200`（服务端发的 UA 就够）。**这类要靠实测裁决，不能靠类推** ——
+  假设在这里被推翻过一次。
+- **验证方式**（唯一可靠的一种）：起**真服务端**（`dart run server/bin/server.dart --web-root build/web
+  --port <p>`），用「客户端会发的头」curl 打 `/proxy/<slug>/…`，看**上游原样的响应**。
+  **桌面能搜 ≠ Web 能搜**，这条路没有离线替代品。
+- **自查动作**：新源落地后，把 http_client 的 `headers:` 与 `_forwardedRequestHeaders` / `_authorize`
+  逐条对照；若源依赖某个头，就补一条**服务端**测试（"这个头被送出"+"调用方自带的同名头被覆盖"）。
+  另见 `tonkatsu-selfhost-proxy-verify` 技能的三层验证法。
+
 ## 八、提交约定（对齐上游 `docs/COMMITS.md`）
 
 Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国内源相关用 `feat(cn-*)` scope**（如 `feat(cn-bangumi): add Bangumi anime source`、`feat(cn-neodb): add NeoDB book source`），以便 grep 区分上游/分支。
@@ -409,6 +436,8 @@ Conventional Commits：`type(scope): desc`。本分支自带前缀惯例：**国
 2. `flutter test` · `dart test`（packages/core）· `dart test`（server）**全绿**
 3. RPC 生成物 `git diff --exit-code -- packages/core/lib/rpc/generated` 为空
 4. **在线活体验证**通过（临时插真实 API；不允许"测试都过了"当完工）
-5. 护栏、ARB 键数（6×1760 全齐）、`TASK.md` 状态同步
+5. **新源在自托管 Web 形态下过一遍**：起真服务端，用「客户端会发的头」打 `/proxy/<slug>/…`，
+   看**上游原样的响应** —— 前端能编译不等于浏览器能搜（详见七之十七）
+6. 护栏、ARB 键数（6×**1762** 全齐）、`TASK.md` 状态同步
 
 按此清单跑完，再回头补文档与记忆。
