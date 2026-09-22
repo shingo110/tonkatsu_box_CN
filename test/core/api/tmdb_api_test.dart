@@ -388,7 +388,9 @@ void main() {
         expect(result, isFalse);
       });
 
-      test('should return false on error соединения', () async {
+      test('повторно бросает сетевую ошибку вместо «ключа неверен»', () async {
+        // A connection failure never got an answer, so it must surface as the
+        // network problem it is — not as the key being invalid.
         when(() => mockDio.get<dynamic>(
               any(),
               queryParameters: any(named: 'queryParameters'),
@@ -397,9 +399,10 @@ void main() {
           requestOptions: RequestOptions(),
         ));
 
-        final bool result = await sut.validateApiKey(testApiKey);
-
-        expect(result, isFalse);
+        expect(
+          () => sut.validateApiKey(testApiKey),
+          throwsA(isA<DioException>()),
+        );
       });
     });
 

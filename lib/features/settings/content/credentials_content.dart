@@ -1,4 +1,5 @@
 import 'package:core/models/data_source.dart';
+import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -510,8 +511,12 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
     setState(() => _comicVineValidating = true);
     final SettingsNotifier notifier =
         ref.read(settingsNotifierProvider.notifier);
-    final bool valid = await notifier.validateComicVineKey();
+        final bool? valid = await _runKeyCheck(notifier.validateComicVineKey);
     if (!mounted) return;
+    if (valid == null) {
+      setState(() => _comicVineValidating = false);
+      return;
+    }
     setState(() {
       _comicVineValidating = false;
       _comicVineValidated = valid ? StatusType.success : StatusType.error;
@@ -614,10 +619,16 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
 
   Future<void> _validatePodcastIndexKeys() async {
     setState(() => _podcastIndexValidating = true);
-    final bool valid = await ref
-        .read(settingsNotifierProvider.notifier)
-        .validatePodcastIndexKeys();
+    final bool? valid = await _runKeyCheck(
+      () => ref
+          .read(settingsNotifierProvider.notifier)
+          .validatePodcastIndexKeys(),
+    );
     if (!mounted) return;
+    if (valid == null) {
+      setState(() => _podcastIndexValidating = false);
+      return;
+    }
     setState(() {
       _podcastIndexValidating = false;
       _podcastIndexValidated = valid ? StatusType.success : StatusType.error;
@@ -695,8 +706,12 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
     setState(() => _googleBooksValidating = true);
     final SettingsNotifier notifier =
         ref.read(settingsNotifierProvider.notifier);
-    final bool valid = await notifier.validateGoogleBooksKey();
+        final bool? valid = await _runKeyCheck(notifier.validateGoogleBooksKey);
     if (!mounted) return;
+    if (valid == null) {
+      setState(() => _googleBooksValidating = false);
+      return;
+    }
     setState(() {
       _googleBooksValidating = false;
       _googleBooksValidated = valid ? StatusType.success : StatusType.error;
@@ -772,8 +787,12 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
     setState(() => _hardcoverValidating = true);
     final SettingsNotifier notifier =
         ref.read(settingsNotifierProvider.notifier);
-    final bool valid = await notifier.validateHardcoverKey();
+        final bool? valid = await _runKeyCheck(notifier.validateHardcoverKey);
     if (!mounted) return;
+    if (valid == null) {
+      setState(() => _hardcoverValidating = false);
+      return;
+    }
     setState(() {
       _hardcoverValidating = false;
       _hardcoverValidated = valid ? StatusType.success : StatusType.error;
@@ -945,6 +964,25 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
     }
   }
 
+  /// Runs a key check, separating "the upstream refused the key" from "the
+  /// request never got an answer". The validators collapse both into a bare
+  /// `false`, which used to read as every key being invalid at once whenever a
+  /// proxy broke the network path. Returns null when the check could not run.
+  Future<bool?> _runKeyCheck(Future<bool> Function() check) async {
+    try {
+      return await check();
+    } on DioException catch (e) {
+      if (mounted) {
+        context.showSnack(
+          '${S.of(context).credentialsConnectionError}'
+          '${e.message == null ? '' : ': ${e.message}'}',
+          type: SnackType.error,
+        );
+      }
+      return null;
+    }
+  }
+
   Widget _buildErrorSection(String errorMessage) {
     return SettingsGroup(
       title: S.of(context).settingsError,
@@ -1091,8 +1129,12 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
     setState(() => _sgdbValidating = true);
     final SettingsNotifier notifier =
         ref.read(settingsNotifierProvider.notifier);
-    final bool valid = await notifier.validateSteamGridDbKey();
+        final bool? valid = await _runKeyCheck(notifier.validateSteamGridDbKey);
     if (!mounted) return;
+    if (valid == null) {
+      setState(() => _sgdbValidating = false);
+      return;
+    }
     setState(() {
       _sgdbValidating = false;
       _sgdbValidated = valid ? StatusType.success : StatusType.error;
@@ -1109,8 +1151,12 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
     setState(() => _tmdbValidating = true);
     final SettingsNotifier notifier =
         ref.read(settingsNotifierProvider.notifier);
-    final bool valid = await notifier.validateTmdbKey();
+        final bool? valid = await _runKeyCheck(notifier.validateTmdbKey);
     if (!mounted) return;
+    if (valid == null) {
+      setState(() => _tmdbValidating = false);
+      return;
+    }
     setState(() {
       _tmdbValidating = false;
       _tmdbValidated = valid ? StatusType.success : StatusType.error;
@@ -1152,8 +1198,12 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
     setState(() => _tvdbValidating = true);
     final SettingsNotifier notifier =
         ref.read(settingsNotifierProvider.notifier);
-    final bool valid = await notifier.validateTvdbKey();
+        final bool? valid = await _runKeyCheck(notifier.validateTvdbKey);
     if (!mounted) return;
+    if (valid == null) {
+      setState(() => _tvdbValidating = false);
+      return;
+    }
     setState(() {
       _tvdbValidating = false;
       _tvdbValidated = valid ? StatusType.success : StatusType.error;

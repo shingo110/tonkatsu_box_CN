@@ -12,6 +12,28 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — a broken proxy read as "every API key is invalid"
+
+With a VPN on, the network self-check reported all 22 sources unreachable, and
+every key check on the credentials page failed as "API key invalid" — keys that
+worked again the moment the VPN came off. The key validators collapsed two very
+different outcomes into one `false`: a 401 from the upstream (the key really is
+wrong) and a request that never got an answer at all (the network path is
+broken). The page then rendered that single `false` as "invalid key" for every
+source at once.
+
+The validators now re-raise a failure that carries no response — nothing was
+answered, so the cause is the network or the proxy, and calling the key invalid
+would be a lie. A refused key still needs an actual answer from the upstream.
+The credentials page catches the re-raised failure and reports it as a
+connection error with the transport's own message instead.
+
+The unreachable self-check verdicts themselves were correct: they only fire
+when a request truly got no answer. Note for mainland users: the app's HTTP
+client does not read the system proxy (Dart never does), so a VPN has to run in
+TUN / global mode to carry its traffic; per-app proxy modes have no effect on
+it.
+
 ## [cn] Fixed — the review list blamed the wrong catalogue for its misses
 
 The first device run of the PlayStation importer read 46 games and matched 17,

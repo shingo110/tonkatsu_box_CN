@@ -286,6 +286,21 @@
   在向导卡片上多一枚「需国际网络」chip。
 - **活体记录**：`probe/reachability_probe_live.txt`（20/20 可达，2.0s；豆瓣 222ms / 微信读书 741ms
   与其余 1043–2025ms 泾渭分明，正好印证区域分类）。
+- **D25 补充（代理环境与校验映射，少爷真机实测）**：
+  ① **开代理后 22 源自检全部「无法连接」是真实连接层故障，不是自检误判** —— 判据本身如实。
+  机制：自检与校验共用 `createApiDio`，而 **Dart `HttpClient` 不读系统代理**（全仓库无 `findProxy`）；
+  TUN 接管 DNS（fake-ip）后 app 流量全进代理 ⇒ 代理出口/分流对这些域不通 ⇒ 连接层全炸。
+  规则模式下国内域也挂，指向代理软件的 DNS/分流处理 —— **app 侧无解也不该硬解**。
+  让用户先做一个 30 秒验证：开代理后用**浏览器**直接开 `https://www.taptap.cn/` ——
+  浏览器也打不开就是代理层，别往代码里找。
+  ② **「API密钥无效」误报是真 bug，已修**：各 `validateApiKey` 原本
+  `on DioException { return false; }`，把"**没收到应答**"与"**密钥被拒**"压成同一个 `false`，
+  设置页再统一显示「XX API 密钥无效」⇒ 代理一断，**所有源同时"密钥无效"**。
+  修法：**`e.response == null`（从没拿到应答）一律 rethrow**，有应答但非 200 才算密钥错；
+  设置页 `_runKeyCheck` 捕获并以「连接错误 + 真实原因」提示（snack），不再误判密钥。
+  **判据**：校验失败的报错必须能区分三态 —— 密钥无效 / 无应答（网络或代理）/ 上游拒绝。
+  范围：SteamGridDB / TMDB / TheTVDB / ComicVine / Google Books 五处；Hardcover 的客户端
+  把异常包成 `HardcoverApiException`（无 response 可判），**未改**，待其客户端暴露状态码后再补。
 
 ### 七之十二、MangaDex 中文标题（2026-09-21，D17 · 既有源改造，零新增）
 

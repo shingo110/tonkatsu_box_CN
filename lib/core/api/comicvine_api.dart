@@ -160,7 +160,10 @@ class ComicVineApi {
       return res.statusCode == 200 &&
           body is Map<String, dynamic> &&
           ((body['status_code'] as num?)?.toInt() ?? 0) == 1;
-    } on DioException {
+    } on DioException catch (e) {
+      // No response means the request never got an answer — a network or
+      // proxy failure, not a bad key. Re-raise so the caller can say so.
+      if (e.response == null) rethrow;
       return false;
     }
   }

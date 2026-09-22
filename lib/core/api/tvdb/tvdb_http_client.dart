@@ -42,6 +42,11 @@ class TvdbHttpClient {
     try {
       await _login(apiKey);
       return true;
+    } on DioException catch (e) {
+      // No response means the request never got an answer — a network or
+      // proxy failure, not a bad key. Re-raise so the caller can say so.
+      if (e.response == null) rethrow;
+      return false;
     } on Object {
       return false;
     }

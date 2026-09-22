@@ -40,7 +40,12 @@ class SteamGridDbHttpClient {
         ),
       );
       return response.statusCode == 200;
-    } on DioException {
+    } on DioException catch (e) {
+      // No response means the request never got an answer — a network or
+      // proxy failure. Collapsing that into `false` used to report this key
+      // as invalid at the same time as every other one, whenever the network
+      // path broke.
+      if (e.response == null) rethrow;
       return false;
     }
   }
