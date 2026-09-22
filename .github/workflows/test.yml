@@ -131,9 +131,13 @@ jobs:
 
       # Writes the coverage % to a public Gist; shields.io renders the README
       # badge from it. Requires repo secret GIST_TOKEN (PAT with `gist` scope)
-      # and the real Gist id below.
+      # and the real Gist id below. Both belong to the upstream author, so a
+      # fork gets a 401 here and the whole job turns red even with every test
+      # green — hence the repository guard: upstream runs it, forks skip it.
       - name: Update coverage badge
-        if: github.event_name == 'push'
+        if: >-
+          github.event_name == 'push' &&
+          github.repository == 'hacan359/tonkatsu_box'
         uses: schneegans/dynamic-badges-action@v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
