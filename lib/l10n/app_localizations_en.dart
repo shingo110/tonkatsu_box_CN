@@ -6112,7 +6112,7 @@ class SEn extends S {
 
   @override
   String psnImportFetched(int count) {
-    return '$count purchased games read';
+    return 'Read $count games from the account';
   }
 
   @override

@@ -6,6 +6,7 @@ import 'package:core/models/universal_import_result.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/igdb_api.dart';
 import '../../../core/database/database_service.dart';
 import '../../../core/import/import_progress.dart';
 import '../../../core/import/sources/name_list/game_name_list_import_service.dart';
@@ -43,13 +44,15 @@ enum _Stage { input, review }
 /// inherently lossy, so nothing is written until the user has seen what each
 /// line resolved to and had the chance to skip or replace it.
 class GameNameListImportContent extends ConsumerStatefulWidget {
-  const GameNameListImportContent({super.key, this.initialNames});
+  const GameNameListImportContent({super.key, this.initialQueries});
 
-  /// Names to drop straight into the review step, skipping the paste stage.
+  /// Rows to drop straight into the review step, skipping the paste stage.
   ///
   /// The PlayStation importer feeds the library it just fetched through here,
   /// so matching, review and writing stay one implementation instead of two.
-  final List<String>? initialNames;
+  /// Each row may carry a second spelling of its title, which is what lets a
+  /// name Sony gives in English also be looked up in a Chinese catalogue.
+  final List<GameNameQuery>? initialQueries;
 
   @override
   ConsumerState<GameNameListImportContent> createState() =>
@@ -76,6 +79,9 @@ class _GameNameListImportContentState
   /// Guards the seeded run so it fires once, and only after the platform table
   /// has loaded.
   bool _autoStarted = false;
+
+  /// Other spellings of a seeded name, keyed by the name itself.
+  Map<String, List<String>> _seededAliases = const <String, List<String>>{};
 
   @override
   void initState() {
@@ -104,13 +110,21 @@ class _GameNameListImportContentState
   /// the same list typed by hand.
   void _maybeAutoStart() {
     if (_autoStarted || !_platformsLoaded) return;
-    final List<String>? seeded = widget.initialNames;
+    final List<GameNameQuery>? seeded = widget.initialQueries;
     if (seeded == null || seeded.isEmpty) return;
     _autoStarted = true;
 
+    // Kept by name, not by position: if the user edits the pasted text before
+    // matching, a name that survives keeps its other spellings and a name that
+    // does not simply has none.
+    _seededAliases = <String, List<String>>{
+      for (final GameNameQuery query in seeded)
+        if (query.aliases.isNotEmpty) query.name: query.aliases,
+    };
+
     // Through the same parser a pasted list goes through, so a fetched name
     // that the parser would have dropped behaves identically either way.
-    _controller.text = seeded.join('\n');
+    _controller.text = seeded.map((GameNameQuery q) => q.name).join('\n');
     _parsed = NameListParser.parse(_controller.text);
     if (_parsed.isEmpty) return;
 
@@ -147,9 +161,17 @@ class _GameNameListImportContentState
     });
   }
 
+  /// Whether the Latin half of a lookup has any catalogue to go to.
+  ///
+  /// Deliberately not just `connectionStatus`: a token left over from an
+  /// earlier IGDB setup reads as "connected" while every call throws, which
+  /// hid this warning on a device where the English names had no catalogue at
+  /// all — the review list then showed one "search failed" per English title
+  /// instead of saying why.
   bool get _igdbConnected =>
+      ref.read(igdbApiProvider).hasCredentials &&
       ref.read(settingsNotifierProvider).connectionStatus ==
-      ConnectionStatus.connected;
+          ConnectionStatus.connected;
 
   @override
   Widget build(BuildContext context) {
@@ -736,6 +758,8 @@ class _GameNameListImportContentState
     setState(() {
       _stage = _Stage.input;
       _session = null;
+      // Back to a hand-typed list: carry no spellings over from the seed.
+      _seededAliases = const <String, List<String>>{};
     });
   }
 
@@ -747,11 +771,17 @@ class _GameNameListImportContentState
     final List<String> names = _parsed;
     if (names.isEmpty) return;
 
+    // A pasted list has one spelling per name; a fetched one may have two.
+    final List<GameNameQuery> queries = <GameNameQuery>[
+      for (final String name in names)
+        (name: name, aliases: _seededAliases[name] ?? const <String>[]),
+    ];
+
     final ValueNotifier<ImportProgress?> progressNotifier =
         ValueNotifier<ImportProgress?>(null);
 
     final Future<GameNameMatchSession> matchFuture = service.match(
-      names,
+      queries,
       platformId: _platformId,
       onProgress: (ImportProgress progress) {
         progressNotifier.value = progress;

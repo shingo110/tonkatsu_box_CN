@@ -101,6 +101,17 @@ class PsnPurchasedGame {
   bool get isUsable => name.trim().isNotEmpty;
 }
 
+/// One library entry, as the matcher wants it: the name Sony shows, plus any
+/// other spelling the same title has.
+///
+/// Only the play history returns a second spelling (`localizedName`), so a
+/// purchased-only title arrives with none — which is the honest result, not a
+/// gap to paper over.
+///
+/// The shape matches the importer's own `GameNameQuery`, so a list of these
+/// crosses into `match` without a conversion step.
+typedef PsnLibraryTitle = ({String name, List<String> aliases});
+
 /// One row of `gamelist/v2/users/me/titles` — a title the account has *played*.
 ///
 /// This is the half a purchase list cannot see. A game played from the

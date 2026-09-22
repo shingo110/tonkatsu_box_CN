@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/import/sources/name_list/game_name_list_import_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../shared/theme/app_spacing.dart';
 import '../../../shared/widgets/sub_screen_title_bar.dart';
@@ -7,12 +8,12 @@ import '../content/game_name_list_import_content.dart';
 
 /// Thin [Scaffold]/title-bar wrapper around [GameNameListImportContent].
 class GameNameListImportScreen extends StatelessWidget {
-  const GameNameListImportScreen({super.key, this.initialNames});
+  const GameNameListImportScreen({super.key, this.initialQueries});
 
-  /// Forwarded to the content, so a caller that already holds the names — the
-  /// PlayStation importer, after reading the purchase list — lands directly on
-  /// the review step.
-  final List<String>? initialNames;
+  /// Forwarded to the content, so a caller that already holds the rows — the
+  /// PlayStation importer, after reading the library — lands directly on the
+  /// review step.
+  final List<GameNameQuery>? initialQueries;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,8 @@ class GameNameListImportScreen extends StatelessWidget {
                   horizontal: isWide ? AppSpacing.lg : AppSpacing.md,
                   vertical: AppSpacing.sm,
                 ),
-                child: GameNameListImportContent(initialNames: initialNames),
+                child:
+                    GameNameListImportContent(initialQueries: initialQueries),
               ),
             ),
           ),

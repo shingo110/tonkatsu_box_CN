@@ -10775,7 +10775,7 @@ abstract class S {
   /// No description provided for @psnImportFetched.
   ///
   /// In en, this message translates to:
-  /// **'{count} purchased games read'**
+  /// **'Read {count} games from the account'**
   String psnImportFetched(int count);
 
   /// No description provided for @psnImportEmpty.

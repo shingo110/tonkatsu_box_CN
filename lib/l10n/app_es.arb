@@ -2622,7 +2622,7 @@
       "count": {"type": "int"}
     }
   },
-  "psnImportFetched": "{count} juegos comprados leidos",
+  "psnImportFetched": "{count} juegos leídos de la cuenta",
   "@psnImportFetched": {
     "placeholders": {
       "count": {"type": "int"}

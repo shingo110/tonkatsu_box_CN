@@ -2709,7 +2709,7 @@
       "count": {"type": "int"}
     }
   },
-  "psnImportFetched": "{count} purchased games read",
+  "psnImportFetched": "Read {count} games from the account",
   "@psnImportFetched": {
     "placeholders": {
       "count": {"type": "int"}

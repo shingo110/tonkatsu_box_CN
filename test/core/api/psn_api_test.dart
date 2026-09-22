@@ -5,7 +5,7 @@ import 'package:tonkatsu_box/core/api/psn_api.dart';
 
 import '../../helpers/test_helpers.dart';
 
-/// `fetchLibraryNames` is the seam where the two halves of a PlayStation
+/// `fetchLibraryTitles` is the seam where the two halves of a PlayStation
 /// library meet. They come from different hosts, so a failure in one must not
 /// cost the user the other — and only a total failure is worth an error.
 void main() {
@@ -88,6 +88,15 @@ void main() {
     });
   }
 
+  /// Names only, for the assertions that do not care about extra spellings.
+  Future<List<String>> namesOf({
+    required String accessToken,
+    void Function(int fetched)? onPage,
+  }) async =>
+      (await api.fetchLibraryTitles(accessToken: accessToken, onPage: onPage))
+          .map((PsnLibraryTitle title) => title.name)
+          .toList();
+
   test('merges what was bought and what was played, purchases first',
       () async {
     stubLibrary(
@@ -95,7 +104,7 @@ void main() {
       playedBody: played(<String>['Hogwarts Legacy', 'Bloodborne']),
     );
 
-    final List<String> names = await api.fetchLibraryNames(accessToken: 'jwt');
+    final List<String> names = await namesOf(accessToken: 'jwt');
 
     // A title owned *and* played is one line, and the purchase spelling wins.
     expect(
@@ -113,7 +122,7 @@ void main() {
       playedBody: played(<String>['霍格沃茨之遗']),
     );
 
-    final List<String> names = await api.fetchLibraryNames(accessToken: 'jwt');
+    final List<String> names = await namesOf(accessToken: 'jwt');
 
     expect(names, contains('霍格沃茨之遗'));
   });
@@ -125,7 +134,7 @@ void main() {
       playedFails: true,
     );
 
-    final List<String> names = await api.fetchLibraryNames(accessToken: 'jwt');
+    final List<String> names = await namesOf(accessToken: 'jwt');
 
     expect(names, <String>['God of War']);
   });
@@ -138,7 +147,7 @@ void main() {
       },
     );
 
-    final List<String> names = await api.fetchLibraryNames(accessToken: 'jwt');
+    final List<String> names = await namesOf(accessToken: 'jwt');
 
     expect(names, <String>['God of War']);
   });
@@ -150,7 +159,7 @@ void main() {
       playedBody: played(<String>['Hogwarts Legacy']),
     );
 
-    final List<String> names = await api.fetchLibraryNames(accessToken: 'jwt');
+    final List<String> names = await namesOf(accessToken: 'jwt');
 
     expect(names, <String>['Hogwarts Legacy']);
   });
@@ -159,7 +168,7 @@ void main() {
     stubLibrary(purchasedFails: true, purchasedStatus: 401, playedFails: true);
 
     expect(
-      () => api.fetchLibraryNames(accessToken: 'jwt'),
+      () => namesOf(accessToken: 'jwt'),
       throwsA(
         isA<PsnApiException>().having(
           (PsnApiException e) => e.message,
@@ -173,7 +182,7 @@ void main() {
   test('an empty account is not an error', () async {
     stubLibrary(purchasedBody: purchases(<String>[]), playedBody: played(<String>[]));
 
-    expect(await api.fetchLibraryNames(accessToken: 'jwt'), isEmpty);
+    expect(await namesOf(accessToken: 'jwt'), isEmpty);
   });
 
   test('reports progress for both halves', () async {
@@ -183,7 +192,7 @@ void main() {
     );
 
     final List<int> seen = <int>[];
-    await api.fetchLibraryNames(accessToken: 'jwt', onPage: seen.add);
+    await namesOf(accessToken: 'jwt', onPage: seen.add);
 
     // Never goes backwards, and ends on the merged total.
     expect(seen.last, 3);

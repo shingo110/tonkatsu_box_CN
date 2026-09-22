@@ -6205,7 +6205,7 @@ class SFr extends S {
 
   @override
   String psnImportFetched(int count) {
-    return '$count jeux achetes lus';
+    return '$count jeux lus depuis le compte';
   }
 
   @override

@@ -6168,7 +6168,7 @@ class SPt extends S {
 
   @override
   String psnImportFetched(int count) {
-    return '$count jogos comprados lidos';
+    return '$count jogos lidos da conta';
   }
 
   @override

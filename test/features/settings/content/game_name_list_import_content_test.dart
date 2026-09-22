@@ -40,10 +40,18 @@ void main() {
   late MockGameNameListImportService service;
   late GlobalKey<NavigatorState> hostKey;
 
-  setUpAll(registerAllFallbacks);
+  setUpAll(() {
+    registerAllFallbacks();
+    registerFallbackValue(<GameNameQuery>[]);
+  });
 
-  /// One name that matched nothing, so the row shows the Review button.
-  GameNameMatchSession session() {
+/// The seeded library: one name that matched nothing, so the row shows the
+/// Review button.
+const List<GameNameQuery> seeded = <GameNameQuery>[
+  (name: 'Hogwarts Legacy', aliases: <String>[]),
+];
+
+GameNameMatchSession session() {
     return GameNameMatchSession(
       rows: <GameNameMatchRow>[
         GameNameMatchRow(
@@ -98,7 +106,7 @@ void main() {
                 builder: (BuildContext context) => const Scaffold(
                   body: SingleChildScrollView(
                     child: GameNameListImportContent(
-                      initialNames: <String>['Hogwarts Legacy'],
+                      initialQueries: seeded,
                     ),
                   ),
                 ),

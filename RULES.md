@@ -511,6 +511,24 @@ PSN 只剩社区逆向出来的这一套：**NPSSO cookie → code → token**�
   **「返回一半」比「干净地失败」对用户有用得多。**
 - **仍未采纳**：`trophyTitles`（只含**拿过奖杯**的，玩过但没奖杯的会漏）—— 游玩历史是它的超集。
 
+**「查询失败」的语义（D24 二轮，真机截图钉死）**：预览页上「查询失败」= **该行问过的所有来源都抛了异常**，
+而不是"目录里没有"。曾有一个粘性 bug：IGDB 一抛异常就把整批标成失败，**之后 TapTap 兜底即使匹配成功也不撤销**
+——真机上就出现了「右边是 `>`（已匹配）、副标题却写查询失败、图标是断云」的自相矛盾行。
+修法：按**行**记"问过几处、答上几处"，只有**一处都没答上**才算失败；
+`searchFailed` 的断言必须同时覆盖"兜底成功"与"两处都炸"两种情况。
+
+**IGDB 死令牌会让"未配置"看起来像"已连接"**：`connectionStatus == connected` 只看**本地是否存有未过期令牌**，
+不看 `clientId`/`clientSecret` 是否还在 ⇒ 令牌残留 + 密钥清空 ⇒ 无警告横幅，而每个英文名的调用都抛
+`API credentials not set`。修法两条：① 匹配器**开工前**先问 `IgdbApi.hasCredentials`，
+没有就**整个跳过 IGDB**，拉丁名直接落到 TapTap（便宜且诚实）；
+② 预览页的警告横幅判据改为 `hasCredentials && connected`，二者缺一都提示。
+
+**别名匹配（D24 落地）**：`match` 的入参从 `List<String>` 升为 `List<GameNameQuery>`（record：`name` + `aliases`），
+**同一行的多个拼写各自走自己的目录、候选合并回一行**——中文名喂中文目录、拉丁名喂拉丁目录，
+**不改任何阈值**（七之十八的封顶不等式原样生效）。同拼写去重在匹配器内做，重复字符串只花一次请求。
+PSN 侧由 `PsnLibraryTitle`（`fetchLibraryTitles`）供给别名；**只有游玩历史有 `localizedName`**，
+纯购买的行没有别名就是没有，不要造假。
+
 **别给它写 `ImportSource`**：`ImportSource` 的语义是「名字 → **目录条目**」，而 PSN 只给**裸名字**
 （与粘贴名单同构）。所以 PSN 止步于 `List<String>`，交给 `GameNameListImportContent(initialNames:)` ——
 **匹配、阈值、预览、入库全部复用同一套实现**（即 七之十八 那套）。

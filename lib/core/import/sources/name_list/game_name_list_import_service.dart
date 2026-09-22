@@ -24,12 +24,16 @@ import 'game_title_matcher.dart';
 
 final Provider<GameNameListImportService> gameNameListImportServiceProvider =
     Provider<GameNameListImportService>((Ref ref) {
+  final IgdbApi igdb = ref.watch(igdbApiProvider);
   return GameNameListImportService(
-    igdbApi: ref.watch(igdbApiProvider),
+    igdbApi: igdb,
     tapTapApi: ref.watch(tapTapApiProvider),
     database: ref.watch(databaseServiceProvider),
     repository: ref.watch(collectionRepositoryProvider),
     wishlistRepository: ref.watch(wishlistRepositoryProvider),
+    // Screened once, here, so no matcher pass ever spends a request on a
+    // catalogue it has no credentials for.
+    igdbConfigured: igdb.hasCredentials,
   );
 });
 
@@ -134,6 +138,14 @@ class GameNameListImportOptions extends ImportOptions {
 /// Two phases by design. [match] queries both catalogues and returns what it
 /// found **without touching the database**, so the user can correct mismatches
 /// and skip rows first; [import] writes only what survived that review.
+/// One line to look up: the name the source gave, plus any other spelling of
+/// the same title.
+///
+/// A record rather than two parallel lists, so a caller cannot misalign them.
+/// The shape is shared with the PlayStation client's own title record, which is
+/// how `localizedName` travels from a play-history row to the matcher.
+typedef GameNameQuery = ({String name, List<String> aliases});
+
 class GameNameListImportService implements ImportSource {
   GameNameListImportService({
     required IgdbApi igdbApi,
@@ -141,9 +153,11 @@ class GameNameListImportService implements ImportSource {
     required DatabaseService database,
     required CollectionRepository repository,
     required WishlistRepository wishlistRepository,
+    bool igdbConfigured = true,
   })  : _igdbApi = igdbApi,
         _tapTapApi = tapTapApi,
         _db = database,
+        _igdbUsable = igdbConfigured,
         _writer = ImportWriter(
           collections: repository,
           wishlist: wishlistRepository,
@@ -160,31 +174,73 @@ class GameNameListImportService implements ImportSource {
   final DatabaseService _db;
   final ImportWriter _writer;
 
+  /// Whether IGDB has credentials to call with.
+  ///
+  /// A persisted-but-dead token makes the rest of the app believe IGDB is
+  /// connected, and every query then throws — one "search failed" per Latin
+  /// name, for a catalogue that was never reachable. Knowing up front lets the
+  /// pass be skipped, so those names fall through to TapTap and are reported as
+  /// what they are.
+  final bool _igdbUsable;
+
   @override
   String get displayName => sourceLabel;
 
   /// Phase one: look every name up, write nothing.
+  ///
+  /// A row carries its own spelling plus any [GameNameQuery.aliases] — the same
+  /// title under a second name. PSN's play history returns both a plain and a
+  /// localized name, and that is what lets one row be looked up in both
+  /// catalogues: the Chinese one is Chinese-first, the Latin one is Latin-first,
+  /// and a title Sony spells in English is invisible to the first.
+  ///
+  /// A row counts as failed only when **every** spelling of it threw. A
+  /// catalogue that answers "nothing here" is not a failure, and neither is one
+  /// that was never asked — reporting a row as failed because a *different*
+  /// source stumbled is what made a working fallback look broken.
   Future<GameNameMatchSession> match(
-    List<String> names, {
+    List<GameNameQuery> queries, {
     int? platformId,
     ImportProgressCallback? onProgress,
   }) async {
-    final int total = names.length;
-    final Map<int, List<GameNameCandidate>> found =
-        <int, List<GameNameCandidate>>{};
-    final Set<int> failedSearch = <int>{};
+    final int total = queries.length;
+
+    // One entry per (row, spelling). Rows are what the user sees, so every
+    // result is folded back onto the row it came from. A spelling that repeats
+    // another one for the same row is dropped: the same string asked twice of
+    // the same catalogue can only cost a request.
+    final List<String> spellings = <String>[];
+    final List<List<int>> spellingsOfRow =
+        List<List<int>>.generate(total, (_) => <int>[]);
+    for (int i = 0; i < total; i++) {
+      final Set<String> seen = <String>{};
+      for (final String text in <String>[
+        queries[i].name,
+        ...queries[i].aliases,
+      ]) {
+        final String trimmed = text.trim();
+        if (trimmed.isEmpty || !seen.add(trimmed)) continue;
+        spellingsOfRow[i].add(spellings.length);
+        spellings.add(trimmed);
+      }
+    }
 
     // A Chinese title only exists in the Chinese catalogue and a Latin one
     // almost never does, so splitting first keeps the request count near one
     // per name instead of asking both catalogues about everything.
     final List<int> latin = <int>[];
     final List<int> han = <int>[];
-    for (int i = 0; i < total; i++) {
-      (GameTitleMatcher.hasHan(names[i]) ? han : latin).add(i);
+    for (int i = 0; i < spellings.length; i++) {
+      (GameTitleMatcher.hasHan(spellings[i]) ? han : latin).add(i);
     }
 
-    // Counted per *name* and never twice, so `done` cannot overshoot `total`:
-    // the progress bar is fed straight into LinearProgressIndicator.
+    final Map<int, List<GameNameCandidate>> foundBySpelling =
+        <int, List<GameNameCandidate>>{};
+    /// Spellings a source returned an answer for, empty results included.
+    final Set<int> answered = <int>{};
+    /// Spellings a source threw on.
+    final Set<int> failed = <int>{};
+
     int done = 0;
     void report(String? message) {
       onProgress?.call(ImportProgress(
@@ -195,17 +251,39 @@ class GameNameListImportService implements ImportSource {
       ));
     }
 
+    /// A row is done once every spelling of it has been attempted.
+    void recount() {
+      int resolved = 0;
+      for (final List<int> ofRow in spellingsOfRow) {
+        if (ofRow.isEmpty) continue;
+        bool all = true;
+        for (final int spelling in ofRow) {
+          if (!answered.contains(spelling) && !failed.contains(spelling)) {
+            all = false;
+            break;
+          }
+        }
+        if (all) resolved++;
+      }
+      done = resolved;
+    }
+
     report(null);
 
-    if (latin.isNotEmpty) {
+    // No credentials means every request would throw, which would then be
+    // reported as one failure per Latin name. Leaving the catalogue out is both
+    // cheaper and truthful: those rows simply get their TapTap chance below.
+    final bool igdbUsable = _igdbUsable && latin.isNotEmpty;
+    if (igdbUsable) {
       await _collectFromIgdb(
-        names,
+        spellings,
         latin,
-        found,
-        failedSearch,
+        foundBySpelling,
+        answered,
+        failed,
         platformId: platformId,
-        onBatch: (int processed) {
-          done += processed;
+        onBatch: (_) {
+          recount();
           report('Matching with IGDB...');
         },
       );
@@ -213,13 +291,14 @@ class GameNameListImportService implements ImportSource {
 
     if (han.isNotEmpty) {
       await _collectFromTapTap(
-        names,
+        spellings,
         han,
-        found,
-        failedSearch,
+        foundBySpelling,
+        answered,
+        failed,
         platformId: platformId,
         onEach: () {
-          done++;
+          recount();
           report('Matching with TapTap...');
         },
         merge: false,
@@ -227,24 +306,54 @@ class GameNameListImportService implements ImportSource {
     }
 
     // A Latin title IGDB does not carry — mainland indie releases, mobile
-    // ports — often has a TapTap row, so retry the ones that came back empty
-    // or unconvincing. Those names are already counted, hence no progress
-    // callback here; only the message moves.
+    // ports, anything with no IGDB entry — often has a TapTap row, so retry
+    // the ones that came back empty or unconvincing. Those names are already
+    // counted, hence no progress callback here; only the message moves.
     final List<int> latinFallback = <int>[
-      for (final int position in latin)
-        if (_needsFallback(found[position])) position,
+      for (final int spelling in latin)
+        if (_needsFallback(
+          foundBySpelling[spelling],
+          answered.contains(spelling),
+        ))
+          spelling,
     ];
     if (latinFallback.isNotEmpty) {
-      report('Checking TapTap for the rest...');
+      recount();
+      report(igdbUsable
+          ? 'Checking TapTap for the rest...'
+          : 'Matching with TapTap...');
       await _collectFromTapTap(
-        names,
+        spellings,
         latinFallback,
-        found,
-        failedSearch,
+        foundBySpelling,
+        answered,
+        failed,
         platformId: platformId,
         onEach: null,
         merge: true,
       );
+    }
+
+    // Fold every spelling's candidates back onto the row that produced it.
+    final Map<int, List<GameNameCandidate>> found =
+        <int, List<GameNameCandidate>>{};
+    final Set<int> noAnswer = <int>{};
+    for (int row = 0; row < total; row++) {
+      final List<int> ofRow = spellingsOfRow[row];
+      if (ofRow.isEmpty) continue;
+      bool anyAnswer = false;
+      for (final int spelling in ofRow) {
+        if (answered.contains(spelling)) anyAnswer = true;
+        final List<GameNameCandidate>? candidates = foundBySpelling[spelling];
+        if (candidates == null || candidates.isEmpty) continue;
+        _merge(
+          positions: found,
+          position: row,
+          incoming: candidates,
+          platformId: platformId,
+        );
+      }
+      if (!anyAnswer) noAnswer.add(row);
     }
 
     final List<GameNameMatchRow> rows = <GameNameMatchRow>[];
@@ -252,10 +361,10 @@ class GameNameListImportService implements ImportSource {
       final List<GameNameCandidate> candidates =
           found[i] ?? const <GameNameCandidate>[];
       rows.add(GameNameMatchRow(
-        original: names[i],
+        original: queries[i].name,
         candidates: candidates,
         selectedIndex: _preselect(candidates),
-        searchFailed: failedSearch.contains(i),
+        searchFailed: noAnswer.contains(i),
       ));
     }
 
@@ -381,20 +490,21 @@ class GameNameListImportService implements ImportSource {
 
   /// Batched by the API's own multi-query ceiling.
   Future<void> _collectFromIgdb(
-    List<String> names,
-    List<int> positions,
+    List<String> spellings,
+    List<int> targets,
     Map<int, List<GameNameCandidate>> into,
-    Set<int> failedSearch, {
+    Set<int> answered,
+    Set<int> failed, {
     required int? platformId,
     required void Function(int processed) onBatch,
   }) async {
     const int batchSize = IgdbApi.maxMultiQueryBatch;
 
-    for (int start = 0; start < positions.length; start += batchSize) {
-      final int end = start + batchSize > positions.length
-          ? positions.length
+    for (int start = 0; start < targets.length; start += batchSize) {
+      final int end = start + batchSize > targets.length
+          ? targets.length
           : start + batchSize;
-      final List<int> batch = positions.sublist(start, end);
+      final List<int> batch = targets.sublist(start, end);
 
       try {
         // No platform filter: IGDB's coverage is incomplete for remasters and
@@ -403,10 +513,14 @@ class GameNameListImportService implements ImportSource {
         final Map<int, List<Game>> results =
             await _igdbApi.multiSearchGamesByName(
           <({String name, int? platformId})>[
-            for (final int position in batch)
-              (name: names[position], platformId: null),
+            for (final int index in batch)
+              (name: spellings[index], platformId: null),
           ],
         );
+
+        // The catalogue answered, even if every query in the batch came back
+        // empty. Only a throw is a failure.
+        answered.addAll(batch);
 
         for (int i = 0; i < batch.length; i++) {
           final List<Game> games = results[i] ?? const <Game>[];
@@ -415,7 +529,7 @@ class GameNameListImportService implements ImportSource {
             positions: into,
             position: batch[i],
             incoming: _rank(
-              names[batch[i]],
+              spellings[batch[i]],
               games,
               DataSource.igdb,
               platformId,
@@ -425,7 +539,7 @@ class GameNameListImportService implements ImportSource {
         }
       } on Exception catch (e) {
         _log.warning('IGDB batch match failed: $e');
-        failedSearch.addAll(batch);
+        failed.addAll(batch);
       }
 
       onBatch(batch.length);
@@ -434,35 +548,37 @@ class GameNameListImportService implements ImportSource {
 
   /// One request per name; the shared host limiter paces them.
   Future<void> _collectFromTapTap(
-    List<String> names,
-    List<int> positions,
+    List<String> spellings,
+    List<int> targets,
     Map<int, List<GameNameCandidate>> into,
-    Set<int> failedSearch, {
+    Set<int> answered,
+    Set<int> failed, {
     required int? platformId,
     required void Function()? onEach,
     required bool merge,
   }) async {
-    for (final int position in positions) {
+    for (final int index in targets) {
       try {
         final List<Game> games =
-            (await _tapTapApi.searchGames(query: names[position], page: 1)).$1;
+            (await _tapTapApi.searchGames(query: spellings[index], page: 1)).$1;
+        answered.add(index);
         if (games.isNotEmpty) {
           final List<GameNameCandidate> ranked =
-              _rank(names[position], games, DataSource.taptap, platformId);
+              _rank(spellings[index], games, DataSource.taptap, platformId);
           if (merge) {
             _merge(
               positions: into,
-              position: position,
+              position: index,
               incoming: ranked,
               platformId: platformId,
             );
           } else {
-            into[position] = ranked;
+            into[index] = ranked;
           }
         }
       } on Exception catch (e) {
-        _log.warning('TapTap match failed for "${names[position]}": $e');
-        failedSearch.add(position);
+        _log.warning('TapTap match failed for "${spellings[index]}": $e');
+        failed.add(index);
       }
       onEach?.call();
     }
@@ -530,7 +646,16 @@ class GameNameListImportService implements ImportSource {
   }
 
   /// Nothing came back, or nothing convincing enough to show as the answer.
-  static bool _needsFallback(List<GameNameCandidate>? candidates) {
+  /// Whether a Latin spelling is worth handing to TapTap.
+  ///
+  /// [answered] tells "the catalogue found nothing" apart from "the catalogue
+  /// was never asked" — an unusable IGDB leaves its spellings unanswered, and
+  /// those are exactly the ones the Chinese catalogue should get a shot at.
+  static bool _needsFallback(
+    List<GameNameCandidate>? candidates,
+    bool answered,
+  ) {
+    if (!answered) return true;
     if (candidates == null || candidates.isEmpty) return true;
     return candidates.first.score < GameTitleMatcher.confidentScore;
   }

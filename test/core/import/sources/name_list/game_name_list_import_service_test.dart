@@ -113,10 +113,17 @@ void main() {
 
   Future<GameNameMatchSession> runMatch(
     List<String> names, {
+    List<List<String>>? aliases,
     int? platformId,
   }) =>
       sut.match(
-        names,
+        <GameNameQuery>[
+          for (int i = 0; i < names.length; i++)
+            (
+              name: names[i],
+              aliases: aliases == null ? const <String>[] : aliases[i],
+            ),
+        ],
         platformId: platformId,
         onProgress: (ImportProgress p) => progressCalls.add(p),
       );
@@ -139,6 +146,89 @@ void main() {
       // The Latin title resolved on IGDB, so no TapTap request was spent on it.
       verifyNever(() => mockTapTap.searchGames(query: 'God of War', page: 1));
       verify(() => mockTapTap.searchGames(query: '战神', page: 1)).called(1);
+    });
+
+    test('searches both catalogues when a title has two spellings', () async {
+      // What PSN's play history hands over: Sony's English name, plus the
+      // localized one. The Chinese catalogue only knows the second.
+      igdbByQuery['Hogwarts Legacy'] = <Game>[_igdbGame(100, 'Hogwarts Legacy')];
+      tapTapByQuery['霍格沃茨之遗'] = <Game>[_tapTapGame(9, '霍格沃茨之遗')];
+
+      final GameNameMatchSession session = await runMatch(
+        <String>['Hogwarts Legacy'],
+        aliases: <List<String>>[
+          <String>['霍格沃茨之遗'],
+        ],
+      );
+
+      expect(session.rows, hasLength(1));
+      expect(
+        session.rows.single.candidates.map((GameNameCandidate c) => c.source),
+        containsAll(<DataSource>[DataSource.igdb, DataSource.taptap]),
+      );
+      // One row, not two: the alias is a spelling of the same title.
+      verify(() => mockTapTap.searchGames(query: '霍格沃茨之遗', page: 1))
+          .called(1);
+    });
+
+    test('drops an alias that merely repeats the name', () async {
+      final GameNameMatchSession session = await runMatch(
+        <String>['Zenith'],
+        aliases: <List<String>>[
+          <String>['Zenith', '  '],
+        ],
+      );
+
+      expect(session.rows.single.original, 'Zenith');
+      verify(() => mockTapTap.searchGames(query: 'Zenith', page: 1)).called(1);
+    });
+
+    test('an answering fallback is not reported as a failed search', () async {
+      // The reported bug: IGDB threw on every Latin name, and the row kept
+      // saying "search failed" even though TapTap had already answered it.
+      when(() => mockIgdb.multiSearchGamesByName(any()))
+          .thenThrow(const IgdbApiException('API credentials not set'));
+      tapTapByQuery['Zenith'] = <Game>[_tapTapGame(3, 'Zenith')];
+
+      final GameNameMatchSession session = await runMatch(<String>['Zenith']);
+
+      expect(session.rows.single.searchFailed, isFalse);
+      expect(session.rows.single.candidates, isNotEmpty);
+    });
+
+    test('a row TapTap also fails on is a failed search', () async {
+      when(() => mockIgdb.multiSearchGamesByName(any()))
+          .thenThrow(const IgdbApiException('API credentials not set'));
+      when(() => mockTapTap.searchGames(
+            query: any(named: 'query'),
+            page: any(named: 'page'),
+          )).thenThrow(Exception('tap tap down'));
+
+      final GameNameMatchSession session = await runMatch(<String>['Zenith']);
+
+      expect(session.rows.single.searchFailed, isTrue);
+    });
+
+    test('skips the IGDB pass entirely without credentials', () async {
+      // A dead token makes the app believe IGDB is connected while every call
+      // throws. Not asking at all is cheaper and lands the names on TapTap.
+      final GameNameListImportService withoutIgdb = GameNameListImportService(
+        igdbApi: mockIgdb,
+        tapTapApi: mockTapTap,
+        database: mockDb,
+        repository: mockRepo,
+        wishlistRepository: mockWishlist,
+        igdbConfigured: false,
+      );
+      tapTapByQuery['Zenith'] = <Game>[_tapTapGame(3, 'Zenith')];
+
+      final GameNameMatchSession session = await withoutIgdb.match(
+        <GameNameQuery>[(name: 'Zenith', aliases: const <String>[])],
+      );
+
+      expect(session.rows.single.searchFailed, isFalse);
+      expect(session.rows.single.candidates.first.source, DataSource.taptap);
+      verifyNever(() => mockIgdb.multiSearchGamesByName(any()));
     });
 
     test('falls back to TapTap when IGDB knows nothing about a Latin title',
@@ -183,13 +273,18 @@ void main() {
       expect(session.unmatchedCount, 1);
     });
 
-    test('flags a row whose lookup threw', () async {
+    test('a row is not a failure when a source answered with nothing',
+        () async {
+      // IGDB may throw on every Latin name while the Chinese catalogue simply
+      // has nothing under that spelling: that reads as "not found", which the
+      // user can act on, not as "the lookup broke".
       when(() => mockIgdb.multiSearchGamesByName(any()))
           .thenThrow(const IgdbApiException('boom'));
 
-      final GameNameMatchSession session = await runMatch(<String>['God of War']);
+      final GameNameMatchSession session =
+          await runMatch(<String>['God of War']);
 
-      expect(session.rows.first.searchFailed, isTrue);
+      expect(session.rows.first.searchFailed, isFalse);
       expect(session.rows.first.candidates, isEmpty);
     });
 

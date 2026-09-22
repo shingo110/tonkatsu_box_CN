@@ -3050,7 +3050,7 @@
       "count": {"type": "int"}
     }
   },
-  "psnImportFetched": "{count} jogos comprados lidos",
+  "psnImportFetched": "{count} jogos lidos da conta",
   "@psnImportFetched": {
     "placeholders": {
       "count": {"type": "int"}

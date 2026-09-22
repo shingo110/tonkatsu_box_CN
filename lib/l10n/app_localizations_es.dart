@@ -6187,7 +6187,7 @@ class SEs extends S {
 
   @override
   String psnImportFetched(int count) {
-    return '$count juegos comprados leidos';
+    return '$count juegos leídos de la cuenta';
   }
 
   @override

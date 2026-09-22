@@ -2283,7 +2283,7 @@
       "count": {"type": "int"}
     }
   },
-  "psnImportFetched": "Прочитано купленных игр: {count}",
+  "psnImportFetched": "Прочитано игр из аккаунта: {count}",
   "@psnImportFetched": {
     "placeholders": {
       "count": {"type": "int"}

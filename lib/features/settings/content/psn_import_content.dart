@@ -36,7 +36,7 @@ class _PsnImportContentState extends ConsumerState<PsnImportContent> {
 
   /// Non-null once the library has been read; the review stage takes over from
   /// there.
-  List<String>? _names;
+  List<PsnLibraryTitle>? _titles;
 
   /// A refresh token left by an earlier session, if the user opted in.
   String? _savedToken;
@@ -72,14 +72,14 @@ class _PsnImportContentState extends ConsumerState<PsnImportContent> {
 
   @override
   Widget build(BuildContext context) {
-    final List<String>? names = _names;
-    if (names != null) {
+    final List<PsnLibraryTitle>? titles = _titles;
+    if (titles != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          _buildConnectedBanner(S.of(context), names.length),
+          _buildConnectedBanner(S.of(context), titles.length),
           const SizedBox(height: AppSpacing.md),
-          GameNameListImportContent(initialNames: names),
+          GameNameListImportContent(initialQueries: titles),
         ],
       );
     }
@@ -290,7 +290,7 @@ class _PsnImportContentState extends ConsumerState<PsnImportContent> {
             onPressed: _busy
                 ? null
                 : () => setState(() {
-                      _names = null;
+                      _titles = null;
                       _fetched = 0;
                       _error = null;
                     }),
@@ -336,8 +336,9 @@ class _PsnImportContentState extends ConsumerState<PsnImportContent> {
 
       // Both halves of the library, not just the purchases: a title played
       // from the PlayStation Plus catalogue was never bought, and would
-      // otherwise never appear here.
-      final List<String> names = await api.fetchLibraryNames(
+      // otherwise never appear here. The rows carry their other spellings too,
+      // so a title Sony names in English can still be looked up in Chinese.
+      final List<PsnLibraryTitle> titles = await api.fetchLibraryTitles(
         accessToken: tokens.accessToken,
         onPage: (int fetched) {
           if (mounted) setState(() => _fetched = fetched);
@@ -345,7 +346,7 @@ class _PsnImportContentState extends ConsumerState<PsnImportContent> {
       );
 
       if (!mounted) return;
-      if (names.isEmpty) {
+      if (titles.isEmpty) {
         setState(() {
           _busy = false;
           _error = S.of(context).psnImportEmpty;
@@ -357,7 +358,7 @@ class _PsnImportContentState extends ConsumerState<PsnImportContent> {
       _npsso.clear();
       setState(() {
         _busy = false;
-        _names = names;
+        _titles = titles;
       });
     } on PsnApiException catch (e) {
       if (!mounted) return;

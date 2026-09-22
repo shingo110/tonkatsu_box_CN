@@ -50,8 +50,8 @@ class PsnApi {
   }) =>
       _library.fetchPlayedGames(accessToken: accessToken, onPage: onPage);
 
-  /// The whole library as bare names: what was bought, then what was played,
-  /// in that order and de-duplicated.
+  /// The whole library as rows to match: what was bought, then what was played,
+  /// in that order and de-duplicated by name.
   ///
   /// Both halves are read, because neither is complete on its own — a game
   /// played from a subscription was never purchased, and a game bought and
@@ -61,25 +61,43 @@ class PsnApi {
   /// best-effort and a failure only becomes an error when nothing at all came
   /// back. Returning the half that worked is a better outcome than returning
   /// none of it, and the user sees the count either way.
-  Future<List<String>> fetchLibraryNames({
+  ///
+  /// Rows carry their other spellings, which is how a title Sony names in
+  /// English can still be found in a Chinese catalogue.
+  Future<List<PsnLibraryTitle>> fetchLibraryTitles({
     required String accessToken,
     void Function(int fetched)? onPage,
   }) async {
-    final List<String> names = <String>[];
-    final Set<String> seen = <String>{};
+    final List<PsnLibraryTitle> titles = <PsnLibraryTitle>[];
+    final Map<String, int> indexByName = <String, int>{};
     PsnApiException? firstFailure;
 
-    void collect(Iterable<String> values) {
-      for (final String value in values) {
-        final String name = value.trim();
-        if (name.isNotEmpty && seen.add(name.toLowerCase())) names.add(name);
+    void collect(Iterable<PsnLibraryTitle> incoming) {
+      for (final PsnLibraryTitle title in incoming) {
+        final String name = title.name.trim();
+        if (name.isEmpty) continue;
+        final String key = name.toLowerCase();
+        final int? existing = indexByName[key];
+        if (existing == null) {
+          indexByName[key] = titles.length;
+          titles.add((name: name, aliases: cleanAliases(title.aliases, name)));
+          continue;
+        }
+        // A game that was both bought and played is one line, and the play
+        // history is the half that knows its localized name.
+        final PsnLibraryTitle current = titles[existing];
+        final List<String> merged =
+            cleanAliases(<String>[...current.aliases, ...title.aliases], name);
+        if (merged.length != current.aliases.length) {
+          titles[existing] = (name: current.name, aliases: merged);
+        }
       }
     }
 
-    Future<void> read(Future<Iterable<String>> Function() half) async {
+    Future<void> read(Future<Iterable<PsnLibraryTitle>> Function() half) async {
       try {
         collect(await half());
-        onPage?.call(names.length);
+        onPage?.call(titles.length);
       } on PsnApiException catch (e) {
         firstFailure ??= e;
       }
@@ -90,23 +108,43 @@ class PsnApi {
         accessToken: accessToken,
         onPage: onPage,
       ))
-          .map((PsnPurchasedGame game) => game.name),
+          // The store's purchase list has no localized name to offer.
+          .map((PsnPurchasedGame game) =>
+              (name: game.name, aliases: const <String>[])),
     );
     await read(
       () async => (await fetchPlayedGames(
         accessToken: accessToken,
         onPage: onPage,
       ))
-          .map((PsnPlayedGame game) => game.displayName),
+          .map((PsnPlayedGame game) => (
+                name: game.displayName,
+                aliases: <String>[
+                  if (game.localizedName != null) game.localizedName!,
+                ],
+              )),
     );
 
     final PsnApiException? failure = firstFailure;
-    if (names.isEmpty && failure != null) throw failure;
-    return names;
+    if (titles.isEmpty && failure != null) throw failure;
+    return titles;
   }
 
   void dispose() {
     _auth.dispose();
     _library.dispose();
   }
+}
+
+/// Trims spellings, drops blanks and duplicates, and drops the one that merely
+/// repeats [name] — the matcher would otherwise spend a request on it.
+List<String> cleanAliases(Iterable<String> raw, String name) {
+  final Set<String> seen = <String>{name.trim().toLowerCase()};
+  final List<String> kept = <String>[];
+  for (final String value in raw) {
+    final String trimmed = value.trim();
+    if (trimmed.isEmpty || !seen.add(trimmed.toLowerCase())) continue;
+    kept.add(trimmed);
+  }
+  return kept;
 }

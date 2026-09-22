@@ -5799,7 +5799,7 @@ class SZh extends S {
 
   @override
   String psnImportFetched(int count) {
-    return '已读取 $count 个已购游戏';
+    return '已读取账号的 $count 个游戏';
   }
 
   @override

@@ -12,6 +12,28 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — the review list blamed the wrong catalogue for its misses
+
+The first device run of the PlayStation importer read 46 games and matched 17,
+with almost every miss labelled "search failed". The label was telling the
+truth about the wrong thing: with no usable IGDB credentials, every Latin-name
+batch throws, and the matcher marked all of those rows as failed — including
+the ones its TapTap fallback had then gone on to match, which is how a row
+could show a chevron (matched) over a "search failed" subtitle.
+
+Three things changed. A row is now a failure only when every source it was
+asked about threw; a catalogue that answers "nothing here" is a miss, not a
+crash, and an unusable one is simply not asked — the matcher screens
+`IgdbApi.hasCredentials` up front and hands its Latin names straight to TapTap,
+where the matching pass finds several that the old path reported as broken.
+And a row may now carry other spellings of its title: PSN's play history
+returns a localized name alongside Sony's own, so the same row is looked up in
+both catalogues — the Chinese one first in Chinese, the Latin one in Latin —
+with the thresholds untouched. The connected warning on the review screen now
+also checks that IGDB credentials actually exist: a token left over from an
+earlier setup read as "connected" while every call threw, which is how this
+reached a device without anyone being told the English half had no catalogue.
+
 ## [cn] Fixed — PlayStation Plus titles were missing from the import
 
 Signing in worked but the library was short: games played from the PlayStation

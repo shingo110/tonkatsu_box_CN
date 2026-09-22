@@ -6213,7 +6213,7 @@ class SRu extends S {
 
   @override
   String psnImportFetched(int count) {
-    return 'Прочитано купленных игр: $count';
+    return 'Прочитано игр из аккаунта: $count';
   }
 
   @override
