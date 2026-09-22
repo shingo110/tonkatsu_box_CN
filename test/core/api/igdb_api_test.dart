@@ -121,9 +121,7 @@ void main() {
           'token_type': 'bearer',
         };
 
-        when(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenAnswer((_) async => Response<dynamic>(
               data: responseData,
               statusCode: 200,
@@ -138,10 +136,40 @@ void main() {
         expect(result.accessToken, equals(testAccessToken));
       });
 
-      test('должен выбросить исключение при невалидных credentials', () async {
+      test('gives the auth handshake a wider timeout than the data calls',
+          () async {
+        // 从大陆网络到 Twitch 通常要绕代理出国，5 秒的数据超时让这次握手
+        // 在慢节点上永远失败 —— 而它两个月才用一次，慢一点毫无代价。
+        final List<Object?> capturedOptions = <Object?>[];
         when(() => mockDio.post<dynamic>(
               any(),
               queryParameters: any(named: 'queryParameters'),
+              options: any(named: 'options'),
+            )).thenAnswer((Invocation inv) async {
+          capturedOptions.add(inv.namedArguments[#options]);
+          return Response<dynamic>(
+            data: <String, dynamic>{
+              'access_token': testAccessToken,
+              'expires_in': 5000000,
+              'token_type': 'bearer',
+            },
+            statusCode: 200,
+            requestOptions: RequestOptions(),
+          );
+        });
+
+        await sut.getAccessToken(
+          clientId: testClientId,
+          clientSecret: testClientSecret,
+        );
+
+        final Options options = capturedOptions.single as Options;
+        expect(options.connectTimeout, const Duration(seconds: 30));
+        expect(options.receiveTimeout, const Duration(seconds: 30));
+      });
+
+      test('должен выбросить исключение при невалидных credentials', () async {
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenThrow(DioException(
           response: Response<dynamic>(
             statusCode: 401,
@@ -164,9 +192,7 @@ void main() {
       });
 
       test('должен выбросить исключение при таймауте', () async {
-        when(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenThrow(DioException(
           type: DioExceptionType.connectionTimeout,
           requestOptions: RequestOptions(),
@@ -186,9 +212,7 @@ void main() {
       });
 
       test('должен выбросить исключение on error соединения', () async {
-        when(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenThrow(DioException(
           type: DioExceptionType.connectionError,
           requestOptions: RequestOptions(),
@@ -208,9 +232,7 @@ void main() {
       });
 
       test('должен выбросить исключение при неуспешном статусе', () async {
-        when(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenAnswer((_) async => Response<dynamic>(
               data: null,
               statusCode: 500,
@@ -235,9 +257,7 @@ void main() {
           'token_type': 'bearer',
         };
 
-        when(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenAnswer((_) async => Response<dynamic>(
               data: responseData,
               statusCode: 200,
@@ -253,9 +273,7 @@ void main() {
       });
 
       test('should return false при невалидных credentials', () async {
-        when(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenThrow(DioException(
           response: Response<dynamic>(
             statusCode: 401,
@@ -795,9 +813,7 @@ void main() {
           );
         });
 
-        when(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenAnswer((_) async => Response<dynamic>(
               data: <String, dynamic>{
                 'access_token': 'new_token',
@@ -815,9 +831,7 @@ void main() {
         // 3 IGDB calls: initial 401 + retry, then the name-filter fallback
         // for the empty page; 1 Twitch refresh call.
         expect(igdbCallCount, equals(3));
-        verify(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        verify(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).called(1);
       });
 
@@ -860,9 +874,7 @@ void main() {
           requestOptions: RequestOptions(),
         ));
 
-        when(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenThrow(DioException(
           response: Response<dynamic>(
             statusCode: 401,
@@ -911,9 +923,7 @@ void main() {
           );
         });
 
-        when(() => mockDio.post<dynamic>(
-              any(),
-              queryParameters: any(named: 'queryParameters'),
+        when(() => mockDio.post<dynamic>(              any(),              queryParameters: any(named: 'queryParameters'),              options: any(named: 'options'),
             )).thenAnswer((_) async => Response<dynamic>(
               data: <String, dynamic>{
                 'access_token': 'refreshed_token',

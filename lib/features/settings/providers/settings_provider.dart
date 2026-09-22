@@ -910,9 +910,13 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
       return true;
     } on IgdbApiException catch (e) {
+      // The message names the class of failure; the detail carries the
+      // transport's own words (socket refused, handshake failed, timed out) —
+      // without it a blocked auth host and a wrong secret read identically.
       state = state.copyWith(
         connectionStatus: ConnectionStatus.error,
-        errorMessage: e.message,
+        errorMessage:
+            e.detail == null ? e.message : '${e.message}\n${e.detail}',
         isLoading: false,
       );
       return false;

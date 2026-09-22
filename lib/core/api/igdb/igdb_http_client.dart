@@ -18,6 +18,12 @@ class IgdbHttpClient {
   static final Logger _log = Logger('IgdbApi');
 
   static const Duration _timeout = Duration(seconds: 5);
+
+  /// The auth call runs at most twice a month, and from a mainland network it
+  /// usually has to leave through a proxy before it even starts handshaking —
+  /// the 5-second data timeout made that hop fail on any slow node, which read
+  /// as "IGDB is down" forever when really the token just needed longer.
+  static const Duration _authTimeout = Duration(seconds: 30);
   static const String _twitchAuthUrl = 'https://id.twitch.tv/oauth2/token';
   static const String _igdbBaseUrl = 'https://api.igdb.com/v4';
 
@@ -62,6 +68,11 @@ class IgdbHttpClient {
           'client_secret': clientSecret,
           'grant_type': 'client_credentials',
         },
+        options: Options(
+          // A slow proxy hop is normal here; give the handshake room to finish.
+          connectTimeout: _authTimeout,
+          receiveTimeout: _authTimeout,
+        ),
       );
 
       if (response.statusCode == 200 && response.data != null) {

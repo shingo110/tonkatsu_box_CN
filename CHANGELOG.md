@@ -41,6 +41,15 @@ directly reachable — and a client-credentials token lasts about sixty days.
 Authorize once on any network that reaches Twitch, then use the app without a
 proxy for two months.
 
+The auth call also gets its own thirty-second budget. It shared the 5-second
+data timeout, and from a mainland network it usually has to leave through a
+proxy before the TLS handshake even starts — five seconds made the handshake
+fail on any slow node, forever, which is why the connection test had never
+succeeded with working credentials and a reachable endpoint. When it still
+fails, the page now also shows the transport's own words (socket refused,
+handshake failed, timed out) instead of just the category label, so a blocked
+auth host and a wrong secret no longer read identically.
+
 ## [cn] Fixed — the review list blamed the wrong catalogue for its misses
 
 The first device run of the PlayStation importer read 46 games and matched 17,
