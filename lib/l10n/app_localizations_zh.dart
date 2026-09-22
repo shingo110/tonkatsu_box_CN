@@ -5711,6 +5711,28 @@ class SZh extends S {
   String get settingsReachability => '网络连通性自检';
 
   @override
+  String get settingsProxy => '代理设置';
+
+  @override
+  String get settingsProxySubtitle => '通过本地代理转发应用流量以访问被屏蔽的数据源';
+
+  @override
+  String get settingsProxyHint =>
+      '填写你 VPN 应用暴露的本地端口（Clash 混合端口通常为 HTTP 7890、SOCKS5 7891）。关闭即直连，与修改前一致。';
+
+  @override
+  String get settingsProxyEnabled => '启用代理';
+
+  @override
+  String get settingsProxyType => '类型';
+
+  @override
+  String get settingsProxyHost => '主机';
+
+  @override
+  String get settingsProxyPort => '端口';
+
+  @override
   String get settingsReachabilitySubtitle => '查看当前网络能连通哪些数据源';
 
   @override

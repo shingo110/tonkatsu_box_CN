@@ -7,6 +7,7 @@ import '../../../shared/constants/api_defaults.dart';
 import '../../../core/selfhost/server_credentials.dart';
 import '../../../shared/constants/platform_features.dart';
 import '../../../shared/theme/app_theme_id.dart';
+import '../../../core/services/app_proxy_config.dart';
 import '../../../shared/constants/rich_hero_style.dart';
 import '../../../core/services/discord_rpc_service.dart';
 import '../../../core/api/comicvine_api.dart';
@@ -174,6 +175,17 @@ abstract class SettingsKeys {
 
   /// Slider step; 0.85 / 1.0 / 1.15 / 1.3 are the intended stops.
   static const double textScaleStep = 0.15;
+
+  /// Outbound proxy so Dart traffic can leave a restricted network through the
+  /// local port a VPN app exposes, instead of relying on TUN capture.
+  static const String proxyEnabled = 'proxy_enabled';
+  static const String proxyType = 'proxy_type';
+  static const String proxyHost = 'proxy_host';
+  static const String proxyPort = 'proxy_port';
+
+  static const String proxyTypeDefault = 'http';
+  static const String proxyHostDefault = '127.0.0.1';
+  static const int proxyPortDefault = 7890;
 }
 
 class SettingsState {
@@ -217,6 +229,10 @@ class SettingsState {
     this.cardScale = SettingsKeys.cardScaleDefault,
     this.textScale = SettingsKeys.textScaleDefault,
     this.appTheme = AppThemeId.dark,
+    this.proxyEnabled = false,
+    this.proxyType = SettingsKeys.proxyTypeDefault,
+    this.proxyHost = SettingsKeys.proxyHostDefault,
+    this.proxyPort = SettingsKeys.proxyPortDefault,
   });
 
   final String? clientId;
@@ -325,6 +341,13 @@ class SettingsState {
 
   /// Selected app theme.
   final AppThemeId appTheme;
+
+  /// Outbound proxy — toggle + endpoint. Lets Dart traffic leave a restricted
+  /// network through the local port a VPN app exposes.
+  final bool proxyEnabled;
+  final String proxyType;
+  final String proxyHost;
+  final int proxyPort;
 
   String? resolveOverlay({
     String? platformOverlay,
@@ -455,6 +478,10 @@ class SettingsState {
     double? cardScale,
     double? textScale,
     AppThemeId? appTheme,
+    bool? proxyEnabled,
+    String? proxyType,
+    String? proxyHost,
+    int? proxyPort,
   }) {
     return SettingsState(
       clientId: clientId ?? this.clientId,
@@ -503,6 +530,10 @@ class SettingsState {
       cardScale: cardScale ?? this.cardScale,
       textScale: textScale ?? this.textScale,
       appTheme: appTheme ?? this.appTheme,
+      proxyEnabled: proxyEnabled ?? this.proxyEnabled,
+      proxyType: proxyType ?? this.proxyType,
+      proxyHost: proxyHost ?? this.proxyHost,
+      proxyPort: proxyPort ?? this.proxyPort,
     );
   }
 }
@@ -698,6 +729,15 @@ class SettingsNotifier extends Notifier<SettingsState> {
     final AppThemeId appTheme =
         AppThemeId.fromId(_prefs.getString(SettingsKeys.appTheme));
 
+    final bool proxyEnabled =
+        _prefs.getBool(SettingsKeys.proxyEnabled) ?? false;
+    final String proxyType = _prefs.getString(SettingsKeys.proxyType) ??
+        SettingsKeys.proxyTypeDefault;
+    final String proxyHost = _prefs.getString(SettingsKeys.proxyHost) ??
+        SettingsKeys.proxyHostDefault;
+    final int proxyPort = _prefs.getInt(SettingsKeys.proxyPort) ??
+        SettingsKeys.proxyPortDefault;
+
     // Valid token → connected immediately (skip verify);
     // expired with credentials → trigger auto-verify below.
     final bool hasValidToken = accessToken != null &&
@@ -744,6 +784,10 @@ class SettingsNotifier extends Notifier<SettingsState> {
       cardScale: cardScale,
       textScale: textScale,
       appTheme: appTheme,
+      proxyEnabled: proxyEnabled,
+      proxyType: proxyType,
+      proxyHost: proxyHost,
+      proxyPort: proxyPort,
     );
 
     // API keys already wired by apiKeysProvider; only the request-time language param is set here.
@@ -780,6 +824,15 @@ class SettingsNotifier extends Notifier<SettingsState> {
         }
       });
     }
+
+    // Seed the live proxy config the HttpOverrides layer reads on every
+    // request, so Dart traffic routes through the user's local proxy port.
+    AppProxyConfig.current = AppProxyConfig(
+      enabled: proxyEnabled,
+      type: AppProxyType.fromId(proxyType),
+      host: proxyHost,
+      port: proxyPort,
+    );
 
     return loadedState;
   }
@@ -1132,6 +1185,51 @@ class SettingsNotifier extends Notifier<SettingsState> {
   Future<void> setAlwaysShowSubcategories({required bool enabled}) async {
     await _prefs.setBool(SettingsKeys.alwaysShowSubcategories, enabled);
     state = state.copyWith(alwaysShowSubcategories: enabled);
+  }
+
+  Future<void> setProxyEnabled({required bool enabled}) async {
+    await _prefs.setBool(SettingsKeys.proxyEnabled, enabled);
+    AppProxyConfig.current = AppProxyConfig(
+      enabled: enabled,
+      type: AppProxyType.fromId(state.proxyType),
+      host: state.proxyHost,
+      port: state.proxyPort,
+    );
+    state = state.copyWith(proxyEnabled: enabled);
+  }
+
+  Future<void> setProxyType(String type) async {
+    await _prefs.setString(SettingsKeys.proxyType, type);
+    AppProxyConfig.current = AppProxyConfig(
+      enabled: state.proxyEnabled,
+      type: AppProxyType.fromId(type),
+      host: state.proxyHost,
+      port: state.proxyPort,
+    );
+    state = state.copyWith(proxyType: type);
+  }
+
+  Future<void> setProxyHost(String host) async {
+    final String trimmed = host.trim();
+    await _prefs.setString(SettingsKeys.proxyHost, trimmed);
+    AppProxyConfig.current = AppProxyConfig(
+      enabled: state.proxyEnabled,
+      type: AppProxyType.fromId(state.proxyType),
+      host: trimmed,
+      port: state.proxyPort,
+    );
+    state = state.copyWith(proxyHost: trimmed);
+  }
+
+  Future<void> setProxyPort(int port) async {
+    await _prefs.setInt(SettingsKeys.proxyPort, port);
+    AppProxyConfig.current = AppProxyConfig(
+      enabled: state.proxyEnabled,
+      type: AppProxyType.fromId(state.proxyType),
+      host: state.proxyHost,
+      port: port,
+    );
+    state = state.copyWith(proxyPort: port);
   }
 
   Future<void> setDateFormat(String presetId) async {

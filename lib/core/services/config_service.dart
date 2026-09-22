@@ -109,12 +109,19 @@ class ConfigService {
     SettingsKeys.richCollectionsEnabled,
     SettingsKeys.richHeroStyle,
     SettingsKeys.hideEmptyMediaTypeChevrons,
+    // Outbound proxy (lets Dart traffic leave a restricted network directly
+    // through the local port a VPN app exposes, bypassing TUN capture).
+    SettingsKeys.proxyEnabled,
+    SettingsKeys.proxyType,
+    SettingsKeys.proxyHost,
+    SettingsKeys.proxyPort,
   ];
 
   /// Keys whose values are ints, not strings.
   static const List<String> _intKeys = <String>[
     SettingsKeys.tokenExpires,
     SettingsKeys.lastSync,
+    SettingsKeys.proxyPort,
   ];
 
   /// Keys whose values are bools. steamRememberCredentials must round-trip —
@@ -131,6 +138,7 @@ class ConfigService {
     SettingsKeys.discordRaSyncEnabled,
     SettingsKeys.richCollectionsEnabled,
     SettingsKeys.hideEmptyMediaTypeChevrons,
+    SettingsKeys.proxyEnabled,
   ];
 
   Map<String, Object> collectSettings() {

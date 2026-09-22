@@ -35,6 +35,7 @@ import '../../welcome/screens/welcome_screen.dart';
 import 'cache_screen.dart';
 import 'credentials_screen.dart';
 import 'reachability_screen.dart';
+import 'proxy_settings_screen.dart';
 import 'credits_screen.dart';
 import 'database_screen.dart';
 import '../../../core/services/backup_service.dart';
@@ -600,6 +601,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: l.settingsReachabilitySubtitle,
             onTap: () => _pushScreen(const ReachabilityScreen()),
           ),
+          if (!kIsWebBuild)
+            SettingsTile(
+              leadingIcon: Icons.lan_outlined,
+              leadingColor: _kReachabilityColor,
+              title: l.settingsProxy,
+              subtitle: l.settingsProxySubtitle,
+              onTap: () => _pushScreen(const ProxySettingsScreen()),
+            ),
         ],
       ),
       gap,
