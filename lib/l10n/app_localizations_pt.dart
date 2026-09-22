@@ -6172,6 +6172,10 @@ class SPt extends S {
   }
 
   @override
+  String get credentialsIgdbAuthHint =>
+      'O servidor da Twitch (id.twitch.tv) é inacessível a partir de redes da China continental. Autorize uma vez a partir de uma rede que o alcance: o token dura cerca de 60 dias e as buscas vão depois diretas a api.igdb.com, sem proxy.';
+
+  @override
   String get psnImportEmpty => 'A conta nao retornou jogos comprados';
 
   @override

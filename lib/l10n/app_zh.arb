@@ -2617,7 +2617,7 @@
       "count": {"type": "int"}
     }
   },
-  "psnImportFetched": "已读取账号的 {count} 个游戏",
+  "psnImportFetched": "已读取账号的 {count} 个游戏","credentialsIgdbAuthHint": "无法连接 Twitch 授权服务器（id.twitch.tv）在境内属正常。只需在能出国的网络下完成一次授权：令牌约 60 天有效，此后搜索直连 api.igdb.com，无需代理。",
   "@psnImportFetched": {
     "placeholders": {
       "count": {"type": "int"}

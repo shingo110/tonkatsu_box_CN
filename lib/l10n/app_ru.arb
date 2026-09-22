@@ -2283,7 +2283,7 @@
       "count": {"type": "int"}
     }
   },
-  "psnImportFetched": "Прочитано игр из аккаунта: {count}",
+  "psnImportFetched": "Прочитано игр из аккаунта: {count}","credentialsIgdbAuthHint": "Сервер Twitch (id.twitch.tv) недоступен из материковых сетей Китая — это нормально. Авторизуйтесь один раз из сети, которая до него добирается: токен действует около 60 дней, а поиск потом идёт напрямую к api.igdb.com без прокси.",
   "@psnImportFetched": {
     "placeholders": {
       "count": {"type": "int"}

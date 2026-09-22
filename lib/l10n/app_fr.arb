@@ -2622,7 +2622,7 @@
       "count": {"type": "int"}
     }
   },
-  "psnImportFetched": "{count} jeux lus depuis le compte",
+  "psnImportFetched": "{count} jeux lus depuis le compte","credentialsIgdbAuthHint": "Le serveur Twitch (id.twitch.tv) est inaccessible depuis les réseaux de Chine continentale. Autorisez une fois depuis un réseau qui l atteint : le jeton dure environ 60 jours, et les recherches vont ensuite directement à api.igdb.com, sans proxy.",
   "@psnImportFetched": {
     "placeholders": {
       "count": {"type": "int"}

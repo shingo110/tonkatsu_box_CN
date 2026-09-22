@@ -6116,6 +6116,10 @@ class SEn extends S {
   }
 
   @override
+  String get credentialsIgdbAuthHint =>
+      'The Twitch auth server (id.twitch.tv) is unreachable from mainland networks — that is expected. Authorize once on any network that can reach it: the token lasts about 60 days, and searches afterwards go straight to api.igdb.com with no proxy.';
+
+  @override
   String get psnImportEmpty => 'The account returned no purchased games';
 
   @override

@@ -10778,6 +10778,12 @@ abstract class S {
   /// **'Read {count} games from the account'**
   String psnImportFetched(int count);
 
+  /// No description provided for @credentialsIgdbAuthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The Twitch auth server (id.twitch.tv) is unreachable from mainland networks — that is expected. Authorize once on any network that can reach it: the token lasts about 60 days, and searches afterwards go straight to api.igdb.com with no proxy.'**
+  String get credentialsIgdbAuthHint;
+
   /// No description provided for @psnImportEmpty.
   ///
   /// In en, this message translates to:

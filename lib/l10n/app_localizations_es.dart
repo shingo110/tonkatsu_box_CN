@@ -6191,6 +6191,10 @@ class SEs extends S {
   }
 
   @override
+  String get credentialsIgdbAuthHint =>
+      'El servidor de Twitch (id.twitch.tv) no es accesible desde redes de China continental. Autoriza una vez desde una red que sí llegue: el token dura unos 60 días y las búsquedas van luego directas a api.igdb.com, sin proxy.';
+
+  @override
   String get psnImportEmpty => 'La cuenta no devolvio juegos comprados';
 
   @override

@@ -189,6 +189,23 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
           description: S.of(context).welcomeApiIgdbDesc,
           source: DataSource.igdb,
         ),
+        // The auth host is a different domain from the data host, and only the
+        // auth one is blocked from mainland networks — so a failed connection
+        // test reads as "IGDB is unusable" when really the token just needs to
+        // be minted once from a network that can reach Twitch. The token then
+        // lasts about two months against the directly reachable data host.
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          child: Text(
+            S.of(context).credentialsIgdbAuthHint,
+            style: AppTypography.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,

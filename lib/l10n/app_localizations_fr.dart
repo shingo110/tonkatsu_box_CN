@@ -6209,6 +6209,10 @@ class SFr extends S {
   }
 
   @override
+  String get credentialsIgdbAuthHint =>
+      'Le serveur Twitch (id.twitch.tv) est inaccessible depuis les réseaux de Chine continentale. Autorisez une fois depuis un réseau qui l atteint : le jeton dure environ 60 jours, et les recherches vont ensuite directement à api.igdb.com, sans proxy.';
+
+  @override
   String get psnImportEmpty => 'Le compte n\'a renvoye aucun jeu achete';
 
   @override

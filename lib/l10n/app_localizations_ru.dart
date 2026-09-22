@@ -6217,6 +6217,10 @@ class SRu extends S {
   }
 
   @override
+  String get credentialsIgdbAuthHint =>
+      'Сервер Twitch (id.twitch.tv) недоступен из материковых сетей Китая — это нормально. Авторизуйтесь один раз из сети, которая до него добирается: токен действует около 60 дней, а поиск потом идёт напрямую к api.igdb.com без прокси.';
+
+  @override
   String get psnImportEmpty => 'Учётная запись не вернула купленных игр';
 
   @override

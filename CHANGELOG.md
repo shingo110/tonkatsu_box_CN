@@ -34,6 +34,13 @@ client does not read the system proxy (Dart never does), so a VPN has to run in
 TUN / global mode to carry its traffic; per-app proxy modes have no effect on
 it.
 
+Two more facts make IGDB usable from mainland networks anyway, and the
+credentials page now says so on the IGDB card: the auth host
+(`id.twitch.tv`) is the only blocked one — the data host (`api.igdb.com`) is
+directly reachable — and a client-credentials token lasts about sixty days.
+Authorize once on any network that reaches Twitch, then use the app without a
+proxy for two months.
+
 ## [cn] Fixed — the review list blamed the wrong catalogue for its misses
 
 The first device run of the PlayStation importer read 46 games and matched 17,

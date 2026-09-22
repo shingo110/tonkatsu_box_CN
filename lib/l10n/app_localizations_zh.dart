@@ -5803,6 +5803,10 @@ class SZh extends S {
   }
 
   @override
+  String get credentialsIgdbAuthHint =>
+      '无法连接 Twitch 授权服务器（id.twitch.tv）在境内属正常。只需在能出国的网络下完成一次授权：令牌约 60 天有效，此后搜索直连 api.igdb.com，无需代理。';
+
+  @override
   String get psnImportEmpty => '该账号没有返回已购游戏';
 
   @override
