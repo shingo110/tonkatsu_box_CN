@@ -12,6 +12,29 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — in-app outbound proxy setting
+
+Mainland users need an outbound path for a few sources (IGDB's auth host
+`id.twitch.tv` is blocked, while its data host `api.igdb.com` is directly
+reachable). The app's Dart `HttpClient` never reads the system or VPN proxy,
+so previously the only way to carry its traffic was a TUN/VPN that captured it
+at the network layer — which on Android often broke forwarding for the whole
+app.
+
+A new in-app proxy setting (Settings → Data sources → Proxy) lets the app send
+every outbound request through a local HTTP or SOCKS5 proxy (e.g. FlClash's
+`127.0.0.1:7890` / `:7891`). `AppHttpOverrides.findProxy` routes accordingly;
+`localhost` always goes direct (self-hosted server unaffected), and with the
+setting off the app behaves exactly as before (an enabled-but-dead proxy
+degrades to direct automatically).
+
+- `lib/core/services/app_proxy_config.dart`: `AppProxyConfig` singleton + `findProxyForUri` routing.
+- `lib/core/services/app_http_overrides.dart`: `createHttpClient` now injects `findProxy`.
+- `lib/features/settings/providers/settings_provider.dart`: four proxy keys + state fields + setters.
+- `lib/core/services/config_service.dart`: whitelist gains the four proxy keys (backups carry them).
+- `lib/features/settings/screens/proxy_settings_screen.dart`: the settings page.
+- `lib/l10n/app_*.arb`: 7 new keys, all six languages in sync.
+
 ## [cn] Fixed — a broken proxy read as "every API key is invalid"
 
 With a VPN on, the network self-check reported all 22 sources unreachable, and
