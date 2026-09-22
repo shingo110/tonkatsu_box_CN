@@ -15,6 +15,16 @@ class MigrationV64 extends Migration {
 
   @override
   Future<void> migrate(Database db) async {
+    // A rewound or wiped `user_version` replays this migration against a
+    // schema that already landed here. Dropping would take the user's
+    // listened-track history with it, so detect the finished state and only
+    // sweep the v63 scaffolding that a replay rebuilds.
+    if (await Migration.tableExists(db, 'audio_cache')) {
+      await db.execute('DROP TABLE IF EXISTS music_tracks_cache');
+      await db.execute('DROP TABLE IF EXISTS music_albums_cache');
+      return;
+    }
+
     await db.execute('DROP TABLE IF EXISTS listened_tracks');
     await db.execute('DROP TABLE IF EXISTS music_tracks_cache');
     await db.execute('DROP TABLE IF EXISTS music_albums_cache');

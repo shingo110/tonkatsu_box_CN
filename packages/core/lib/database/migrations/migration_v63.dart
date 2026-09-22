@@ -14,8 +14,14 @@ class MigrationV63 extends Migration {
 
   @override
   Future<void> migrate(Database db) async {
+    // Every table here is dropped and rebuilt by v64, so on any upgrade path
+    // these three are throwaway scaffolding. `IF NOT EXISTS` keeps the
+    // migration replayable: a database whose schema already reached v64 but
+    // whose `user_version` fell behind (a crash mid-upgrade, a restored file)
+    // replays v57..v64, and a bare CREATE would abort on the leftover
+    // `listened_tracks` v64 created — which is what wedged such files.
     await db.execute('''
-      CREATE TABLE music_albums_cache (
+      CREATE TABLE IF NOT EXISTS music_albums_cache (
         id INTEGER NOT NULL,
         source TEXT NOT NULL DEFAULT 'musicBrainz',
         mbid TEXT NOT NULL,
@@ -56,7 +62,7 @@ class MigrationV63 extends Migration {
     // Track list of the picked release, keyed naturally like tv_episodes_cache
     // — the surrogate id is local-only and never exported.
     await db.execute('''
-      CREATE TABLE music_tracks_cache (
+      CREATE TABLE IF NOT EXISTS music_tracks_cache (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         album_id INTEGER NOT NULL,
         source TEXT NOT NULL DEFAULT 'musicBrainz',
@@ -72,7 +78,7 @@ class MigrationV63 extends Migration {
     ''');
 
     await db.execute('''
-      CREATE TABLE listened_tracks (
+      CREATE TABLE IF NOT EXISTS listened_tracks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         collection_id INTEGER NOT NULL,
         album_id INTEGER NOT NULL,

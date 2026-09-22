@@ -22,4 +22,14 @@ abstract class Migration {
       await db.execute('ALTER TABLE $table ADD COLUMN $columnDef');
     }
   }
+
+  /// Counterpart to [addColumnIfAbsent] for whole tables: a rewound or wiped
+  /// `user_version` replays a migration whose CREATE has already run.
+  static Future<bool> tableExists(Database db, String table) async {
+    final List<Map<String, Object?>> rows = await db.rawQuery(
+      "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
+      <Object?>[table],
+    );
+    return rows.isNotEmpty;
+  }
 }

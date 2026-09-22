@@ -12,6 +12,28 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — a stale `user_version` bricked the app on launch
+
+A database whose schema was already at v64 but whose `user_version` still read
+56 made every launch replay `[v57..v64]`. Every other migration tolerated the
+replay — the rebuild-style ones drop first, the rest guard with `IF NOT EXISTS`
+— but v63 used a bare `CREATE TABLE`, so on replay it hit the `listened_tracks`
+table v64 had already built, threw, and rolled the whole upgrade back. The
+version stayed at 56, so the next launch failed identically and the app could
+not open at all.
+
+v63 now guards its three `CREATE TABLE`s with `IF NOT EXISTS`, and v64 checks
+`Migration.tableExists('audio_cache')` up front: on a replay it skips its own
+`DROP`/`CREATE` of the music tables rather than re-running them, which also
+keeps the user's listening history intact. A regression test builds exactly the
+"schema latest, version stale" database and asserts it opens, lands on v64, and
+still has its rows.
+
+- `packages/core/lib/database/migrations/migration.dart`: `Migration.tableExists` helper.
+- `packages/core/lib/database/migrations/migration_v63.dart`: `CREATE TABLE IF NOT EXISTS` on all three tables.
+- `packages/core/lib/database/migrations/migration_v64.dart`: skip when already applied instead of dropping user data.
+- `packages/core/test/database/migrations/migration_stale_version_test.dart`: replay regression test.
+
 ## [cn] Added — in-app outbound proxy setting
 
 Mainland users need an outbound path for a few sources (IGDB's auth host
