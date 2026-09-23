@@ -50,4 +50,16 @@ abstract final class AppAssets {
       'assets/images/music_brainz_color.png';
   static const String iconPodcastIndexColor =
       'assets/images/podcastindex_color.png';
+
+  /// Domestic sources. Their marks come from `tool/brand_icons`, which pulls
+  /// each vendor's own 512px artwork and normalises it to the 256px shape the
+  /// other logo assets use.
+  static const String iconTapTapColor = 'assets/images/icon_taptap_color.png';
+  static const String iconBangumiColor =
+      'assets/images/icon_bangumi_color.png';
+  static const String iconNeoDbColor = 'assets/images/icon_neodb_color.png';
+  static const String iconWeReadColor = 'assets/images/icon_weread_color.png';
+  static const String iconDoubanColor = 'assets/images/icon_douban_color.png';
+  static const String iconXimalayaColor =
+      'assets/images/icon_ximalaya_color.png';
 }

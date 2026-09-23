@@ -12,6 +12,25 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — brand marks for the six domestic sources
+
+TapTap, Bangumi, NeoDB, WeRead, Douban and Ximalaya shipped without artwork, so
+their badges rendered a lettered monogram while every other source showed its
+own logo — and at badge size (about 11 px) a letter reads as nothing at all.
+
+Each mark now comes from the vendor's own distribution: the App Store catalogue
+entry for the vendor's app, or, for NeoDB — whose only listing belongs to a
+third-party client rather than to the site — the site's own icon.
+`tool/brand_icons/fetch_brand_icons.py` fetches them, checks the bundle id it
+got back so a renamed or delisted app fails loudly instead of quietly
+contributing a stranger's artwork, and normalises each to the 256×256 RGBA PNG
+the existing assets use. Re-running rewrites the same bytes.
+
+- `assets/images/icon_{taptap,bangumi,neodb,weread,douban,ximalaya}_color.png`: the six marks.
+- `tool/brand_icons/fetch_brand_icons.py`: the fetcher; `--check` reports sources without writing.
+- `lib/shared/theme/app_assets.dart`: six `icon*Color` constants.
+- `lib/shared/constants/data_source_ui.dart`: `iconAsset` returns them instead of `null`.
+
 ## [cn] Fixed — connect-check failures blamed the wrong thing, in English
 
 `SettingsNotifier` has no l10n channel, so the settings page's error section
