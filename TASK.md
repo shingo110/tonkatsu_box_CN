@@ -838,7 +838,16 @@ native-assets 钩子，在本沙箱必崩（`hooks_runner`），直接执行同�
 不追加透明留白、不裁剪、不重新绘制。既有 22 个资产是透明底彩色图形，两种形态的差异来自品牌自身
 的标识设计，属预期而非取图失误。
 
-**发版**：`pubspec.yaml` bump 到 `0.44.3+44`，推注解 tag `cn-v0.44.3` 触发 `release-cn.yml` 出三端。
+**发版**：`pubspec.yaml` bump 到 `0.44.3+44`（`1941789e` docs + `d1b7c453` release，annotated tag 显式
+指向 `d1b7c453`），推 tag 触发 `release-cn.yml`：**run `35890586078` 五项全绿**（Quality Gate / Build
+Windows / Build Web / Build Android / Create GitHub Release），资产三件 `tonkatsu-box-cn-v0.44.3-{windows.zip,
+android.apk,web.tar.gz}`。
+
+**包内容核验（不只看大小）**：`cn-v0.44.2` 与 `0.44.3` 只差六个 PNG 与两句文案，陈旧产物在体积上几乎
+无差，故逐包解出核对 —— 三端均含全部六个新图标且字节一致（tap 25416 / bgm 62105 / neodb 17327 /
+weread 15008 / douban 12186 / ximalaya 10905）；Windows `tonkatsu_box.exe` 版本资源为 `0.44.3+44`
+且**不含**旧串 `0.44.2+43`。sha256：win `a31295ce…` / apk `26a2de22…` / web `a4f16951…`。
+
 本版相对 `cn-v0.44.2` 的差异 = **D27**（连接检查失败分流 + 两处文案回归本地化）+ **D28**（六个
 国内源品牌图标）+ **D29**（自托管活体扩容，仅探测脚本，不含产物变更）。
 
