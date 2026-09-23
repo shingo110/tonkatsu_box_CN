@@ -16,6 +16,8 @@ import 'core/services/platform_init_io.dart'
     if (dart.library.js_interop) 'core/services/platform_init_web.dart';
 import 'core/selfhost/server_credentials.dart';
 import 'core/services/profile_service.dart';
+import 'core/services/system_font_models.dart';
+import 'core/services/system_fonts.dart';
 import 'features/settings/providers/profile_provider.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'shared/constants/platform_features.dart';
@@ -79,6 +81,26 @@ Future<void> _loadAppState() async {
   _profilesData = await profileService.loadProfiles();
 
   _heroDir = await CollectionHeroService.resolveRoot();
+
+  // Before runApp, so the first frame already renders in the user's font
+  // instead of painting in Inter and jumping a moment later.
+  await _restoreAppFont();
+}
+
+/// Re-registers the saved system font with the engine.
+///
+/// This runs on every start because a registered font lives in the engine,
+/// not in preferences. A font that has since been uninstalled or moved falls
+/// back to the bundled one and is forgotten, so the cost is a single start.
+Future<void> _restoreAppFont() async {
+  if (!kSystemFontsAvailable) return;
+  final SystemFontFamily? saved = SystemFontFamily.decode(
+    _prefs.getString(SettingsKeys.fontFamily),
+  );
+  if (saved == null) return;
+  if (await activateSystemFont(saved)) return;
+  useDefaultFont();
+  await _prefs.remove(SettingsKeys.fontFamily);
 }
 
 /// In-process restart for mobile: swaps the [ProviderScope]'s [Key] to rebuild

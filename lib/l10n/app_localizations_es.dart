@@ -3675,6 +3675,37 @@ class SEs extends S {
       'Tamaño del texto de la interfaz, además del ajuste del sistema';
 
   @override
+  String get settingsFont => 'Fuente';
+
+  @override
+  String get settingsFontSubtitle => 'Usa una fuente instalada en este equipo';
+
+  @override
+  String get settingsFontHint =>
+      'Elige una fuente ya instalada en este equipo. Solo la aplicación de escritorio puede leer las fuentes del sistema.';
+
+  @override
+  String get settingsFontDefault => 'Predeterminada (Inter)';
+
+  @override
+  String get settingsFontSearch => 'Buscar fuentes';
+
+  @override
+  String settingsFontWeightCount(int count) {
+    return '$count pesos';
+  }
+
+  @override
+  String get settingsFontUnavailable =>
+      'Las fuentes del sistema solo están disponibles en la aplicación de escritorio.';
+
+  @override
+  String get settingsFontLoading => 'Leyendo las fuentes instaladas…';
+
+  @override
+  String get settingsFontApplyFailed => 'No se pudo cargar esa fuente';
+
+  @override
   String get collectionEditHeroImage => 'Imagen de portada';
 
   @override

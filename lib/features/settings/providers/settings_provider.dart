@@ -186,6 +186,15 @@ abstract class SettingsKeys {
   static const String proxyTypeDefault = 'http';
   static const String proxyHostDefault = '127.0.0.1';
   static const int proxyPortDefault = 7890;
+
+  /// Selected system font, stored as JSON (see `SystemFontFamily`), which
+  /// carries the font files too so a cold start can register it without
+  /// re-scanning the disk.
+  ///
+  /// Deliberately absent from the config export: it names files that exist on
+  /// this machine only, so importing it elsewhere would restore nothing.
+  /// Desktop only — see `kSystemFontsAvailable`.
+  static const String fontFamily = 'font_family';
 }
 
 class SettingsState {

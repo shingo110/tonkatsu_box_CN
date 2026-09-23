@@ -3685,6 +3685,38 @@ class SRu extends S {
       'Размер текста интерфейса поверх системной настройки';
 
   @override
+  String get settingsFont => 'Шрифт';
+
+  @override
+  String get settingsFontSubtitle =>
+      'Использовать шрифт, установленный на этом компьютере';
+
+  @override
+  String get settingsFontHint =>
+      'Использует шрифт, уже установленный на этом ПК. Только настольное приложение может читать системные шрифты.';
+
+  @override
+  String get settingsFontDefault => 'По умолчанию (Inter)';
+
+  @override
+  String get settingsFontSearch => 'Поиск шрифтов';
+
+  @override
+  String settingsFontWeightCount(int count) {
+    return '$count начертаний';
+  }
+
+  @override
+  String get settingsFontUnavailable =>
+      'Системные шрифты доступны только в настольном приложении.';
+
+  @override
+  String get settingsFontLoading => 'Чтение установленных шрифтов…';
+
+  @override
+  String get settingsFontApplyFailed => 'Не удалось загрузить этот шрифт';
+
+  @override
   String get collectionEditHeroImage => 'Обложка';
 
   @override

@@ -3619,6 +3619,37 @@ class SEn extends S {
       'Interface text size, on top of the system setting';
 
   @override
+  String get settingsFont => 'Font';
+
+  @override
+  String get settingsFontSubtitle => 'Use a font installed on this computer';
+
+  @override
+  String get settingsFontHint =>
+      'Picks a font already installed on this PC. Only the desktop app can read system fonts.';
+
+  @override
+  String get settingsFontDefault => 'Default (Inter)';
+
+  @override
+  String get settingsFontSearch => 'Search fonts';
+
+  @override
+  String settingsFontWeightCount(int count) {
+    return '$count weights';
+  }
+
+  @override
+  String get settingsFontUnavailable =>
+      'System fonts are available in the desktop app only.';
+
+  @override
+  String get settingsFontLoading => 'Reading installed fonts…';
+
+  @override
+  String get settingsFontApplyFailed => 'That font could not be loaded';
+
+  @override
   String get collectionEditHeroImage => 'Cover image';
 
   @override

@@ -3402,6 +3402,35 @@ class SZh extends S {
   String get settingsTextScaleSubtitle => '界面文字大小，在系统设置基础上调整';
 
   @override
+  String get settingsFont => '字体';
+
+  @override
+  String get settingsFontSubtitle => '使用本机已安装的字体';
+
+  @override
+  String get settingsFontHint => '从这台电脑上已安装的字体中选择。只有桌面端可以读取系统字体。';
+
+  @override
+  String get settingsFontDefault => '默认（Inter）';
+
+  @override
+  String get settingsFontSearch => '搜索字体';
+
+  @override
+  String settingsFontWeightCount(int count) {
+    return '$count 个字重';
+  }
+
+  @override
+  String get settingsFontUnavailable => '系统字体仅在桌面端可用。';
+
+  @override
+  String get settingsFontLoading => '正在读取本机字体…';
+
+  @override
+  String get settingsFontApplyFailed => '无法加载该字体';
+
+  @override
   String get collectionEditHeroImage => '封面图片';
 
   @override

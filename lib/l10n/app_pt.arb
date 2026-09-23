@@ -1848,6 +1848,20 @@
   "settingsCardScaleSubtitle": "Tamanho dos cards nas grades de coleções",
   "settingsTextScale": "Tamanho do texto",
   "settingsTextScaleSubtitle": "Tamanho do texto da interface, além da configuração do sistema",
+  "settingsFont": "Fonte",
+  "settingsFontSubtitle": "Usar uma fonte instalada neste computador",
+  "settingsFontHint": "Escolhe uma fonte já instalada neste PC. Apenas o aplicativo de desktop pode ler fontes do sistema.",
+  "settingsFontDefault": "Padrão (Inter)",
+  "settingsFontSearch": "Pesquisar fontes",
+  "settingsFontWeightCount": "{count} pesos",
+  "@settingsFontWeightCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsFontUnavailable": "Fontes do sistema estão disponíveis apenas no aplicativo de desktop.",
+  "settingsFontLoading": "Lendo as fontes instaladas…",
+  "settingsFontApplyFailed": "Não foi possível carregar essa fonte",
   "collectionEditHeroImage": "Imagem de capa",
   "collectionEditHeroImageHint": "Recomendado 2560×1080 (21:9). Assunto principal à direita — o lado esquerdo é coberto pelo título, a parte inferior se funde com o fundo",
   "collectionEditHeroPick": "Escolher imagem",

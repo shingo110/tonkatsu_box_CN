@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/logging/startup_error.dart';
+import 'core/services/app_font_config.dart';
 import 'core/services/backup_service.dart';
+import 'features/settings/providers/font_provider.dart';
 import 'features/settings/providers/kodi_settings_provider.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'features/splash/screens/splash_screen.dart';
@@ -57,6 +59,10 @@ class _TonkatsuBoxAppState extends ConsumerState<TonkatsuBoxApp> {
     final AppThemeId themeId = ref.watch(
       settingsNotifierProvider.select((SettingsState s) => s.appTheme),
     );
+    // A system font lives in the engine, not in ThemeData — AppTypography
+    // reads the family per style — so this is watched purely to rebuild the
+    // key below and remount the tree under the new font.
+    final AppFontConfig font = ref.watch(fontProvider);
     // AppColors getters read a static palette, so it must be swapped before
     // the subtree builds; the ValueKey below remounts everything on switch.
     AppColors.palette = themeId.palette;
@@ -70,7 +76,10 @@ class _TonkatsuBoxAppState extends ConsumerState<TonkatsuBoxApp> {
         ref.read(inputModeProvider.notifier).setMouseMode();
       },
       child: MaterialApp(
-        key: ValueKey<AppThemeId>(themeId),
+        // The font joins the key for the same reason the theme is in it: every
+        // AppTypography style is built from a static, so rebuilding the tree
+        // is the only way to re-font it.
+        key: ValueKey<String>('${themeId.id}|${font.family}'),
         title: 'Tonkatsu Box',
         debugShowCheckedModeBanner: false,
         theme: theme,

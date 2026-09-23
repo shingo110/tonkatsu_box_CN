@@ -1583,6 +1583,20 @@
   "settingsCardScaleSubtitle": "Card size in collection grids",
   "settingsTextScale": "Text size",
   "settingsTextScaleSubtitle": "Interface text size, on top of the system setting",
+  "settingsFont": "Font",
+  "settingsFontSubtitle": "Use a font installed on this computer",
+  "settingsFontHint": "Picks a font already installed on this PC. Only the desktop app can read system fonts.",
+  "settingsFontDefault": "Default (Inter)",
+  "settingsFontSearch": "Search fonts",
+  "settingsFontWeightCount": "{count} weights",
+  "@settingsFontWeightCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsFontUnavailable": "System fonts are available in the desktop app only.",
+  "settingsFontLoading": "Reading installed fonts…",
+  "settingsFontApplyFailed": "That font could not be loaded",
   "collectionEditHeroImage": "Cover image",
   "collectionEditHeroImageHint": "Recommended 2560×1080 (21:9). Main subject on the right — the left side is covered by the title, the bottom fades into the background",
   "collectionEditHeroPick": "Choose image",

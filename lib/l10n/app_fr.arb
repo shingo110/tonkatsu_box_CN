@@ -1563,6 +1563,20 @@
   "settingsCardScaleSubtitle": "Taille des cartes dans les collections (mode grille)",
   "settingsTextScale": "Taille du texte",
   "settingsTextScaleSubtitle": "Taille du texte de l’interface, en plus du réglage système",
+  "settingsFont": "Police",
+  "settingsFontSubtitle": "Utiliser une police installée sur cet ordinateur",
+  "settingsFontHint": "Choisit une police déjà installée sur ce PC. Seule l'application de bureau peut lire les polices du système.",
+  "settingsFontDefault": "Par défaut (Inter)",
+  "settingsFontSearch": "Rechercher une police",
+  "settingsFontWeightCount": "{count} graisses",
+  "@settingsFontWeightCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsFontUnavailable": "Les polices système ne sont disponibles que dans l'application de bureau.",
+  "settingsFontLoading": "Lecture des polices installées…",
+  "settingsFontApplyFailed": "Impossible de charger cette police",
   "collectionEditHeroImage": "Bannière",
   "collectionEditHeroImageHint": "2560×1080 recommandé (21:9). Sujet principal sur la droite — le côté gauche est recouvert par le titre — le bas disparaît dans le fond",
   "collectionEditHeroPick": "Choisir une image",
