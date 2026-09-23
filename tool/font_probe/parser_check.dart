@@ -24,7 +24,7 @@ const Set<String> _suffixes = <String>{'.ttf', '.otf', '.ttc', '.otc'};
 
 List<String> _roots() {
   final List<String> roots = <String>[];
-  final String? windir = Platform.environment['SystemRoot'] ?? r'C:\Windows';
+  final String windir = Platform.environment['SystemRoot'] ?? r'C:\Windows';
   roots.add('$windir\\Fonts');
   final String? local = Platform.environment['LOCALAPPDATA'];
   if (local != null && local.isNotEmpty) {

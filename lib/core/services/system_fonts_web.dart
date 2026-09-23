@@ -1,12 +1,3 @@
-import 'dart:io';
-import 'dart:isolate';
-import 'dart:typed_data';
-
-import 'package:flutter/services.dart' show ByteData, FontLoader;
-import 'package:logging/logging.dart';
-
-import 'app_font_config.dart';
-import 'font_binary_parser.dart';
 import 'system_font_models.dart';
 
 /// Web stub: the picker is a desktop feature, and a browser cannot read the
