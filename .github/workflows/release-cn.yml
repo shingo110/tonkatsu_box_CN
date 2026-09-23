@@ -81,14 +81,14 @@ jobs:
         run: |
           $version = "${{ github.ref_name }}"
           Compress-Archive -Path build\windows\x64\runner\Release\* `
-            -DestinationPath "tonkatsu-box-cn-${version}-windows.zip"
+            -DestinationPath "tonkatsu-box-${version}-windows.zip"
         shell: powershell
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-build
-          path: tonkatsu-box-cn-${{ github.ref_name }}-windows.zip
+          path: tonkatsu-box-${{ github.ref_name }}-windows.zip
           retention-days: 1
 
   build-android:
@@ -134,13 +134,13 @@ jobs:
         run: |
           VERSION="${{ github.ref_name }}"
           mv build/app/outputs/flutter-apk/app-release.apk \
-             "tonkatsu-box-cn-${VERSION}-android.apk"
+             "tonkatsu-box-${VERSION}-android.apk"
 
       - name: Upload Android artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-build
-          path: tonkatsu-box-cn-${{ github.ref_name }}-android.apk
+          path: tonkatsu-box-${{ github.ref_name }}-android.apk
           retention-days: 1
 
   build-web:
@@ -168,13 +168,13 @@ jobs:
       - name: Archive Web bundle
         run: |
           VERSION="${{ github.ref_name }}"
-          tar czf "tonkatsu-box-cn-${VERSION}-web.tar.gz" -C build/web .
+          tar czf "tonkatsu-box-${VERSION}-web.tar.gz" -C build/web .
 
       - name: Upload Web artifact
         uses: actions/upload-artifact@v4
         with:
           name: web-build
-          path: tonkatsu-box-cn-${{ github.ref_name }}-web.tar.gz
+          path: tonkatsu-box-${{ github.ref_name }}-web.tar.gz
           retention-days: 1
 
   create-release:
@@ -224,6 +224,6 @@ jobs:
           gh release create "$VERSION" \
             --title "Tonkatsu Box CN $VERSION" \
             --notes-file release_notes.md \
-            "tonkatsu-box-cn-${VERSION}-windows.zip" \
-            "tonkatsu-box-cn-${VERSION}-android.apk" \
-            "tonkatsu-box-cn-${VERSION}-web.tar.gz"
+            "tonkatsu-box-${VERSION}-windows.zip" \
+            "tonkatsu-box-${VERSION}-android.apk" \
+            "tonkatsu-box-${VERSION}-web.tar.gz"
