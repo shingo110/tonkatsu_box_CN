@@ -12,6 +12,50 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — pick a system font for the UI (desktop)
+
+Every `AppTypography` style carried a compile-time `fontFamily`, so the app
+could only ever render in the bundled Inter. On Windows the machine's own
+fonts are now discoverable and selectable (Settings → Appearance → Font).
+
+The family name is read out of the font binary rather than off the file name
+(`msyh.ttc` is 微软雅黑), through a pure-Dart reader for the `name`, `OS/2` and
+`head` tables — verified against all 779 faces installed on the dev machine
+with none dropped. A `.ttc` collection holds several faces, but the engine
+renders only face 0 of a file, so a collection contributes exactly one entry
+per file; that is what the picker lists, and it is why listing all faces would
+promise fonts the app cannot actually load.
+
+Selected families are registered with `FontLoader` under a `TK:<family>` key,
+so our bytes can never be confused with a same-named system font. Switching
+remounts the tree — the `MaterialApp` key now carries the font the way it
+already carried the theme — and the saved selection is re-registered before
+the first frame. A font that has since been uninstalled falls back to Inter
+and is forgotten, so the failure costs one launch.
+
+While a family's bytes are registered on selection, the picker's own list
+needs no registration at all: each row renders in the system family name,
+which the engine resolves without any bytes in our heap.
+
+The picker is Windows-only (`kSystemFontsAvailable`) and the selection is
+deliberately left out of the exported config, because it names files that
+exist on this machine alone.
+
+- `lib/core/services/font_binary_parser.dart`: `parseFontFace` / `countFontFaces` / `FontFaceInfo`.
+- `lib/core/services/system_font_models.dart`: `SystemFontFile`, `SystemFontFamily` + JSON round trip.
+- `lib/core/services/system_fonts.dart`: façade; `system_fonts_io.dart` scans and registers, `system_fonts_web.dart` is a no-op.
+- `lib/core/services/app_font_config.dart`: `AppFontConfig.current`, `fontRegistrationKey`, `defaultFontFamily`.
+- `lib/shared/theme/app_typography.dart`: `fontFamily` is now a getter, not a compile-time constant.
+- `lib/features/settings/providers/font_provider.dart`: `FontNotifier` (`select`, `reset`).
+- `lib/features/settings/screens/font_settings_screen.dart`: the picker.
+- `lib/features/settings/screens/settings_screen.dart`: Appearance entry, gated on `kSystemFontsAvailable`.
+- `lib/features/settings/providers/settings_provider.dart`: `SettingsKeys.fontFamily`.
+- `lib/app.dart`: the font joins the `MaterialApp` key.
+- `lib/main.dart`: `_restoreAppFont` registers the saved font before the first frame.
+- `lib/l10n/app_*.arb` (x6): font strings, key sets aligned.
+- `test/core/services/font_binary_parser_test.dart`: unit tests on synthesised font bytes, so they need no installed font.
+- `tool/font_probe/`: probes for the parts this machine cannot run under `flutter test`.
+
 ## [cn] Fixed — a stale `user_version` bricked the app on launch
 
 A database whose schema was already at v64 but whose `user_version` still read
