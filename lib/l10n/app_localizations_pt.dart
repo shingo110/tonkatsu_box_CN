@@ -582,6 +582,13 @@ class SPt extends S {
   String get settingsError => 'Erro';
 
   @override
+  String get credentialsMissingHint => 'Informe o Client ID e o Client Secret';
+
+  @override
+  String get settingsErrorNetworkHint =>
+      'A solicitação falhou. Verifique sua rede ou o proxy (Configurações → Fontes de dados → Proxy). Detalhes técnicos:';
+
+  @override
   String get settingsAppLanguage => 'Idioma do app';
 
   @override

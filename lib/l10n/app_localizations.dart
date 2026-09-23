@@ -1095,6 +1095,18 @@ abstract class S {
   /// **'Error'**
   String get settingsError;
 
+  /// No description provided for @credentialsMissingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter Client ID and Client Secret'**
+  String get credentialsMissingHint;
+
+  /// No description provided for @settingsErrorNetworkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The request failed. Check your network or proxy settings (Settings → Data sources → Proxy). Technical details:'**
+  String get settingsErrorNetworkHint;
+
   /// No description provided for @settingsAppLanguage.
   ///
   /// In en, this message translates to:

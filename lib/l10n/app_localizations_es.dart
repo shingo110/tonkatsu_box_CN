@@ -582,6 +582,14 @@ class SEs extends S {
   String get settingsError => 'Error';
 
   @override
+  String get credentialsMissingHint =>
+      'Introduce el Client ID y el Client Secret';
+
+  @override
+  String get settingsErrorNetworkHint =>
+      'La solicitud falló. Comprueba tu red o el proxy (Ajustes → Fuentes de datos → Proxy). Detalles técnicos:';
+
+  @override
   String get settingsAppLanguage => 'Idioma de la aplicación';
 
   @override

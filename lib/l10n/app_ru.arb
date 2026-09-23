@@ -219,6 +219,8 @@
   "settingsChangelogEmpty": "Нет заметок о выпуске",
   "settingsCreditsLicensesSubtitle": "TMDB, IGDB, SteamGridDB, open-source лицензии",
   "settingsError": "Ошибка",
+  "credentialsMissingHint": "Укажите Client ID и Client Secret",
+  "settingsErrorNetworkHint": "Запрос не выполнен. Проверьте сеть или прокси (Настройки → Источники данных → Прокси). Технические подробности:",
   "settingsAppLanguage": "Язык приложения",
   "settingsConnections": "Подключения",
   "settingsApiKeys": "API ключи",

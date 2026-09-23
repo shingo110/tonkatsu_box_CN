@@ -12,6 +12,29 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — connect-check failures blamed the wrong thing, in English
+
+`SettingsNotifier` has no l10n channel, so the settings page's error section
+was fed a hard-coded English sentence when nothing was stored, and the raw Dio
+text with `URL:` / `Type:` labels whenever a request actually failed. Neither
+said what to do next, and the first was the only untranslated string left in
+six locales.
+
+The two failures are now told apart without adding state: `error` with no
+`errorMessage` means the check never left the device (credentials missing),
+while `error` carrying a message means the transport failed. The UI branches on
+that — a localized hint for the former, a localized "what to check" line above
+the verbatim transport detail for the latter. Those transport words
+(`socket refused`, `timed out`) are the only part worth pasting into a bug
+report, so they are deliberately left untranslated, and the labels stay English
+because `buildApiErrorDetail` lives in the pure-Dart `lib/core/api` layer that
+may not depend on Flutter localizations.
+
+- `lib/features/settings/providers/settings_provider.dart`: `verifyConnection` reports missing credentials as `error` with no message.
+- `lib/features/settings/content/credentials_content.dart`: `_buildErrorSection` takes a nullable message and branches on it; the section now renders whenever the status is `error`.
+- `lib/l10n/app_*.arb` (x6): `credentialsMissingHint`, `settingsErrorNetworkHint`.
+- `test/features/settings/content/credentials_content_error_section_test.dart`: pins both shapes against the real notifier.
+
 ## [cn] Added — pick a system font for the UI (desktop)
 
 Every `AppTypography` style carried a compile-time `fontFamily`, so the app
