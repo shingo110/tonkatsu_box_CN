@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：D1–D27 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）
+- **已完成**：D1–D29 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面**本地**构建（缺 VS C++ 工作负载）—— 但发布走 CI 的 `windows-2022` 运行器，不阻塞出包
 
@@ -289,7 +289,7 @@
 （= 需密钥源数）与豆瓣节标题。
 
 **未做（待定夺）**：豆瓣密钥无官方申请入口（官方 API 已停发），其 url 暂指站根；新接入的国内源
-（豆瓣 / NeoDB / Bangumi / WeRead）**均无品牌图标**，只能吃 Material 兜底图标，待补资源。
+（豆瓣 / NeoDB / Bangumi / WeRead，以及其后接入的 TapTap / 喜马拉雅）**均无品牌图标**，只能吃 Material 兜底图标 —— **2026-09-23 已补齐（→ D28）**。
 
 ### D12 · 豆瓣改为内置公用密钥，配置界面下线（2026-09-20，起源：少爷定夺）
 
@@ -780,6 +780,50 @@ UI 侧据 `ConnectionStatus.error` 渲染，再按 `errorMessage` 是否为空�
 **新增护栏**：`test/features/settings/content/credentials_content_error_section_test.dart` —— 起真 notifier
 驱动真 `CredentialsContent`，分别钉住两种形态（缺凭据 ⇒ 提示文案；传输失败 ⇒ 本地化引导 + 原文详情）。
 
+### D28 · 六个国内源的品牌图标（2026-09-23，起源：D11 遗留的「待补资源」）
+
+**问题**：`DataSourceUi.iconAsset` 对这六个源全返回 `null` ⇒ `SourceLogo` 落到 `_Monogram`
+兜底（彩框 + 首字母）。而图标在界面上只有 **11–32 逻辑像素**（`SourceBadge` 用
+`fontSize * 1.4`，小号即 11.2），纯字母在那么小的尺寸下几乎没有识别度，与其余带真实 logo 的
+源并列时更像「缺了东西」。
+
+**素材来源**（新增 `tool/brand_icons/fetch_brand_icons.py`，可重跑）：取各源**厂商自有的
+512×512** 素材 —— 五家取自 App Store 目录里它们自己的 app（`com.easyplay.taptap.now` /
+`tv.bgm.Bangumi` / `com.tencent.weread` / `com.douban.frodo` / `com.gemd.iting`）；NeoDB 取自
+其**官网**图标 —— App Store 上只有第三方客户端（`Piecelet for NeoDB`），拿别人的作品当 NeoDB
+的标识不合适。脚本按 bundleId 校验返回值，对不上就报错，避免静默换上一个陌生 app 的图标。
+
+**统一规格**：一律缩到 **256×256 RGBA PNG**，命名 `icon_<slug>_color.png`，与既有 logo 资产
+同形，`iconAsset` 直接指过去即可。六件合计约 146 KB。
+
+- `assets/images/icon_{taptap,bangumi,neodb,weread,douban,ximalaya}_color.png`（新增）
+- `tool/brand_icons/fetch_brand_icons.py`（新增；`--check` 只报来源与尺寸，不写盘）
+- `lib/shared/theme/app_assets.dart`（+6 常量）
+- `lib/shared/constants/data_source_ui.dart`（6 处 `null` → 常量）
+
+**未做**：`DataSource.vgMaps` 仍无图标 —— 上游本来就没有，也没有官方素材可取。
+
+### D29 · 自托管 /proxy 活体扩到 WeRead 与豆瓣（2026-09-23）
+
+**问题**：D10 建立的活体脚本 `probe/selfhost_proxy_live.py` 只覆盖 Bangumi 与 NeoDB，**WeRead
+与豆瓣这两条国内链路从未跑过真实自托管**。豆瓣尤其只有签名单测钉着，「服务端签名能否真的换回
+豆瓣数据」一直没实证，而豆瓣正是 D12 起**零配置即可用**的那条链路。
+
+**结论：13/13 通过。** 两条新链路：
+
+- `GET /proxy/weread/web/search/global?keyword=三体&maxIdx=0&count=5` ⇒ 200，行数与直连相同、
+  **首条 bookId 一致**。判据刻意不比字节：WeRead 每次响应带新的 `sid` / `queryUid`，同一请求
+  连发两次直连的 sha256 就已经不同 —— 比字节只会得到一个恒假的失败。
+- `GET /proxy/douban/api/v2/search/book?q=三体&count=5&start=0` ⇒ 200、`total=269`、首条与直连
+  同一 `target.id`：**服务端 HMAC-SHA1 签名 + 内置公用密钥 + Frodo UA 替换三者同时成立的实证**。
+  直连那一腿由脚本用 Python 独立复刻签名（不调服务端代码），否则「两边一起错」会被当成通过。
+
+**顺带修正两处过时的地方**：① 原第 6 项拿豆瓣验「无密钥的源必须 503」，但豆瓣自 D12 起带内置
+公用密钥，这条**已不成立** —— 判据改用 IGDB（真正无默认密钥）；② 启动方式从
+`dart run server/bin/server.dart` 改为 `dart <绝对路径>/server.dart`：`dart run` 会先跑
+native-assets 钩子，在本沙箱必崩（`hooks_runner`），直接执行同一脚本则不受影响（package 解析
+仍从脚本路径找到 `server/.dart_tool`）。
+
 ---
 
 ## 📋 候选（下一步从这里挑）
@@ -910,7 +954,7 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
 | # | 事项 | 现状 | 影响 |
 |:-:|------|------|------|
 | B1 | Windows 桌面运行 | 缺 Visual Studio C++ 工作负载 + 插件符号链接受限 → `flutter run -d windows` 不可用 | 无法桌面预览；写码/分析/测试不受影响 |
-| B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` / `neodb.social` / `weread.qq.com` / `frodo.douban.com`，✅ **2026-09-20 闭环（→ D10）**。真实自托管实测 7/7：Bangumi GET / POST、NeoDB 搜索经代理返回与直连**逐字节相同**；豆瓣无密钥 503、非白名单目标 404 均在服务端拦下。护栏两条：`server/test/proxy_serve_integration_test.dart`、`test/core/api/proxy_round_trip_test.dart` | ✅ 已闭环 |
+| B2 | Web 端 /proxy 全链路验证 | 白名单已加 `api.bgm.tv` / `neodb.social` / `weread.qq.com` / `frodo.douban.com`，✅ **2026-09-20 闭环（→ D10）**。真实自托管实测 **7/7（2026-09-20）→ 13/13（2026-09-23，扩到 WeRead 与豆瓣两条国内链路，→ D29）**：Bangumi GET / POST、NeoDB 搜索经代理返回与直连**逐字节相同**；WeRead 与直连**同 bookId**；豆瓣由服务端签名后 200 且首条与直连一致；IGDB 无密钥 503、非白名单目标 404 均在服务端拦下。护栏两条：`server/test/proxy_serve_integration_test.dart`、`test/core/api/proxy_round_trip_test.dart` | ✅ 已闭环 |
 | B3 | 上游同步 | fork 基线 0.44.0；上游以周为节奏发版 | 每次同步人造裁决冲突清单见 PROJECT.md §3 |
 | B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB / **豆瓣**）；漫画 ✅（**Bangumi 书籍类型**）；**游戏 ✅（TapTap）；音乐 ✅（豆瓣音乐）；播客 ✅（喜马拉雅）** | **已闭环** —— 七类媒体均有免密钥中文源；仅漫画仍全境外托管（中文元数据可用，但路由需出境） |
 | B5 | **PSN 导入的匹配率低**（D24 少爷真机反馈） | 二轮已落地：**粘性误报已修**（"查询失败"只在该行问过的所有来源都抛异常时出现）+ **无凭据跳过 IGDB** + **别名匹配**（`GameNameQuery`，多拼写各走各的目录）。**剩下的一步在少爷手上**：配置 IGDB 密钥（Twitch 开发者后台免费）—— ① 现状是**残留令牌让"未配置"看起来像"已连接"**，警告横幅曾被藏住；② 纯 VR/主机独占（Zenith / Vegas Infinite / Epic Roller Coasters 这类）TapTap 没有、索尼也没给中文名，**只有 IGDB 能救** | **别名已做；等少爷配好 IGDB 再实测一轮**。若配好后中文名仍搜不动英文目录，再考虑 ③ PSN 自建目录（工作量等同 D16–D19 加源） |
@@ -931,3 +975,4 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
 12. `test/features/search/providers/source_region_default_test.dart` —— 钉死**默认开启集合**：书 = `douban` + `weread`、影 = `douban_movie`、动画 = 仅 `douban_anime`（D16 改）、漫画等无境内源的类型**一个都不关**。动 `_initiallyDisabledSourceIds` 的规则即炸（D15 加，D16 更新）。
 13. `test/core/api/api_error_extract_test.dart` —— **遍历 `lib/core/api` 下所有 `implements Exception` 的类，缺一即炸**。加源的 `XxxApiException` 必须同时进 `extractApiError`（`lib/core/api/api_error_extract.dart`）的 switch，否则搜索错误条会显示类名与 `(status: null)`、且 `detail` 丢失。D13 补 9 个：本次新增的 NeoDB / Bangumi / WeRead ＋ 上游本就漏的 Kitsu / MangaDex / MusicBrainz / Podcast Index / TheTVDB / TVMaze。
 14. `test/features/settings/content/credentials_content_error_section_test.dart` —— **钉住连接检查的两种失败形态**：`error` + `errorMessage == null` ⇒ 显示「请先填写凭据」；`error` + 有 message ⇒ 显示本地化引导语 + **原文技术详情**。把 `_buildErrorSection` 的判据从 `errorMessage != null` 改回单条件即炸（D27 加）。
+15. `tool/brand_icons/fetch_brand_icons.py` —— **重跑会覆盖** `assets/images/icon_{taptap,bangumi,neodb,weread,douban,ximalaya}_color.png`。新接国内源时在这里加一行（bundleId 或官网 URL）并重跑，否则新源的徽章又会落回 monogram；脚本按 bundleId 校验返回值，改名 / 下架的 app 会直接报错，而不是静默换上一张陌生图标（D28 加）。
