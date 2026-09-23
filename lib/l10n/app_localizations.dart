@@ -6398,6 +6398,60 @@ abstract class S {
   /// **'Interface text size, on top of the system setting'**
   String get settingsTextScaleSubtitle;
 
+  /// No description provided for @settingsFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Font'**
+  String get settingsFont;
+
+  /// No description provided for @settingsFontSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a font installed on this computer'**
+  String get settingsFontSubtitle;
+
+  /// No description provided for @settingsFontHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Picks a font already installed on this PC. Only the desktop app can read system fonts.'**
+  String get settingsFontHint;
+
+  /// No description provided for @settingsFontDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default (Inter)'**
+  String get settingsFontDefault;
+
+  /// No description provided for @settingsFontSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search fonts'**
+  String get settingsFontSearch;
+
+  /// No description provided for @settingsFontWeightCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} weights'**
+  String settingsFontWeightCount(int count);
+
+  /// No description provided for @settingsFontUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'System fonts are available in the desktop app only.'**
+  String get settingsFontUnavailable;
+
+  /// No description provided for @settingsFontLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading installed fonts…'**
+  String get settingsFontLoading;
+
+  /// No description provided for @settingsFontApplyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'That font could not be loaded'**
+  String get settingsFontApplyFailed;
+
   /// No description provided for @collectionEditHeroImage.
   ///
   /// In en, this message translates to:

@@ -1563,6 +1563,20 @@
   "settingsCardScaleSubtitle": "Tamaño de las tarjetas en las cuadrículas de colecciones",
   "settingsTextScale": "Tamaño del texto",
   "settingsTextScaleSubtitle": "Tamaño del texto de la interfaz, además del ajuste del sistema",
+  "settingsFont": "Fuente",
+  "settingsFontSubtitle": "Usa una fuente instalada en este equipo",
+  "settingsFontHint": "Elige una fuente ya instalada en este equipo. Solo la aplicación de escritorio puede leer las fuentes del sistema.",
+  "settingsFontDefault": "Predeterminada (Inter)",
+  "settingsFontSearch": "Buscar fuentes",
+  "settingsFontWeightCount": "{count} pesos",
+  "@settingsFontWeightCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsFontUnavailable": "Las fuentes del sistema solo están disponibles en la aplicación de escritorio.",
+  "settingsFontLoading": "Leyendo las fuentes instaladas…",
+  "settingsFontApplyFailed": "No se pudo cargar esa fuente",
   "collectionEditHeroImage": "Imagen de portada",
   "collectionEditHeroImageHint": "Recomendado 2560×1080 (21:9). El sujeto principal a la derecha — el lado izquierdo lo cubre el título y la parte inferior se funde con el fondo",
   "collectionEditHeroPick": "Elegir imagen",

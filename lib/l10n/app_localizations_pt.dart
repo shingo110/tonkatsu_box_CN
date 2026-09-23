@@ -3661,6 +3661,38 @@ class SPt extends S {
       'Tamanho do texto da interface, além da configuração do sistema';
 
   @override
+  String get settingsFont => 'Fonte';
+
+  @override
+  String get settingsFontSubtitle =>
+      'Usar uma fonte instalada neste computador';
+
+  @override
+  String get settingsFontHint =>
+      'Escolhe uma fonte já instalada neste PC. Apenas o aplicativo de desktop pode ler fontes do sistema.';
+
+  @override
+  String get settingsFontDefault => 'Padrão (Inter)';
+
+  @override
+  String get settingsFontSearch => 'Pesquisar fontes';
+
+  @override
+  String settingsFontWeightCount(int count) {
+    return '$count pesos';
+  }
+
+  @override
+  String get settingsFontUnavailable =>
+      'Fontes do sistema estão disponíveis apenas no aplicativo de desktop.';
+
+  @override
+  String get settingsFontLoading => 'Lendo as fontes instaladas…';
+
+  @override
+  String get settingsFontApplyFailed => 'Não foi possível carregar essa fonte';
+
+  @override
   String get collectionEditHeroImage => 'Imagem de capa';
 
   @override

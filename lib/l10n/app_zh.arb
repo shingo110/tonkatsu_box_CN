@@ -1558,6 +1558,20 @@
   "settingsCardScaleSubtitle": "收藏网格中卡片的大小",
   "settingsTextScale": "文字大小",
   "settingsTextScaleSubtitle": "界面文字大小，在系统设置基础上调整",
+  "settingsFont": "字体",
+  "settingsFontSubtitle": "使用本机已安装的字体",
+  "settingsFontHint": "从这台电脑上已安装的字体中选择。只有桌面端可以读取系统字体。",
+  "settingsFontDefault": "默认（Inter）",
+  "settingsFontSearch": "搜索字体",
+  "settingsFontWeightCount": "{count} 个字重",
+  "@settingsFontWeightCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "settingsFontUnavailable": "系统字体仅在桌面端可用。",
+  "settingsFontLoading": "正在读取本机字体…",
+  "settingsFontApplyFailed": "无法加载该字体",
   "collectionEditHeroImage": "封面图片",
   "collectionEditHeroImageHint": "推荐 2560×1080（21:9）。主体靠右——左侧被标题覆盖，底部融入背景",
   "collectionEditHeroPick": "选择图片",

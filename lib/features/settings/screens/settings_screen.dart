@@ -11,7 +11,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/api/ra_api.dart';
+import '../../../core/services/app_font_config.dart';
 import '../../../core/services/discord_rpc_service.dart';
+import '../../../core/services/system_fonts.dart';
 import '../../../core/services/whats_new_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/selfhost/server_credentials.dart';
@@ -34,6 +36,7 @@ import '../widgets/settings_tile.dart';
 import '../../welcome/screens/welcome_screen.dart';
 import 'cache_screen.dart';
 import 'credentials_screen.dart';
+import 'font_settings_screen.dart';
 import 'reachability_screen.dart';
 import 'proxy_settings_screen.dart';
 import 'credits_screen.dart';
@@ -574,6 +577,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onChangeEnd: notifier.setTextScale,
             ),
           ),
+          // Desktop only: reading the machine's font files is not something a
+          // browser or a phone build can do.
+          if (kSystemFontsAvailable)
+            SettingsTile(
+              leadingIcon: Icons.font_download_outlined,
+              leadingColor: _kAppearanceColor,
+              title: l.settingsFont,
+              subtitle: l.settingsFontSubtitle,
+              value: AppFontConfig.current.displayName,
+              onTap: () => _pushScreen(const FontSettingsScreen()),
+            ),
         ],
       ),
       gap,

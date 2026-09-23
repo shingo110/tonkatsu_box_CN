@@ -3681,6 +3681,38 @@ class SFr extends S {
       'Taille du texte de l’interface, en plus du réglage système';
 
   @override
+  String get settingsFont => 'Police';
+
+  @override
+  String get settingsFontSubtitle =>
+      'Utiliser une police installée sur cet ordinateur';
+
+  @override
+  String get settingsFontHint =>
+      'Choisit une police déjà installée sur ce PC. Seule l\'application de bureau peut lire les polices du système.';
+
+  @override
+  String get settingsFontDefault => 'Par défaut (Inter)';
+
+  @override
+  String get settingsFontSearch => 'Rechercher une police';
+
+  @override
+  String settingsFontWeightCount(int count) {
+    return '$count graisses';
+  }
+
+  @override
+  String get settingsFontUnavailable =>
+      'Les polices système ne sont disponibles que dans l\'application de bureau.';
+
+  @override
+  String get settingsFontLoading => 'Lecture des polices installées…';
+
+  @override
+  String get settingsFontApplyFailed => 'Impossible de charger cette police';
+
+  @override
   String get collectionEditHeroImage => 'Bannière';
 
   @override

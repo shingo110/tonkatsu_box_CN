@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../core/services/app_font_config.dart';
 import '../constants/platform_features.dart';
 import 'app_colors.dart';
 
@@ -9,8 +10,13 @@ import 'app_colors.dart';
 ///
 /// Every style uses the Inter font and [AppColors.textPrimary] by default.
 abstract final class AppTypography {
-  /// Default font family.
-  static const String fontFamily = 'Inter';
+  /// The family every style below renders in.
+  ///
+  /// Read per style, not baked in: replacing [AppFontConfig.current] and
+  /// rebuilding the tree re-fonts the whole UI. [defaultFontFamily] is the
+  /// bundled Inter; a user-selected system font arrives as a registration key
+  /// (`TK:<family>`), which the engine resolves to the bytes we registered.
+  static String get fontFamily => AppFontConfig.current.family;
 
   /// The base scale is dense, tuned for desktop; on phones it reads too small,
   /// so every style gets +1px.
