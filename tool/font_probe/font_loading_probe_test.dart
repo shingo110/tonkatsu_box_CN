@@ -2,13 +2,17 @@
 // render with it? Covers the two risks of the "pick a system font" feature:
 //   1. FontLoader from raw bytes -> a custom family name takes effect.
 //   2. .ttc collections (msyh.ttc etc.) load at all.
-// Delete after running.
+//
+// Run on a real Windows machine:
+//   flutter test tool/font_probe/font_loading_probe_test.dart
+// CI's `flutter test` only walks test/, so this file is never collected there.
 
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show FontLoader;
 import 'package:flutter_test/flutter_test.dart';
 
 /// Renders [text] with [family] and returns the pixel width of the first line.
@@ -49,7 +53,9 @@ Future<int> _inkedPixels(String text, String family, double size) async {
 
 Future<void> _register(String family, File file) async {
   final Uint8List bytes = await file.readAsBytes();
-  final FontLoader loader = FontLoader(family)..addFont(Future.value(bytes.buffer.asByteData()));
+  final ByteData data = bytes.buffer.asByteData();
+  final FontLoader loader = FontLoader(family);
+  loader.addFont(Future<ByteData>.value(data));
   await loader.load();
 }
 
@@ -68,7 +74,6 @@ void main() {
 
     // Baseline: an unregistered family falls back to the test default font.
     final double fallbackW = await _layoutWidth(latin, 'NoSuchFamilyZZZ', 32);
-    final int fallbackInk = await _inkedPixels(latin, 'NoSuchFamilyZZZ', 32);
 
     await _register('ProbeArial', File(arial));
     await _register('ProbeYaHei', File(yaheiTtc));
