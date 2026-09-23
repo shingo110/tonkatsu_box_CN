@@ -219,6 +219,8 @@
   "settingsChangelogEmpty": "暂无更新说明",
   "settingsCreditsLicensesSubtitle": "TMDB、IGDB、SteamGridDB、开源许可",
   "settingsError": "错误",
+  "credentialsMissingHint": "请先填写 Client ID 与 Client Secret",
+  "settingsErrorNetworkHint": "请求失败。请检查网络连接或代理设置（设置 → 数据源 → 代理设置）。技术详情：",
   "settingsAppLanguage": "应用语言",
   "settingsConnections": "连接",
   "settingsApiKeys": "API 密钥",

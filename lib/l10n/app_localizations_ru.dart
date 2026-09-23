@@ -592,6 +592,13 @@ class SRu extends S {
   String get settingsError => 'Ошибка';
 
   @override
+  String get credentialsMissingHint => 'Укажите Client ID и Client Secret';
+
+  @override
+  String get settingsErrorNetworkHint =>
+      'Запрос не выполнен. Проверьте сеть или прокси (Настройки → Источники данных → Прокси). Технические подробности:';
+
+  @override
   String get settingsAppLanguage => 'Язык приложения';
 
   @override

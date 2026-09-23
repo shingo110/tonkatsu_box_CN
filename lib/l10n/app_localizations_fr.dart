@@ -583,6 +583,14 @@ class SFr extends S {
   String get settingsError => 'Erreur';
 
   @override
+  String get credentialsMissingHint =>
+      'Saisissez le Client ID et le Client Secret';
+
+  @override
+  String get settingsErrorNetworkHint =>
+      'La requête a échoué. Vérifiez votre réseau ou le proxy (Paramètres → Sources → Proxy). Détails techniques :';
+
+  @override
   String get settingsAppLanguage => 'Langue de l\'application';
 
   @override

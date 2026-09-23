@@ -137,9 +137,9 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
         _buildPodcastIndexSection(settings, compact),
         const SizedBox(height: AppSpacing.md),
         _buildScreenScraperSection(settings, compact),
-        if (settings.errorMessage != null) ...<Widget>[
+        if (settings.connectionStatus == ConnectionStatus.error) ...<Widget>[
           const SizedBox(height: AppSpacing.md),
-          _buildErrorSection(settings.errorMessage!),
+          _buildErrorSection(settings.errorMessage),
         ],
       ],
     );
@@ -1000,14 +1000,24 @@ class _CredentialsContentState extends ConsumerState<CredentialsContent> {
     }
   }
 
-  Widget _buildErrorSection(String errorMessage) {
+  /// Renders the connect-check failure.
+  ///
+  /// A null [errorMessage] means the notifier bailed before any request went
+  /// out (credentials missing) — see `SettingsNotifier.verifyConnection`.
+  /// Otherwise the raw transport detail stays verbatim below a localized line
+  /// telling the user what to check next; those words are the only useful part
+  /// of a socket-level failure and are meant to be copied for a bug report.
+  Widget _buildErrorSection(String? errorMessage) {
+    final S l = S.of(context);
     return SettingsGroup(
-      title: S.of(context).settingsError,
+      title: l.settingsError,
       children: <Widget>[
         Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Text(
-            errorMessage,
+            errorMessage == null
+                ? l.credentialsMissingHint
+                : '${l.settingsErrorNetworkHint}\n\n$errorMessage',
             style: AppTypography.body.copyWith(color: AppColors.error),
           ),
         ),

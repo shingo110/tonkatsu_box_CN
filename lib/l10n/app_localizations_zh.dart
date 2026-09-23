@@ -532,6 +532,13 @@ class SZh extends S {
   String get settingsError => '错误';
 
   @override
+  String get credentialsMissingHint => '请先填写 Client ID 与 Client Secret';
+
+  @override
+  String get settingsErrorNetworkHint =>
+      '请求失败。请检查网络连接或代理设置（设置 → 数据源 → 代理设置）。技术详情：';
+
+  @override
   String get settingsAppLanguage => '应用语言';
 
   @override

@@ -580,6 +580,14 @@ class SEn extends S {
   String get settingsError => 'Error';
 
   @override
+  String get credentialsMissingHint =>
+      'Please enter Client ID and Client Secret';
+
+  @override
+  String get settingsErrorNetworkHint =>
+      'The request failed. Check your network or proxy settings (Settings → Data sources → Proxy). Technical details:';
+
+  @override
   String get settingsAppLanguage => 'App Language';
 
   @override

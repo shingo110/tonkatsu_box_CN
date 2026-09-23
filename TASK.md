@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：D1–D24 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）
+- **已完成**：D1–D27 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面**本地**构建（缺 VS C++ 工作负载）—— 但发布走 CI 的 `windows-2022` 运行器，不阻塞出包
 
@@ -47,7 +47,8 @@
 - [x] **在线活体验证**：关键词「巨人」→ 20 条 / 4 页；`metaTags:[TV] + 2013 + ≥8.0 + rank≤500 + sort=rank` → 7 条全中；详情解析出 `studios=[東京ムービー]`
 - [x] 既有护栏同步：`source_badge_test` 19→20 · `browse_provider_test` anime 可浏览源 2→3 · `search_sources_test` id 表补 `bangumi_anime`
 - [x] 新护栏：源层测试按名捕获 API 参数（规避 mocktail `captured` 顺序无保证），并校验命名参数超集
-- [ ] **未做**：Web 端 `/proxy/bangumi/**` 在线验证（需自托管环境）；Bangumi 频控上限摸查（连打 30 次全 200，未探到上限）
+- [x] Web 端 `/proxy/bangumi/**` 在线验证 —— **已由 D10 兑现**（真自托管实测 GET 与 POST 均 200，响应体 sha256 与直连相同）
+- [ ] **未做**：Bangumi 频控上限摸查（连打 30 次全 200，未探到上限）
 
 ---
 
@@ -86,7 +87,7 @@
 - [x] **在线活体验证**：「三体」→ 6 条 / 6 页；首条 `authors=[刘慈欣]`（英文重复名已剥除）、`rating=8.6`（未乘 2）、`pages=302`（字符串转数字）、ISBN-13、出版社、中文标签、豆瓣外链全部落地；第 2 页 11 条；短查询（1 字）不发请求
 - [x] 既有护栏同步：`source_badge_test` 20→21 · `search_sources_test` id 表补 `neodb` · `source_output_media_type_test` 补一条
 - [x] `browse_provider_test` 无需改（图书走 `textQueryOnly`，无按源浏览计数断言）
-- [ ] **未做**：Web 端 `/proxy/neodb/**` 在线验证（同 Bangumi，需自托管环境）
+- [x] Web 端 `/proxy/neodb/**` 在线验证 —— **已由 D10 兑现**（搜索经代理返回与直连逐字节相同）
 
 **本轮探测推翻的两条旧结论**（上一轮凭记忆写的，已被实测订正）：
 
@@ -146,7 +147,7 @@
 - [x] 被拒的调用**不污染 FIFO 队列**：连续两次被拒，第二次仍按自己的判断拒绝，而非继承上一个异常
 - [x] **域级共享**：`frodo` / `book` / `movie` 三个子域返回同一实例、同一预算
 - [x] 被动开闸：403 响应使下一次请求被冷却；500 不触发
-- [ ] **未做**：真实豆瓣接口的活体验证（须先有豆瓣源；且活体验证本身会消耗封禁额度，宜随 ISBN 源一并做）
+- [x] 真实豆瓣接口的活体验证 —— **已由 D7 兑现**（ISBN 精确命中 + 关键词搜索，4 发全 200，压在 10 发以内）
 
 **已知折衷（已记入 RULES §七之五）**：冷却文案挂在 `DioException.error` 上，但各源的 `handleDioException` 会把 DioException 包成自家异常并套通用措辞（全仓 112 处 `on DioException catch`），故**既有源**的用户主文案仍是通用措辞，精确原因落在「详情」面板的 `Cause:` 行。**新写的豆瓣源须在自己的 `handleDioException` 里优先判 `e.error is HostCooldownException` 并采用其文案。**
 
@@ -707,6 +708,80 @@ TLS 握手在慢节点上 5 秒到不了 ⇒ **永远超时** ⇒ "从来没有�
 且 `verifyConnection` 的 errorMessage 现在附带传输层 detail（socket refused / handshake failed / timed out），
 **让"授权域被墙"与"密钥填错"从此可区分**。测试：新增断言授权请求携带 30s 超时；11 处 post stub 补齐 options。
 
+### D26 · 桌面端界面字体（2026-09-23，起源：少爷问「能否换本机字体」）
+
+**结论**：此前无此功能 —— 全仓唯一字体族来源是 `AppTypography.fontFamily` 的硬编码 `'Inter'`，
+只打包 Inter 400/500/600/700。Windows 端可读本机字体库并应用，移动端不做。
+
+**两条路线**：A 直接用系统族名（零内存／依赖引擎匹配／本机不可验）；**B 读字体字节 + `FontLoader`
+注册自定义族名**（可控／可单测／能显示中文名／内存十几 MB）。**少爷定夺「走 B」**。
+
+**SFNT 二进制三个坑**（`font_binary_parser.dart`，纯 Dart 无 flutter/io 依赖）：
+
+1. `NameRecord` 在文件里是**紧打包 12 字节**（6×uint16），按内存对齐的 16 字节遍历 ⇒ 解出
+   `plat=12`／`lang=0x0403` 等非法值、族名大面积 `?`。
+2. `.ttc` 的表偏移是**绝对偏移**（相对文件头），加 face base 反而读垃圾。
+3. 语言码不能只认 `0x0409`，**`0x0000`（language-neutral）也要收**；中文名走 `0x0804`。
+   族名取 `id 16`（typographic）优先、`id 1` 回落，且 **Windows 记录缺失时用 Mac/Unicode 记录兜底**
+   （否则只有 Mac 名的字体会被整条丢弃）。
+
+**落地**（新增 8 个源文件 + 改 7 个既有文件）：`font_binary_parser.dart` · `system_font_models.dart`
+（JSON 序列化，破损数据回落默认字体）· `system_fonts{,_io,_web}.dart`（条件导入门面，Web stub 恒不可用）
+· `app_font_config.dart`（`AppFontConfig.current` 静态单例）· `font_provider.dart` ·
+`font_settings_screen.dart` · `font_binary_parser_test.dart`；改 `app_typography.dart`（`const` → getter）、
+`app.dart`（`ValueKey` 纳入字体 ⇒ 切换整树重建）、`main.dart`（首帧前恢复，字体被卸载则回落并遗忘）、
+`settings_provider.dart`、`settings_screen.dart`、6 份 arb + 7 个生成 dart、README/CHANGELOG。
+
+**两个设计决定**（与评估文档预估不同，有意）：① 字体**单立 `fontProvider`**，不进 `SettingsNotifier`；
+② 键**不进 `config_service.dart` 白名单** —— 字体是机器本地资源，不随 `.xcoll` 导出、不参与设备同步。
+
+**关键技术点**：注册名加 `TK:` 前缀避免与系统同族名混淆；`.ttc` 只取 face 0（故一文件一条目）；
+字体页每行直接用**系统族名**就地预览（零注册成本），只有选中才读字节注册。
+
+**本机验证**：解析器全量 `273 files / 779 faces / 779 parsed / 148 families / 1167 ms` **零丢弃**；
+模型序列化 21 断言全过；l10n 6 语言键齐平。**渲染生效本机验不了**（无 VS ⇒ `flutter run -d windows`
+不可用）⇒ 以 CI 为 lint／单测裁判，渲染交真机。
+
+**CI 首轮红**（`35852864117`）：Analyze 报 **12 处 lint**，全在「以为不用管」的地方 ——
+`system_fonts_web.dart` 从 io 版复制骨架留了 7 个 unused import；探针 `FontLoader` 漏 import
+`flutter/services.dart`；另有 `always_specify_types`／`unused_local_variable`／
+`unnecessary_nullable_for_final_variable_declarations`。
+**教训：`flutter analyze` 会扫 `tool/`** —— 探针放 `tool/` 只躲开 `flutter test` 的收集面，**躲不开 lint 关**。
+
+**发布**：PR #1 以 `--rebase` 合入（保 3 条 commit、main 线性）⇒ bump `pubspec` `0.44.2+43` ⇒
+推 `cn-v0.44.2`。run `35864881351` 五项全绿，三资产均为单 `cn` 前缀。**少爷真机验收通过**
+（设置 → 外观 → 界面字体，挑微软雅黑即时生效、重启保持）。
+
+### D27 · 连接检查的失败分流（2026-09-23，起源：D25 后验遗留的两处体验缺陷）
+
+D25 修好了「网络失败被误报成密钥无效」，但设置页底部的「错误」分区仍有两处毛病：**网络失败时甩的是
+英文 Dio 原话 + `URL:` / `Type:`，无下一步引导**；IGDB 的「未填凭据」提示又是**硬编码英文**
+（6 语言里唯一的英文）。
+
+**根因**：`SettingsNotifier` 没有 l10n 通道，`errorMessage` 只能塞字符串；而 UI 侧**只看
+`errorMessage != null`**，分不清「压根没发请求」与「请求失败了」。
+
+**修法（零新状态字段）**：把两种失败在**既有字段**上分开 ——
+
+- 缺凭据 ⇒ `connectionStatus: error` 且 **`errorMessage` 为 null**（原来塞英文串）；
+- 传输失败 ⇒ `connectionStatus: error` 且 `errorMessage = message + detail`（原样保留）。
+
+UI 侧据 `ConnectionStatus.error` 渲染，再按 `errorMessage` 是否为空分流：前者显示本地化的
+「请先填写 Client ID 与 Client Secret」，后者显示本地化引导语 + **逐字保留的英文技术详情**
+（socket refused／timed out 是唯一值得贴进 issue 的部分，故**故意不翻译**）。
+
+**刻意不动 core 层**：`buildApiErrorDetail` 的 `URL:` / `Status:` / `Type:` 标签有 **30+ 处 http_client
+调用**，且 `lib/core/api` 是纯 Dart 层（禁依赖 flutter l10n）⇒ 标签保持英文，改在 UI 层加中文引导外壳。
+
+**新 l10n 键 2 个**（6 语言齐平）：`credentialsMissingHint` · `settingsErrorNetworkHint`。
+**本机 l10n 生成可用**（详见护栏条目下的注）：`flutter gen-l10n` 退出码为 1 但**产物已写好**
+（崩溃发生在命令执行完之后的统计上报），随后 `dart format` 一次收敛，diff 只剩 69 行纯新增。
+
+**新增护栏**：`test/features/settings/content/credentials_content_error_section_test.dart` —— 起真 notifier
+驱动真 `CredentialsContent`，分别钉住两种形态（缺凭据 ⇒ 提示文案；传输失败 ⇒ 本地化引导 + 原文详情）。
+
+---
+
 ## 📋 候选（下一步从这里挑）
 
 > 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > Bangumi 漫画 ✅ > 优酷/爱奇艺**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
@@ -781,7 +856,11 @@ TLS 握手在慢节点上 5 秒到不了 ⇒ **永远超时** ⇒ "从来没有�
 
 ---
 
-### T6 · 原生端网络代理设置（待少爷定夺）
+### T6 · 原生端网络代理设置（✅ 2026-09-22 落地，A 方案）
+
+> **已落地**：应用内 HTTP/SOCKS 代理设置（`AppHttpOverrides.findProxy` + `AppProxyConfig`），
+> 设置 → 数据源 → 代理设置。少爷真机验收通过：开 FlClash 本地端口 → 填 `127.0.0.1:7890` →
+> IGDB 验证连接成功、连通性自检 22 源全恢复。**下方的合规评估与四条红线仍是本功能的约束依据**，保留。
 
 D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可达** —— 而这是物理事实，代码改不动。
 但可以让 App 自己会走代理。
@@ -848,6 +927,7 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
 8. `lib/core/api/episode_source/tv_episode_source.dart` —— **影视源必须给 `tvEpisodeSourceResolverProvider` 加一支**（它是 `_ => tmdb` 兜底）。漏了不报任何错，但 `TvShowCacheWarmer` 与 `_refreshedTvShow` 会拿新源的 id 去 TMDB 查，**可能把不相干的剧写进缓存**。
 9. **影视的 `CollectionItem.nativeId` 恒为 null**（该 getter 只对 book / audio 生效）—— 刷新与 `.xcoll` 导入一律用 `externalId`。
 10. `test/features/welcome/widgets/welcome_step_sources_test.dart` —— 向导的**输入框数**与**"获取密钥"链接数**，**按 `kDataSourceCatalog` 派生**（需密钥源数，双字段源另加）。加**需密钥**源必炸；反过来，某源若漏在向导 `_KeyEditor` 的 switch 里，这条也会炸 —— D9 时代它硬编码数字，所以漏了豆瓣照样绿（D11 根治）。双字段源集合现为 **igdb / podcastIndex** 两个（豆瓣 D12 退出）。
-12. `test/shared/constants/source_catalog_region_test.dart` —— **钉死「境内源恰好是豆瓣 + 微信读书」**，并要求每行的 `apiHost` 非空且唯一。新源没分类或分类写反即炸（D15 加）。
-13. `test/features/search/providers/source_region_default_test.dart` —— 钉死**默认开启集合**：书 = `douban` + `weread`、影 = `douban_movie`、动画 3 个全开（无境内源则一个都不关）。动 `_initiallyDisabledSourceIds` 的规则即炸（D15 加）。
-11. `test/core/api/api_error_extract_test.dart` —— **遍历 `lib/core/api` 下所有 `implements Exception` 的类，缺一即炸**。加源的 `XxxApiException` 必须同时进 `extractApiError`（`lib/core/api/api_error_extract.dart`）的 switch，否则搜索错误条会显示类名与 `(status: null)`、且 `detail` 丢失。D13 补 9 个：本次新增的 NeoDB / Bangumi / WeRead ＋ 上游本就漏的 Kitsu / MangaDex / MusicBrainz / Podcast Index / TheTVDB / TVMaze。
+11. `test/shared/constants/source_catalog_region_test.dart` —— **钉死「境内源恰好是豆瓣 + 微信读书」**，并要求每行的 `apiHost` 非空且唯一。新源没分类或分类写反即炸（D15 加）。
+12. `test/features/search/providers/source_region_default_test.dart` —— 钉死**默认开启集合**：书 = `douban` + `weread`、影 = `douban_movie`、动画 = 仅 `douban_anime`（D16 改）、漫画等无境内源的类型**一个都不关**。动 `_initiallyDisabledSourceIds` 的规则即炸（D15 加，D16 更新）。
+13. `test/core/api/api_error_extract_test.dart` —— **遍历 `lib/core/api` 下所有 `implements Exception` 的类，缺一即炸**。加源的 `XxxApiException` 必须同时进 `extractApiError`（`lib/core/api/api_error_extract.dart`）的 switch，否则搜索错误条会显示类名与 `(status: null)`、且 `detail` 丢失。D13 补 9 个：本次新增的 NeoDB / Bangumi / WeRead ＋ 上游本就漏的 Kitsu / MangaDex / MusicBrainz / Podcast Index / TheTVDB / TVMaze。
+14. `test/features/settings/content/credentials_content_error_section_test.dart` —— **钉住连接检查的两种失败形态**：`error` + `errorMessage == null` ⇒ 显示「请先填写凭据」；`error` + 有 message ⇒ 显示本地化引导语 + **原文技术详情**。把 `_buildErrorSection` 的判据从 `errorMessage != null` 改回单条件即炸（D27 加）。

@@ -935,9 +935,13 @@ class SettingsNotifier extends Notifier<SettingsState> {
 
   Future<bool> verifyConnection() async {
     if (!state.hasCredentials) {
+      // No message: this notifier has no l10n access. `error` with a null
+      // `errorMessage` is the contract the settings UI reads as "credentials
+      // missing" and renders from `credentialsMissingHint`; every other
+      // `error` write below carries a transport detail instead.
       state = state.copyWith(
         connectionStatus: ConnectionStatus.error,
-        errorMessage: 'Please enter Client ID and Client Secret',
+        clearError: true,
       );
       return false;
     }

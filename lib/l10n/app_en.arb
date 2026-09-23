@@ -239,6 +239,8 @@
   "settingsChangelogEmpty": "No release notes available",
   "settingsCreditsLicensesSubtitle": "TMDB, IGDB, SteamGridDB, open-source licenses",
   "settingsError": "Error",
+  "credentialsMissingHint": "Please enter Client ID and Client Secret",
+  "settingsErrorNetworkHint": "The request failed. Check your network or proxy settings (Settings → Data sources → Proxy). Technical details:",
   "settingsAppLanguage": "App Language",
   "settingsConnections": "Connections",
   "settingsApiKeys": "API Keys",
