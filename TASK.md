@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：D1–D30 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）
+- **已完成**：D1–D31 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面**本地**构建（缺 VS C++ 工作负载）—— 但发布走 CI 的 `windows-2022` 运行器，不阻塞出包
 
@@ -853,6 +853,38 @@ weread 15008 / douban 12186 / ximalaya 10905）；Windows `tonkatsu_box.exe` 版
 
 ---
 
+### D31 · 第三套配色主题 PS1 复古灰（2026-09-26，起源：少爷「新增一套新配色的主题」）
+
+**先评估后动工**。评估（`tonkatsu_box_第三套主题评估.md`）的核心发现：本仓库「一套主题 = 一个
+palette 文件」的机关在 Sakura 那一轮就已建好 —— `AppPalette` 是唯一的色值数据源（41 个颜色角色），
+`AppColors` 全是读静态 `AppColors.palette` 的 getter，切主题靠 `MaterialApp` 的 `ValueKey` 整树重挂。
+调色板外的硬编码色已收敛干净：全 `lib/` 真·Flutter `Colors.*` 仅 67 处（`transparent` 59 / `white` 6 /
+`black` 2），硬编码 `Color(0x…)` 仅 56 处且几乎全是品牌识别色（PS 蓝 / Nintendo 红 / RA 金 /
+Discord blurple / 标签取色器预设），属**故意**与主题无关。两处 `switch` 都是穷尽性枚举表达式 ⇒
+加枚举成员忘改即编译失败，改动点由编译器点出来，不靠记性。
+
+**配色撞上一条硬物理**（评估时算出、落地时照办）：`#ADADAD` 是中亮灰（相对亮度 0.42），四色标志在其
+上作细线/小图标时对比度只有 0.93–2.25（黄 `#F3C300` 仅 **0.93**，等于隐形），作**填充块**却够用
+（白字 on 蓝 5.30 / 白字 on 红 5.04）。故定法：**蓝、红保留色卡原值**用于填充（主按钮、计数徽章）；
+**黄、绿按色相压暗**用于图标与文字（黄 → `#8A6100`、绿 → `#007A70`、红细线版 → `#C4001F`）。
+每个压暗值在 `ps1_palette.dart` 内标注了原值与实测对比度，日后审计不必重算。
+
+**纹理机制查实**：`background_tile*.png` 不是图，而是 **512×512「全图单色 + alpha 蒙版」**；现有两张
+纹理**共用同一张蒙版**（图案是散落的日文假名与汉字轮廓，辨得出 カ / ッ / 井 / 当），Sakura 当年就是
+「同蒙版换 tint」。PS1 照办，tint `#6E6E6E`。新工具 `tool/theme_tiles/make_theme_tile.py` **已用复现
+已提交的 sakura 纹理做忠实性证明**（像素级一致且不写盘）。
+
+**改动面**：新 palette 1 个 + 注册点 4 处（`app_palette.dart` / `app_theme_id.dart` /
+`settings_screen.dart` / `app_assets.dart`）+ 纹理 1 张 + 生成工具 1 个 + 护栏测试 1 个 + 6 份 arb
+及 7 个生成物（`settingsThemePs1`）。**未动任何 widget、未碰 `packages/core`、无 schema 变更**。
+另新增候选 **T7**（`collection_table_view.dart` 硬编码 `Brightness.dark`，浅色主题下集合表格仍为深色）。
+
+**发版**：`pubspec.yaml` bump 到 `0.44.4+45`（`docs` 一笔在前、`release:` 一笔在后，annotated tag 显式
+指向 `release:` 提交），推 `cn-v0.44.4` 触发 `release-cn.yml` 出 Windows / Android / Web 三端。
+
+**顺带修正**：README 第 27 行仍写着「本分支尚未发布任何构建产物，首个 Release 尚未推送」，与已发四版
+（`cn-v0.44.0`–`cn-v0.44.3`）的事实不符，本版一并改为指向 Releases 页；功能总览与平台表补「界面主题」行。
+
 ## 📋 候选（下一步从这里挑）
 
 > 接入优先序共识：**Bangumi ✅ > NeoDB 图书 ✅ > NeoDB 影视 ✅ > 微信读书 ✅ > 豆瓣（图书 ISBN 直查）✅ > 豆瓣影视 ✅ > Bangumi 漫画 ✅ > 优酷/爱奇艺**。豆瓣元数据最全但引入签名 + 403 两个新变量，且 NeoDB 已是豆瓣数据的免密钥代理，故一直排在最后；其**图书线已于 D7、影视线已于 D8 落地**（两个新变量都已验证：403 退避 D6 + 签名 D7）。豆瓣线至此**全部完成**。
@@ -986,6 +1018,13 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
 | B4 | 中文数据源覆盖 | 动画 ✅（Bangumi）；图书 ✅（NeoDB / 微信读书 / **豆瓣**）；电影 / 剧集 ✅（NeoDB / **豆瓣**）；漫画 ✅（**Bangumi 书籍类型**）；**游戏 ✅（TapTap）；音乐 ✅（豆瓣音乐）；播客 ✅（喜马拉雅）** | **已闭环** —— 七类媒体均有免密钥中文源；仅漫画仍全境外托管（中文元数据可用，但路由需出境） |
 | B5 | **PSN 导入的匹配率**（D24 少爷真机反馈） | 二轮已落地：**粘性误报已修**（「查询失败」只在该行问过的所有来源都抛异常时出现）+ **无凭据跳过 IGDB** + **别名匹配**（`GameNameQuery`，多拼写各走各的目录）。**最后一环「配 IGDB 密钥」已于 2026-09-23 由少爷完成并确认可用（→ D30）** | ✅ **已闭环（2026-09-23）** —— 纯 VR／主机独占的拉丁名自此由 IGDB 目录接管；令牌约 60 天有效，两月借一次网续令牌即可 |
 
+### T7. 集合表格的浅色主题适配
+
+`lib/features/collection/widgets/collection_table/collection_table_view.dart` 硬编码了
+`ShadThemeData(brightness: Brightness.dark)`（TrinaGrid 的 shadcn 弹窗需要 ShadTheme 才能运行），
+⇒ 浅色主题（樱花 / PS1 复古灰）下集合表格仍呈现深色外观，与当前主题脱节。修法是让该 ShadThemeData
+的 brightness 跟随当前 `AppPalette.brightness`。**起源**：D31 评估时发现，Sakura 已受影响。
+
 ## 护栏速查（改代码前看一眼，防炸）
 
 1. `test/shared/widgets/source_badge_test.dart` —— `DataSource.values.length` 硬编码（现 **25**），加枚举即炸。
@@ -1003,3 +1042,7 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
 13. `test/core/api/api_error_extract_test.dart` —— **遍历 `lib/core/api` 下所有 `implements Exception` 的类，缺一即炸**。加源的 `XxxApiException` 必须同时进 `extractApiError`（`lib/core/api/api_error_extract.dart`）的 switch，否则搜索错误条会显示类名与 `(status: null)`、且 `detail` 丢失。D13 补 9 个：本次新增的 NeoDB / Bangumi / WeRead ＋ 上游本就漏的 Kitsu / MangaDex / MusicBrainz / Podcast Index / TheTVDB / TVMaze。
 14. `test/features/settings/content/credentials_content_error_section_test.dart` —— **钉住连接检查的两种失败形态**：`error` + `errorMessage == null` ⇒ 显示「请先填写凭据」；`error` + 有 message ⇒ 显示本地化引导语 + **原文技术详情**。把 `_buildErrorSection` 的判据从 `errorMessage != null` 改回单条件即炸（D27 加）。
 15. `tool/brand_icons/fetch_brand_icons.py` —— **重跑会覆盖** `assets/images/icon_{taptap,bangumi,neodb,weread,douban,ximalaya}_color.png`。新接国内源时在这里加一行（bundleId 或官网 URL）并重跑，否则新源的徽章又会落回 monogram；脚本按 bundleId 校验返回值，改名 / 下架的 app 会直接报错，而不是静默换上一张陌生图标（D28 加）。
+16. `test/shared/theme/theme_palette_guard_test.dart` —— **对全部主题生效**：每个 `AppThemeId` 的
+    `tileAsset` 必须真在 `pubspec.yaml` 的 assets 树里、三套调色板两两互异、九组关键前景/背景
+    （textPrimary/textSecondary/textTertiary × 背景三档、onBrand/brand、onBadge/badge、onOverlay/scrim）
+    对比度不低于下限。**加第四套主题若漏配纹理或对比度不达标即炸**（D31 加）。

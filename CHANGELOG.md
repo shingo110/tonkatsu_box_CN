@@ -12,6 +12,32 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — a third palette theme: PS1 retro grey
+
+The app shipped two palettes (dark, sakura); both are re-tints of one set of
+semantic tokens, so a third — the grey case and four-colour mark of the 1994
+PlayStation — is data plus registration rather than new machinery: one palette
+file, four registration points, one texture and one l10n key per locale. No
+widget, no `packages/core`, no schema change.
+
+The four-colour mark does not survive contact with a mid-light grey as equal
+peers: on `#ADADAD` (relative luminance 0.42) the yellow sits at a contrast ratio
+of 0.93 and the green at 1.26, which is invisible for a hairline glyph. Blue and
+red keep their catalogue values and are used as fills (white on `#2E6DB4` = 5.30,
+white on `#DF0024` = 5.04); yellow and green are darkened along their hue for
+icon and text duty (`#8A6100`, `#007A70`, and `#C4001F` for the hairline red).
+Every darkened value carries its source value and measured ratio in a comment, so
+a later audit does not have to recompute them.
+
+- `lib/shared/theme/palettes/ps1_palette.dart`: the 41 colour roles.
+- `lib/shared/theme/app_palette.dart`, `app_theme_id.dart`: `ps1` alias and enum member.
+- `lib/features/settings/screens/settings_screen.dart`: `_themeLabel` arm.
+- `lib/shared/theme/app_assets.dart`: `backgroundTilePs1`.
+- `assets/images/background_tile_ps1.png`: the shared alpha mask, re-tinted `#6E6E6E`.
+- `tool/theme_tiles/make_theme_tile.py`: the regenerator; `--check` compares without writing.
+- `test/shared/theme/theme_palette_guard_test.dart`: covers every palette — tile present,
+  palettes pairwise distinct, nine contrast floors.
+
 ## [cn] Added — brand marks for the six domestic sources
 
 TapTap, Bangumi, NeoDB, WeRead, Douban and Ximalaya shipped without artwork, so
