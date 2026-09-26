@@ -4,7 +4,8 @@ import 'app_palette.dart';
 /// never rename.
 enum AppThemeId {
   dark('dark'),
-  sakura('sakura');
+  sakura('sakura'),
+  ps1('ps1');
 
   const AppThemeId(this.id);
 
@@ -13,6 +14,7 @@ enum AppThemeId {
   AppPalette get palette => switch (this) {
         AppThemeId.dark => AppPalette.dark,
         AppThemeId.sakura => AppPalette.sakura,
+        AppThemeId.ps1 => AppPalette.ps1,
       };
 
   static AppThemeId fromId(String? id) => AppThemeId.values.firstWhere(

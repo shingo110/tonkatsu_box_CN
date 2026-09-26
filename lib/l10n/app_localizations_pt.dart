@@ -641,6 +641,9 @@ class SPt extends S {
   String get settingsThemeSakura => 'Sakura';
 
   @override
+  String get settingsThemePs1 => 'PS1 Retrô';
+
+  @override
   String get settingsAppLanguageSubtitle => 'Idioma da interface';
 
   @override

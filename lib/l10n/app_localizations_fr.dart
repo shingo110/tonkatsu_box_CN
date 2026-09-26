@@ -643,6 +643,9 @@ class SFr extends S {
   String get settingsThemeSakura => 'Sakura';
 
   @override
+  String get settingsThemePs1 => 'PS1 Rétro';
+
+  @override
   String get settingsAppLanguageSubtitle => 'Langue de l\'interface';
 
   @override

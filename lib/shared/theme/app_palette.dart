@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'palettes/dark_palette.dart';
+import 'palettes/ps1_palette.dart';
 import 'palettes/sakura_palette.dart';
 
 export 'palettes/dark_palette.dart';
+export 'palettes/ps1_palette.dart';
 export 'palettes/sakura_palette.dart';
 
 /// Widgets never read a palette directly — they go through [AppColors].
@@ -57,6 +59,8 @@ class AppPalette {
   static const AppPalette dark = darkPalette;
 
   static const AppPalette sakura = sakuraPalette;
+
+  static const AppPalette ps1 = ps1Palette;
 
   final Brightness brightness;
 
