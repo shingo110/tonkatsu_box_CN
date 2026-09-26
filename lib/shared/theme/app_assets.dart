@@ -7,6 +7,10 @@ abstract final class AppAssets {
   static const String backgroundTileSakura =
       'assets/images/background_tile_sakura.png';
 
+  /// [backgroundTile] tinted to a recessed PS1 shell grey.
+  static const String backgroundTilePs1 =
+      'assets/images/background_tile_ps1.png';
+
   static const String iconDiscord = 'assets/images/icon_discord.svg';
   static const String iconDiscordColor = 'assets/images/icon_discord_color.png';
 

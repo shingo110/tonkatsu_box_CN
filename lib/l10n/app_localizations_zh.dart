@@ -589,6 +589,9 @@ class SZh extends S {
   String get settingsThemeSakura => '樱花';
 
   @override
+  String get settingsThemePs1 => 'PS1 复古灰';
+
+  @override
   String get settingsAppLanguageSubtitle => '界面语言';
 
   @override

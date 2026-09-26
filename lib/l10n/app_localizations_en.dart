@@ -638,6 +638,9 @@ class SEn extends S {
   String get settingsThemeSakura => 'Sakura';
 
   @override
+  String get settingsThemePs1 => 'PS1 Retro';
+
+  @override
   String get settingsAppLanguageSubtitle => 'Interface language';
 
   @override

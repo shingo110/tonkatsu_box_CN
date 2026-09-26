@@ -1197,6 +1197,12 @@ abstract class S {
   /// **'Sakura'**
   String get settingsThemeSakura;
 
+  /// No description provided for @settingsThemePs1.
+  ///
+  /// In en, this message translates to:
+  /// **'PS1 Retro'**
+  String get settingsThemePs1;
+
   /// No description provided for @settingsAppLanguageSubtitle.
   ///
   /// In en, this message translates to:
