@@ -879,8 +879,20 @@ Discord blurple / 标签取色器预设），属**故意**与主题无关。两�
 及 7 个生成物（`settingsThemePs1`）。**未动任何 widget、未碰 `packages/core`、无 schema 变更**。
 另新增候选 **T7**（`collection_table_view.dart` 硬编码 `Brightness.dark`，浅色主题下集合表格仍为深色）。
 
-**发版**：`pubspec.yaml` bump 到 `0.44.4+45`（`docs` 一笔在前、`release:` 一笔在后，annotated tag 显式
-指向 `release:` 提交），推 `cn-v0.44.4` 触发 `release-cn.yml` 出 Windows / Android / Web 三端。
+**发版**：`pubspec.yaml` bump 到 `0.44.4+45`（`docs` 一笔在前 `f8fdc970`、`release:` 一笔在后 `1cdc752a`，
+annotated tag `cn-v0.44.4` 显式指向 `1cdc752a`），推 tag 触发 `release-cn.yml`：**run `36250969836` 五项
+全绿**（Quality Gate / Build Windows / Build Web / Build Android / Create GitHub Release），资产三件
+`tonkatsu-box-cn-v0.44.4-{windows.zip, android.apk, web.tar.gz}`。main 的两次 Tests（`ba0b1b21` /
+`1cdc752a`）均 success。合入走 PR #4 `--rebase --delete-branch`，main 至 `ba0b1b21`。
+
+**包内容核验**：`cn-v0.44.3` 与 `0.44.4` 只差一张纹理、一个 palette 源文件与一个文案键，陈旧产物在体积上
+几乎无差，故逐包解出核对（可重跑脚本 `probe/verify_release_v0444.py`）—— 三端均含
+`background_tile_ps1.png` 且 **sha256 与仓库一致**（`11f6f613…`）；Windows `tonkatsu_box.exe` 版本资源为
+`0.44.4+45` 且**不含**旧串 `0.44.3+44`；六品牌图标仍在。另做端到端核验：主题名确实进了编译产物 ——
+APK / Windows 的 `libapp.so` / `app.so` 中 `PS1 复古灰` 以 **UTF-16LE** 存在（非 Latin-1 字符串在 AOT
+中不走 UTF-8），Web 的 `main.dart.js` 中为转义串 `PS1 \u590d\u53e4\u7070`。
+sha256：apk `6911ccc0…`（100,059,557 B）/ win `9df2fae4…`（25,431,876 B）/ web `6a915a4a…`（23,004,133 B）；
+APK 签名 v2 验通（`apksigner verify --verbose`）。
 
 **顺带修正**：README 第 27 行仍写着「本分支尚未发布任何构建产物，首个 Release 尚未推送」，与已发四版
 （`cn-v0.44.0`–`cn-v0.44.3`）的事实不符，本版一并改为指向 Releases 页；功能总览与平台表补「界面主题」行。
