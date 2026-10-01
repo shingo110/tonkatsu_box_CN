@@ -155,7 +155,7 @@ void main() {
         'hasMore': 1,
       });
 
-      final int page = kWeReadMaxOffset ~/ 20 + 1;
+      const int page = kWeReadMaxOffset ~/ 20 + 1;
 
       final (List<Book> _, bool hasMore, int totalPages) =
           await api.searchBooks(query: '三体', page: page);
