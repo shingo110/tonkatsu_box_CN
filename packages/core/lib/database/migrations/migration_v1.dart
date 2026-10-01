@@ -13,7 +13,7 @@ class MigrationV1 extends Migration {
   @override
   Future<void> migrate(Database db) async {
     await db.execute('''
-      CREATE TABLE platforms (
+      CREATE TABLE IF NOT EXISTS platforms (
         id INTEGER PRIMARY KEY,
         name TEXT NOT NULL,
         abbreviation TEXT,

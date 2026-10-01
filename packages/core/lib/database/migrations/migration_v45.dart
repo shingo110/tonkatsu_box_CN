@@ -14,6 +14,8 @@ class MigrationV45 extends Migration {
 
   @override
   Future<void> migrate(Database db) async {
-    await DatabaseSchema.createTrackedReleasesTable(db);
+    if (!await Migration.tableExists(db, 'tracked_releases')) {
+      await DatabaseSchema.createTrackedReleasesTable(db);
+    }
   }
 }

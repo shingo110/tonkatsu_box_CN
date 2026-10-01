@@ -12,6 +12,8 @@ class MigrationV6 extends Migration {
 
   @override
   Future<void> migrate(Database db) async {
-    await DatabaseSchema.createCanvasConnectionsTable(db);
+    if (!await Migration.tableExists(db, 'canvas_connections')) {
+      await DatabaseSchema.createCanvasConnectionsTable(db);
+    }
   }
 }

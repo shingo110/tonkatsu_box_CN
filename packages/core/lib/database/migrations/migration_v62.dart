@@ -20,6 +20,9 @@ class MigrationV62 extends Migration {
   }
 
   Future<void> _rebuildMoviesCache(Database db) async {
+    if (await Migration.tableExists(db, 'movies_cache_old')) {
+      return;
+    }
     await db.execute('ALTER TABLE movies_cache RENAME TO movies_cache_old');
     await db.execute('''
       CREATE TABLE movies_cache (

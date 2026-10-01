@@ -13,8 +13,14 @@ class MigrationV7 extends Migration {
 
   @override
   Future<void> migrate(Database db) async {
-    await DatabaseSchema.createMoviesCacheTable(db);
-    await DatabaseSchema.createTvShowsCacheTable(db);
-    await DatabaseSchema.createTvSeasonsCacheTable(db);
+    if (!await Migration.tableExists(db, 'movies_cache')) {
+      await DatabaseSchema.createMoviesCacheTable(db);
+    }
+    if (!await Migration.tableExists(db, 'tv_shows_cache')) {
+      await DatabaseSchema.createTvShowsCacheTable(db);
+    }
+    if (!await Migration.tableExists(db, 'tv_seasons_cache')) {
+      await DatabaseSchema.createTvSeasonsCacheTable(db);
+    }
   }
 }

@@ -14,6 +14,14 @@ class MigrationV17 extends Migration {
 
   @override
   Future<void> migrate(Database db) async {
+    // A rewound or wiped `user_version` replays this migration when the
+    // rebuild has already landed. `collection_items_new` is the marker of the
+    // finished state — skipping keeps the replay from crashing on
+    // `DROP TABLE collection_items` of an already-renamed table.
+    if (await Migration.tableExists(db, 'collection_items_new')) {
+      return;
+    }
+
     await db.execute('''
       CREATE TABLE collection_items_new (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,9 +44,21 @@ class MigrationV17 extends Migration {
       )
     ''');
 
+    // Copy with an explicit column list so a future re-order or added column
+    // in `collection_items` can't silently map into the wrong column.
     await db.execute('''
-      INSERT INTO collection_items_new
-      SELECT * FROM collection_items
+      INSERT INTO collection_items_new (
+        id, collection_id, media_type, external_id, platform_id,
+        current_season, current_episode, status, author_comment,
+        user_comment, added_at, sort_order, started_at, completed_at,
+        last_activity_at, user_rating
+      )
+      SELECT
+        id, collection_id, media_type, external_id, platform_id,
+        current_season, current_episode, status, author_comment,
+        user_comment, added_at, sort_order, started_at, completed_at,
+        last_activity_at, user_rating
+      FROM collection_items
     ''');
 
     await db.execute('DROP TABLE collection_items');

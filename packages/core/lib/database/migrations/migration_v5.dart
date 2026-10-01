@@ -12,7 +12,11 @@ class MigrationV5 extends Migration {
 
   @override
   Future<void> migrate(Database db) async {
-    await DatabaseSchema.createCanvasItemsTable(db);
-    await DatabaseSchema.createCanvasViewportTable(db);
+    if (!await Migration.tableExists(db, 'canvas_items')) {
+      await DatabaseSchema.createCanvasItemsTable(db);
+    }
+    if (!await Migration.tableExists(db, 'canvas_viewport')) {
+      await DatabaseSchema.createCanvasViewportTable(db);
+    }
   }
 }

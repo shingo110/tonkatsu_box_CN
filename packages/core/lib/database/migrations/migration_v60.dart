@@ -23,6 +23,9 @@ class MigrationV60 extends Migration {
   // Rebuild for the composite PK; copy rows as source='anilist' and move the
   // old `source` (source material) into `source_material`.
   Future<void> _rebuildAnimeCache(Database db) async {
+    if (await Migration.tableExists(db, 'anime_cache_old')) {
+      return;
+    }
     await db.execute('ALTER TABLE anime_cache RENAME TO anime_cache_old');
     await db.execute('''
       CREATE TABLE anime_cache (

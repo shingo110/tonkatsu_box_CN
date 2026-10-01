@@ -15,7 +15,7 @@ class MigrationV8 extends Migration {
   @override
   Future<void> migrate(Database db) async {
     await db.execute('''
-      CREATE TABLE collection_items (
+      CREATE TABLE IF NOT EXISTS collection_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         collection_id INTEGER NOT NULL,
         media_type TEXT NOT NULL DEFAULT 'game',
@@ -32,7 +32,7 @@ class MigrationV8 extends Migration {
       )
     ''');
     await db.execute('''
-      CREATE INDEX idx_collection_items_collection
+      CREATE INDEX IF NOT EXISTS idx_collection_items_collection
       ON collection_items(collection_id)
     ''');
     await _migrateCollectionGamesToItems(db);

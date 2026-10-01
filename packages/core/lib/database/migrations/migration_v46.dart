@@ -14,6 +14,8 @@ class MigrationV46 extends Migration {
 
   @override
   Future<void> migrate(Database db) async {
-    await DatabaseSchema.createCalendarEntriesTable(db);
+    if (!await Migration.tableExists(db, 'calendar_entries')) {
+      await DatabaseSchema.createCalendarEntriesTable(db);
+    }
   }
 }

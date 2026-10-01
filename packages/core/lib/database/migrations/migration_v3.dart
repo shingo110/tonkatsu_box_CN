@@ -17,7 +17,7 @@ class MigrationV3 extends Migration {
     await DatabaseSchema.createCollectionsTable(db);
 
     await db.execute('''
-      CREATE TABLE collection_games (
+      CREATE TABLE IF NOT EXISTS collection_games (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         collection_id INTEGER NOT NULL,
         igdb_id INTEGER NOT NULL,

@@ -13,7 +13,7 @@ class MigrationV36 extends Migration {
   @override
   Future<void> migrate(Database db) async {
     await db.execute('''
-      CREATE TABLE mood_grids (
+      CREATE TABLE IF NOT EXISTS mood_grids (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         rows INTEGER NOT NULL DEFAULT 1,

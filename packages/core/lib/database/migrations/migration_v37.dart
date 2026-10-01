@@ -22,7 +22,7 @@ class MigrationV37 extends Migration {
     // COALESCE pins NULL to -1 so two NULL platform_ids collide on upsert;
     // bare NULLs are treated as distinct in SQLite unique indexes.
     await db.execute('''
-      CREATE UNIQUE INDEX idx_tracker_game_data_unique
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_tracker_game_data_unique
       ON tracker_game_data(tracker_type, game_id, COALESCE(platform_id, -1))
     ''');
   }

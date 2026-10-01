@@ -15,14 +15,14 @@ class MigrationV18 extends Migration {
     await db.execute('DROP INDEX IF EXISTS idx_ci_coll');
     await db.execute('DROP INDEX IF EXISTS idx_ci_uncat');
     await db.execute('''
-      CREATE UNIQUE INDEX idx_ci_coll
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_ci_coll
       ON collection_items(
         collection_id, media_type, external_id, COALESCE(platform_id, -1)
       )
       WHERE collection_id IS NOT NULL
     ''');
     await db.execute('''
-      CREATE UNIQUE INDEX idx_ci_uncat
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_ci_uncat
       ON collection_items(media_type, external_id, COALESCE(platform_id, -1))
       WHERE collection_id IS NULL
     ''');

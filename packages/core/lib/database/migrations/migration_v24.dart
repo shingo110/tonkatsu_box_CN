@@ -28,22 +28,34 @@ class MigrationV24 extends Migration {
 
     for (final ({int id, String name}) g in _tmdbMovieGenresEn) {
       batch.insert('tmdb_genres', <String, Object?>{
-        'id': g.id, 'type': 'movie', 'lang': 'en', 'name': g.name,
+        'id': g.id,
+        'type': 'movie',
+        'lang': 'en',
+        'name': g.name,
       });
     }
     for (final ({int id, String name}) g in _tmdbMovieGenresRu) {
       batch.insert('tmdb_genres', <String, Object?>{
-        'id': g.id, 'type': 'movie', 'lang': 'ru', 'name': g.name,
+        'id': g.id,
+        'type': 'movie',
+        'lang': 'ru',
+        'name': g.name,
       });
     }
     for (final ({int id, String name}) g in _tmdbTvGenresEn) {
       batch.insert('tmdb_genres', <String, Object?>{
-        'id': g.id, 'type': 'tv', 'lang': 'en', 'name': g.name,
+        'id': g.id,
+        'type': 'tv',
+        'lang': 'en',
+        'name': g.name,
       });
     }
     for (final ({int id, String name}) g in _tmdbTvGenresRu) {
       batch.insert('tmdb_genres', <String, Object?>{
-        'id': g.id, 'type': 'tv', 'lang': 'ru', 'name': g.name,
+        'id': g.id,
+        'type': 'tv',
+        'lang': 'ru',
+        'name': g.name,
       });
     }
 
@@ -54,7 +66,10 @@ class MigrationV24 extends Migration {
     await db.execute('DELETE FROM igdb_genres');
     final Batch batch = db.batch();
     for (final ({int id, String name}) g in _igdbGenres) {
-      batch.insert('igdb_genres', <String, Object?>{'id': g.id, 'name': g.name});
+      batch.insert('igdb_genres', <String, Object?>{
+        'id': g.id,
+        'name': g.name,
+      });
     }
     await batch.commit(noResult: true);
   }
@@ -69,66 +84,86 @@ class MigrationV24 extends Migration {
   }
 
   Future<void> _seedPlatforms(Database db) async {
+    // Backup user data before rebuilding the table. A replayed migration must
+    // not lose platforms the user added since the original seed. The query is
+    // guarded: a crash mid-replay can leave `platforms` dropped but not
+    // recreated, in which case there is nothing to back up.
+    final List<Map<String, Object?>> existing =
+        await Migration.tableExists(db, 'platforms')
+        ? await db.query('platforms')
+        : <Map<String, Object?>>[];
+
     // Rebuild the table so the seed lands in the post-v24 shape (no
     // logo_image_id, no synced_at).
     await db.execute('DROP TABLE IF EXISTS platforms');
     await DatabaseSchema.createPlatformsTable(db);
 
     final Batch batch = db.batch();
+    // Seed first, then merge any pre-existing rows back with INSERT OR REPLACE
+    // so user-added platforms survive the rebuild.
     for (final ({int id, String name, String? abbreviation}) p in _platforms) {
       batch.insert('platforms', <String, Object?>{
-        'id': p.id, 'name': p.name, 'abbreviation': p.abbreviation,
+        'id': p.id,
+        'name': p.name,
+        'abbreviation': p.abbreviation,
       });
+    }
+    for (final Map<String, Object?> row in existing) {
+      batch.insert('platforms', <String, Object?>{
+        'id': row['id'],
+        'name': row['name'],
+        'abbreviation': row['abbreviation'],
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
     await batch.commit(noResult: true);
   }
 }
 
-const List<({int id, String name})> _tmdbMovieGenresEn = <({int id, String name})>[
-  (id: 28, name: 'Action'),
-  (id: 12, name: 'Adventure'),
-  (id: 16, name: 'Animation'),
-  (id: 35, name: 'Comedy'),
-  (id: 80, name: 'Crime'),
-  (id: 99, name: 'Documentary'),
-  (id: 18, name: 'Drama'),
-  (id: 10751, name: 'Family'),
-  (id: 14, name: 'Fantasy'),
-  (id: 36, name: 'History'),
-  (id: 27, name: 'Horror'),
-  (id: 10402, name: 'Music'),
-  (id: 9648, name: 'Mystery'),
-  (id: 10749, name: 'Romance'),
-  (id: 878, name: 'Science Fiction'),
-  (id: 10770, name: 'TV Movie'),
-  (id: 53, name: 'Thriller'),
-  (id: 10752, name: 'War'),
-  (id: 37, name: 'Western'),
-];
+const List<({int id, String name})> _tmdbMovieGenresEn =
+    <({int id, String name})>[
+      (id: 28, name: 'Action'),
+      (id: 12, name: 'Adventure'),
+      (id: 16, name: 'Animation'),
+      (id: 35, name: 'Comedy'),
+      (id: 80, name: 'Crime'),
+      (id: 99, name: 'Documentary'),
+      (id: 18, name: 'Drama'),
+      (id: 10751, name: 'Family'),
+      (id: 14, name: 'Fantasy'),
+      (id: 36, name: 'History'),
+      (id: 27, name: 'Horror'),
+      (id: 10402, name: 'Music'),
+      (id: 9648, name: 'Mystery'),
+      (id: 10749, name: 'Romance'),
+      (id: 878, name: 'Science Fiction'),
+      (id: 10770, name: 'TV Movie'),
+      (id: 53, name: 'Thriller'),
+      (id: 10752, name: 'War'),
+      (id: 37, name: 'Western'),
+    ];
 
-
-const List<({int id, String name})> _tmdbMovieGenresRu = <({int id, String name})>[
-  (id: 28, name: 'боевик'),
-  (id: 12, name: 'приключения'),
-  (id: 16, name: 'мультфильм'),
-  (id: 35, name: 'комедия'),
-  (id: 80, name: 'криминал'),
-  (id: 99, name: 'документальный'),
-  (id: 18, name: 'драма'),
-  (id: 10751, name: 'семейный'),
-  (id: 14, name: 'фэнтези'),
-  (id: 36, name: 'история'),
-  (id: 27, name: 'ужасы'),
-  (id: 10402, name: 'музыка'),
-  (id: 9648, name: 'детектив'),
-  (id: 10749, name: 'мелодрама'),
-  (id: 878, name: 'фантастика'),
-  (id: 10770, name: 'телевизионный фильм'),
-  (id: 53, name: 'триллер'),
-  (id: 10752, name: 'военный'),
-  (id: 37, name: 'вестерн'),
-];
-
+const List<({int id, String name})> _tmdbMovieGenresRu =
+    <({int id, String name})>[
+      (id: 28, name: 'боевик'),
+      (id: 12, name: 'приключения'),
+      (id: 16, name: 'мультфильм'),
+      (id: 35, name: 'комедия'),
+      (id: 80, name: 'криминал'),
+      (id: 99, name: 'документальный'),
+      (id: 18, name: 'драма'),
+      (id: 10751, name: 'семейный'),
+      (id: 14, name: 'фэнтези'),
+      (id: 36, name: 'история'),
+      (id: 27, name: 'ужасы'),
+      (id: 10402, name: 'музыка'),
+      (id: 9648, name: 'детектив'),
+      (id: 10749, name: 'мелодрама'),
+      (id: 878, name: 'фантастика'),
+      (id: 10770, name: 'телевизионный фильм'),
+      (id: 53, name: 'триллер'),
+      (id: 10752, name: 'военный'),
+      (id: 37, name: 'вестерн'),
+    ];
 
 const List<({int id, String name})> _tmdbTvGenresEn = <({int id, String name})>[
   (id: 10759, name: 'Action & Adventure'),
@@ -149,7 +184,6 @@ const List<({int id, String name})> _tmdbTvGenresEn = <({int id, String name})>[
   (id: 37, name: 'Western'),
 ];
 
-
 const List<({int id, String name})> _tmdbTvGenresRu = <({int id, String name})>[
   (id: 10759, name: 'Боевик и Приключения'),
   (id: 16, name: 'мультфильм'),
@@ -168,7 +202,6 @@ const List<({int id, String name})> _tmdbTvGenresRu = <({int id, String name})>[
   (id: 10768, name: 'Война и Политика'),
   (id: 37, name: 'вестерн'),
 ];
-
 
 const List<({int id, String name})> _igdbGenres = <({int id, String name})>[
   (id: 31, name: 'Adventure'),
@@ -195,7 +228,6 @@ const List<({int id, String name})> _igdbGenres = <({int id, String name})>[
   (id: 16, name: 'Turn-based strategy (TBS)'),
   (id: 34, name: 'Visual Novel'),
 ];
-
 
 const List<({String id, String name})> _vndbTags = <({String id, String name})>[
   (id: 'g133', name: 'Male Protagonist'),
@@ -300,9 +332,8 @@ const List<({String id, String name})> _vndbTags = <({String id, String name})>[
   (id: 'g658', name: 'Artist Heroine'),
 ];
 
-
-const List<({int id, String name, String? abbreviation})> _platforms =
-    <({int id, String name, String? abbreviation})>[
+const List<({int id, String name, String? abbreviation})>
+_platforms = <({int id, String name, String? abbreviation})>[
   (id: 3, name: 'Linux', abbreviation: 'Linux'),
   (id: 4, name: 'Nintendo 64', abbreviation: 'N64'),
   (id: 5, name: 'Wii', abbreviation: 'Wii'),
@@ -393,7 +424,11 @@ const List<({int id, String name, String? abbreviation})> _platforms =
   (id: 104, name: 'HP 2100', abbreviation: 'hp2100'),
   (id: 105, name: 'HP 3000', abbreviation: 'hp3000'),
   (id: 106, name: 'SDS Sigma 7', abbreviation: 'sdssigma7'),
-  (id: 107, name: 'Call-A-Computer time-shared mainframe computer system', abbreviation: 'call-a-computer'),
+  (
+    id: 107,
+    name: 'Call-A-Computer time-shared mainframe computer system',
+    abbreviation: 'call-a-computer',
+  ),
   (id: 108, name: 'PDP-11', abbreviation: 'pdp11'),
   (id: 109, name: 'CDC Cyber 70', abbreviation: 'cdccyber70'),
   (id: 110, name: 'PLATO', abbreviation: 'plato'),
@@ -425,7 +460,11 @@ const List<({int id, String name, String? abbreviation})> _platforms =
   (id: 136, name: 'Neo Geo CD', abbreviation: null),
   (id: 137, name: 'New Nintendo 3DS', abbreviation: 'New 3DS'),
   (id: 138, name: 'VC 4000', abbreviation: null),
-  (id: 139, name: '1292 Advanced Programmable Video System', abbreviation: null),
+  (
+    id: 139,
+    name: '1292 Advanced Programmable Video System',
+    abbreviation: null,
+  ),
   (id: 140, name: 'AY-3-8500', abbreviation: null),
   (id: 141, name: 'AY-3-8610', abbreviation: null),
   (id: 142, name: 'PC-50X Family', abbreviation: null),
@@ -500,7 +539,11 @@ const List<({int id, String name, String? abbreviation})> _platforms =
   (id: 417, name: 'Palm OS', abbreviation: null),
   (id: 438, name: 'Arduboy', abbreviation: 'Arduboy'),
   (id: 439, name: 'V.Smile', abbreviation: null),
-  (id: 440, name: 'Visual Memory Unit / Visual Memory System', abbreviation: null),
+  (
+    id: 440,
+    name: 'Visual Memory Unit / Visual Memory System',
+    abbreviation: null,
+  ),
   (id: 441, name: 'PocketStation', abbreviation: null),
   (id: 471, name: 'Meta Quest 3', abbreviation: 'Meta Quest 3'),
   (id: 472, name: 'visionOS', abbreviation: null),

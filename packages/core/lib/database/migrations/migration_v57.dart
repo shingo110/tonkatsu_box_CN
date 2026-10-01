@@ -25,6 +25,9 @@ class MigrationV57 extends Migration {
   }
 
   Future<void> _rebuildTvShowsCache(Database db) async {
+    if (await Migration.tableExists(db, 'tv_shows_cache_old')) {
+      return;
+    }
     await db.execute('ALTER TABLE tv_shows_cache RENAME TO tv_shows_cache_old');
     await db.execute('''
       CREATE TABLE tv_shows_cache (
@@ -105,8 +108,12 @@ class MigrationV57 extends Migration {
   }
 
   Future<void> _rebuildTvSeasonsCache(Database db) async {
-    await db
-        .execute('ALTER TABLE tv_seasons_cache RENAME TO tv_seasons_cache_old');
+    if (await Migration.tableExists(db, 'tv_seasons_cache_old')) {
+      return;
+    }
+    await db.execute(
+      'ALTER TABLE tv_seasons_cache RENAME TO tv_seasons_cache_old',
+    );
     await db.execute('''
       CREATE TABLE tv_seasons_cache (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -134,8 +141,12 @@ class MigrationV57 extends Migration {
   }
 
   Future<void> _rebuildTvEpisodesCache(Database db) async {
+    if (await Migration.tableExists(db, 'tv_episodes_cache_old')) {
+      return;
+    }
     await db.execute(
-        'ALTER TABLE tv_episodes_cache RENAME TO tv_episodes_cache_old');
+      'ALTER TABLE tv_episodes_cache RENAME TO tv_episodes_cache_old',
+    );
     await db.execute('''
       CREATE TABLE tv_episodes_cache (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -166,6 +177,9 @@ class MigrationV57 extends Migration {
   }
 
   Future<void> _rebuildWatchedEpisodes(Database db) async {
+    if (await Migration.tableExists(db, 'watched_episodes_old')) {
+      return;
+    }
     // With `PRAGMA foreign_keys = ON` a row pointing at a deleted collection would
     // fail the rebuild insert on every launch. Such rows are unreachable anyway.
     await db.execute(
@@ -174,7 +188,8 @@ class MigrationV57 extends Migration {
       'watched_episodes.collection_id)',
     );
     await db.execute(
-        'ALTER TABLE watched_episodes RENAME TO watched_episodes_old');
+      'ALTER TABLE watched_episodes RENAME TO watched_episodes_old',
+    );
     await db.execute('''
       CREATE TABLE watched_episodes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
