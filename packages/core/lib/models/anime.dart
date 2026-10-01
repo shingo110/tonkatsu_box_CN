@@ -41,80 +41,93 @@ class Anime {
   });
 
   factory Anime.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic>? titleMap =
-        json['title'] as Map<String, dynamic>?;
-    final String title = titleMap?['romaji'] as String? ??
-        titleMap?['english'] as String? ??
+    final Map<String, dynamic>? titleMap = _jsonMap(json['title']);
+    final String title =
+        _jsonString(titleMap?['romaji']) ??
+        _jsonString(titleMap?['english']) ??
         'Unknown';
 
-    final Map<String, dynamic>? coverMap =
-        json['coverImage'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? coverMap = _jsonMap(json['coverImage']);
 
-    final Map<String, dynamic>? dateMap =
-        json['startDate'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? dateMap = _jsonMap(json['startDate']);
 
-    final List<dynamic>? genresList = json['genres'] as List<dynamic>?;
+    final List<dynamic>? genresList = _jsonList(json['genres']);
 
     // Only the name is kept; per-media spoiler / category are looked up from
     // the catalog table when needed.
     List<String>? tags;
-    final List<dynamic>? tagsList = json['tags'] as List<dynamic>?;
+    final List<dynamic>? tagsList = _jsonList(json['tags']);
     if (tagsList != null && tagsList.isNotEmpty) {
       tags = tagsList
-          .map((dynamic t) =>
-              (t as Map<String, dynamic>)['name'] as String? ?? '')
+          .map((Object? t) {
+            final Map<String, dynamic>? tag = _jsonMap(t);
+            final String? name = tag == null ? null : _jsonString(tag['name']);
+            return name ?? '';
+          })
           .where((String s) => s.isNotEmpty)
           .toList();
       if (tags.isEmpty) tags = null;
     }
 
     List<String>? studios;
-    final Map<String, dynamic>? studiosMap =
-        json['studios'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? studiosMap = _jsonMap(json['studios']);
     if (studiosMap != null) {
-      final List<dynamic>? nodes = studiosMap['nodes'] as List<dynamic>?;
+      final List<dynamic>? nodes = _jsonList(studiosMap['nodes']);
       if (nodes != null && nodes.isNotEmpty) {
         studios = nodes
-            .map((dynamic n) =>
-                (n as Map<String, dynamic>)['name'] as String? ?? '')
+            .map((Object? n) {
+              final Map<String, dynamic>? node = _jsonMap(n);
+              final String? name = node == null
+                  ? null
+                  : _jsonString(node['name']);
+              return name ?? '';
+            })
             .where((String s) => s.isNotEmpty)
             .toList();
         if (studios.isEmpty) studios = null;
       }
     }
 
-    String? description = json['description'] as String?;
+    String? description = _jsonString(json['description']);
     if (description != null) {
       description = _stripHtml(description);
     }
 
-    final int id = json['id'] as int;
-    final Map<String, dynamic>? nextAiring =
-        json['nextAiringEpisode'] as Map<String, dynamic>?;
+    final int id = _jsonInt(json['id']) ?? 0;
+    final Map<String, dynamic>? nextAiring = _jsonMap(
+      json['nextAiringEpisode'],
+    );
 
     return Anime(
       id: id,
       title: title,
-      titleEnglish: titleMap?['english'] as String?,
-      titleNative: titleMap?['native'] as String?,
+      titleEnglish: _jsonString(titleMap?['english']),
+      titleNative: _jsonString(titleMap?['native']),
       description: description,
-      coverUrl: (coverMap?['extraLarge'] ?? coverMap?['large']) as String?,
-      coverUrlMedium: coverMap?['medium'] as String?,
-      averageScore: json['averageScore'] as int?,
-      status: json['status'] as String?,
-      startYear: dateMap?['year'] as int?,
-      startMonth: dateMap?['month'] as int?,
-      startDay: dateMap?['day'] as int?,
-      episodes: json['episodes'] as int?,
-      duration: json['duration'] as int?,
-      format: json['format'] as String?,
-      sourceMaterial: json['source'] as String?,
-      genres: genresList?.map((dynamic g) => g as String).toList(),
+      coverUrl:
+          _jsonString(coverMap?['extraLarge']) ??
+          _jsonString(coverMap?['large']),
+      coverUrlMedium: _jsonString(coverMap?['medium']),
+      averageScore: _jsonInt(json['averageScore']),
+      status: _jsonString(json['status']),
+      startYear: _jsonInt(dateMap?['year']),
+      startMonth: _jsonInt(dateMap?['month']),
+      startDay: _jsonInt(dateMap?['day']),
+      episodes: _jsonInt(json['episodes']),
+      duration: _jsonInt(json['duration']),
+      format: _jsonString(json['format']),
+      sourceMaterial: _jsonString(json['source']),
+      genres: genresList == null
+          ? null
+          : genresList
+                .map((Object? g) => g is String ? g : null)
+                .whereType<String>()
+                .toList(),
       tags: tags,
       studios: studios,
-      bannerUrl: json['bannerImage'] as String?,
-      nextAiringEpisode: nextAiring?['episode'] as int?,
-      nextAiringAt: nextAiring?['airingAt'] as int?,
+      bannerUrl: _jsonString(json['bannerImage']),
+      nextAiringEpisode: _jsonInt(nextAiring?['episode']),
+      nextAiringAt: _jsonInt(nextAiring?['airingAt']),
       externalUrl: 'https://anilist.co/anime/$id',
       updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     );
@@ -123,34 +136,30 @@ class Anime {
   /// Builds an [Anime] from a Kitsu `/anime` JSON:API resource
   /// ({id, attributes}).
   factory Anime.fromKitsu(Map<String, dynamic> json) {
-    final int id = int.parse(json['id'] as String);
+    final int id = _jsonInt(json['id']) ?? 0;
     final Map<String, dynamic> attrs =
-        (json['attributes'] as Map<String, dynamic>?) ??
-            const <String, dynamic>{};
+        _jsonMap(json['attributes']) ?? const <String, dynamic>{};
 
     final Map<String, dynamic> titles =
-        (attrs['titles'] as Map<String, dynamic>?) ??
-            const <String, dynamic>{};
+        _jsonMap(attrs['titles']) ?? const <String, dynamic>{};
     final String? canonical = _nonEmpty(attrs['canonicalTitle']);
     final String? english = _nonEmpty(titles['en']);
     final String? romaji = _nonEmpty(titles['en_jp']) ?? canonical;
     final String? native = _nonEmpty(titles['ja_jp']);
     final String title =
         _firstNonEmpty(<String?>[romaji, english, native, canonical]) ??
-            'Unknown';
+        'Unknown';
 
-    final Map<String, dynamic>? poster =
-        attrs['posterImage'] as Map<String, dynamic>?;
-    final Map<String, dynamic>? banner =
-        attrs['coverImage'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? poster = _jsonMap(attrs['posterImage']);
+    final Map<String, dynamic>? banner = _jsonMap(attrs['coverImage']);
 
     int? startYear;
-    final String? startDate = attrs['startDate'] as String?;
+    final String? startDate = _jsonString(attrs['startDate']);
     if (startDate != null && startDate.length >= 4) {
       startYear = int.tryParse(startDate.substring(0, 4));
     }
 
-    final String? rating = attrs['averageRating'] as String?;
+    final String? rating = _jsonString(attrs['averageRating']);
     final double? ratingValue = rating != null ? double.tryParse(rating) : null;
 
     final Object? slug = attrs['slug'];
@@ -162,18 +171,20 @@ class Anime {
       title: title,
       titleEnglish: english,
       titleNative: native,
-      description: _stripHtml(attrs['synopsis'] as String?),
-      coverUrl: (poster?['original'] ?? poster?['large']) as String?,
-      coverUrlMedium: poster?['medium'] as String?,
+      description: _stripHtml(_jsonString(attrs['synopsis'])),
+      coverUrl:
+          _jsonString(poster?['original']) ?? _jsonString(poster?['large']),
+      coverUrlMedium: _jsonString(poster?['medium']),
       // Kitsu's `coverImage` is the wide banner (its `posterImage` is the
       // cover) — mapped to bannerUrl like AniList's bannerImage.
-      bannerUrl: (banner?['original'] ?? banner?['large']) as String?,
+      bannerUrl:
+          _jsonString(banner?['original']) ?? _jsonString(banner?['large']),
       averageScore: ratingValue?.round(),
-      status: kitsuStatusVocab(attrs['status'] as String?),
+      status: kitsuStatusVocab(_jsonString(attrs['status'])),
       startYear: startYear,
-      episodes: (attrs['episodeCount'] as num?)?.toInt(),
-      duration: (attrs['episodeLength'] as num?)?.toInt(),
-      format: _kitsuFormat(attrs['subtype'] as String?),
+      episodes: _jsonInt(attrs['episodeCount']),
+      duration: _jsonInt(attrs['episodeLength']),
+      format: _kitsuFormat(_jsonString(attrs['subtype'])),
       externalUrl: 'https://kitsu.io/anime/$path',
       updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     );
@@ -199,7 +210,7 @@ class Anime {
       startYear: bangumiDatePart(date, 0),
       startMonth: bangumiDatePart(date, 1),
       startDay: bangumiDatePart(date, 2),
-      episodes: (json['eps'] as num?)?.toInt(),
+      episodes: _jsonInt(json['eps']),
       format: bangumiAnimeFormat(_nonEmpty(json['platform'])),
       tags: bangumiTagNames(json['tags']),
       studios: bangumiAnimeStudios(bangumiInfobox(json['infobox'])),
@@ -275,7 +286,8 @@ class Anime {
     // so an unrecognised value is read as one.
     final String? rawSource = row['source'] as String?;
     final DataSource? knownSource = DataSource.tryFromName(rawSource);
-    final String? sourceMaterial = (row['source_material'] as String?) ??
+    final String? sourceMaterial =
+        (row['source_material'] as String?) ??
         (knownSource == null ? rawSource : null);
 
     return Anime(
@@ -379,8 +391,7 @@ class Anime {
   /// Unix timestamp of when this row was cached.
   final int? updatedAt;
 
-  double? get rating10 =>
-      averageScore != null ? averageScore! / 10.0 : null;
+  double? get rating10 => averageScore != null ? averageScore! / 10.0 : null;
 
   String? get formattedRating => rating10?.toStringAsFixed(1);
 
@@ -397,24 +408,24 @@ class Anime {
   /// Maps an AniList anime [format] code to a display label.
   /// Returns the raw code for unrecognised values and `null` when absent.
   static String? animeFormatLabel(String? format) => switch (format) {
-        'TV' => 'TV',
-        'TV_SHORT' => 'TV Short',
-        'MOVIE' => 'Movie',
-        'SPECIAL' => 'Special',
-        'OVA' => 'OVA',
-        'ONA' => 'ONA',
-        'MUSIC' => 'Music',
-        _ => format,
-      };
+    'TV' => 'TV',
+    'TV_SHORT' => 'TV Short',
+    'MOVIE' => 'Movie',
+    'SPECIAL' => 'Special',
+    'OVA' => 'OVA',
+    'ONA' => 'ONA',
+    'MUSIC' => 'Music',
+    _ => format,
+  };
 
   String? get statusLabel => switch (status) {
-        'FINISHED' => 'Finished',
-        'RELEASING' => 'Airing',
-        'NOT_YET_RELEASED' => 'Not Yet Aired',
-        'CANCELLED' => 'Cancelled',
-        'HIATUS' => 'Hiatus',
-        _ => status,
-      };
+    'FINISHED' => 'Finished',
+    'RELEASING' => 'Airing',
+    'NOT_YET_RELEASED' => 'Not Yet Aired',
+    'CANCELLED' => 'Cancelled',
+    'HIATUS' => 'Hiatus',
+    _ => status,
+  };
 
   String? get seasonLabel {
     if (season == null) return null;
@@ -428,24 +439,21 @@ class Anime {
     return seasonYear != null ? '$seasonName $seasonYear' : seasonName;
   }
 
-  String get episodesString =>
-      episodes != null ? '$episodes ep' : '? ep';
+  String get episodesString => episodes != null ? '$episodes ep' : '? ep';
 
-  String? get durationString =>
-      duration != null ? '$duration min/ep' : null;
+  String? get durationString => duration != null ? '$duration min/ep' : null;
 
   String? get sourceLabel => switch (sourceMaterial) {
-        'ORIGINAL' => 'Original',
-        'MANGA' => 'Based on Manga',
-        'LIGHT_NOVEL' => 'Based on Light Novel',
-        'VISUAL_NOVEL' => 'Based on Visual Novel',
-        'VIDEO_GAME' => 'Based on Video Game',
-        'OTHER' => 'Other',
-        _ => sourceMaterial,
-      };
+    'ORIGINAL' => 'Original',
+    'MANGA' => 'Based on Manga',
+    'LIGHT_NOVEL' => 'Based on Light Novel',
+    'VISUAL_NOVEL' => 'Based on Visual Novel',
+    'VIDEO_GAME' => 'Based on Video Game',
+    'OTHER' => 'Other',
+    _ => sourceMaterial,
+  };
 
-  bool get hasNextAiring =>
-      nextAiringEpisode != null && nextAiringAt != null;
+  bool get hasNextAiring => nextAiringEpisode != null && nextAiringAt != null;
 
   @override
   bool operator ==(Object other) {
@@ -489,8 +497,7 @@ class Anime {
       'next_airing_episode': nextAiringEpisode,
       'next_airing_at': nextAiringAt,
       'external_url': externalUrl,
-      'updated_at':
-          updatedAt ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      'updated_at': updatedAt ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
     };
   }
 
@@ -568,6 +575,23 @@ class Anime {
   static String? _nonEmpty(Object? value) =>
       (value is String && value.isNotEmpty) ? value : null;
 
+  /// Defensive casts for untrusted API JSON: a wrong-shaped field reads as
+  /// null instead of throwing.
+  static Map<String, dynamic>? _jsonMap(Object? value) =>
+      value is Map<String, dynamic> ? value : null;
+
+  static List<dynamic>? _jsonList(Object? value) =>
+      value is List<dynamic> ? value : null;
+
+  static String? _jsonString(Object? value) => value is String ? value : null;
+
+  static int? _jsonInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
   static String? _firstNonEmpty(List<String?> values) {
     for (final String? v in values) {
       if (v != null && v.isNotEmpty) return v;
@@ -577,15 +601,14 @@ class Anime {
 
   /// Maps Kitsu anime `subtype` onto the AniList-style format vocabulary.
   static String? _kitsuFormat(String? subtype) => switch (subtype) {
-        'TV' => 'TV',
-        'movie' => 'MOVIE',
-        'special' => 'SPECIAL',
-        'OVA' => 'OVA',
-        'ONA' => 'ONA',
-        'music' => 'MUSIC',
-        _ => null,
-      };
-
+    'TV' => 'TV',
+    'movie' => 'MOVIE',
+    'special' => 'SPECIAL',
+    'OVA' => 'OVA',
+    'ONA' => 'ONA',
+    'music' => 'MUSIC',
+    _ => null,
+  };
 
   static final RegExp _htmlTagPattern = RegExp('<[^>]*>');
 

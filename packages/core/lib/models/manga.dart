@@ -38,28 +38,29 @@ class Manga {
   });
 
   factory Manga.fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic>? titleMap =
-        json['title'] as Map<String, dynamic>?;
-    final String title = titleMap?['romaji'] as String? ??
-        titleMap?['english'] as String? ??
+    final Map<String, dynamic>? titleMap = _jsonMap(json['title']);
+    final String title =
+        _jsonString(titleMap?['romaji']) ??
+        _jsonString(titleMap?['english']) ??
         'Unknown';
 
-    final Map<String, dynamic>? coverMap =
-        json['coverImage'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? coverMap = _jsonMap(json['coverImage']);
 
-    final Map<String, dynamic>? dateMap =
-        json['startDate'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? dateMap = _jsonMap(json['startDate']);
 
-    final List<dynamic>? genresList = json['genres'] as List<dynamic>?;
+    final List<dynamic>? genresList = _jsonList(json['genres']);
 
     // Only the name is kept; per-media spoiler / category are looked up from
     // the catalog table when needed.
     List<String>? tags;
-    final List<dynamic>? tagsList = json['tags'] as List<dynamic>?;
+    final List<dynamic>? tagsList = _jsonList(json['tags']);
     if (tagsList != null && tagsList.isNotEmpty) {
       tags = tagsList
-          .map((dynamic t) =>
-              (t as Map<String, dynamic>)['name'] as String? ?? '')
+          .map((Object? t) {
+            final Map<String, dynamic>? tag = _jsonMap(t);
+            final String? name = tag == null ? null : _jsonString(tag['name']);
+            return name ?? '';
+          })
           .where((String s) => s.isNotEmpty)
           .toList();
       if (tags.isEmpty) tags = null;
@@ -67,26 +68,27 @@ class Manga {
 
     // Filter staff edges to author-credit roles only (Story, Art, Story & Art).
     List<String>? authors;
-    final Map<String, dynamic>? staffMap =
-        json['staff'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? staffMap = _jsonMap(json['staff']);
     if (staffMap != null) {
-      final List<dynamic>? edges = staffMap['edges'] as List<dynamic>?;
+      final List<dynamic>? edges = _jsonList(staffMap['edges']);
       if (edges != null) {
         authors = edges
-            .where((dynamic e) {
-              final String? role =
-                  (e as Map<String, dynamic>)['role'] as String?;
-              return role == 'Story' ||
-                  role == 'Art' ||
-                  role == 'Story & Art';
+            .where((Object? e) {
+              final Map<String, dynamic>? edge = _jsonMap(e);
+              final String? role = edge == null
+                  ? null
+                  : _jsonString(edge['role']);
+              return role == 'Story' || role == 'Art' || role == 'Story & Art';
             })
-            .map((dynamic e) {
-              final Map<String, dynamic> node =
-                  (e as Map<String, dynamic>)['node']
-                      as Map<String, dynamic>;
-              final Map<String, dynamic> name =
-                  node['name'] as Map<String, dynamic>;
-              return name['full'] as String? ?? '';
+            .map((Object? e) {
+              final Map<String, dynamic>? edge = _jsonMap(e);
+              final Map<String, dynamic>? node = edge == null
+                  ? null
+                  : _jsonMap(edge['node']);
+              final Map<String, dynamic>? name = node == null
+                  ? null
+                  : _jsonMap(node['name']);
+              return _jsonString(name?['full']) ?? '';
             })
             .where((String s) => s.isNotEmpty)
             .toList();
@@ -94,56 +96,64 @@ class Manga {
       }
     }
 
-    String? description = json['description'] as String?;
+    String? description = _jsonString(json['description']);
     if (description != null) {
       description = _stripHtml(description);
     }
 
-    final int id = json['id'] as int;
+    final int id = _jsonInt(json['id']) ?? 0;
 
     return Manga(
       id: id,
       title: title,
-      titleEnglish: titleMap?['english'] as String?,
-      titleNative: titleMap?['native'] as String?,
+      titleEnglish: _jsonString(titleMap?['english']),
+      titleNative: _jsonString(titleMap?['native']),
       description: description,
-      coverUrl: (coverMap?['extraLarge'] ?? coverMap?['large']) as String?,
-      coverUrlMedium: coverMap?['medium'] as String?,
-      averageScore: json['averageScore'] as int?,
-      status: json['status'] as String?,
-      startYear: dateMap?['year'] as int?,
-      startMonth: dateMap?['month'] as int?,
-      startDay: dateMap?['day'] as int?,
-      chapters: json['chapters'] as int?,
-      volumes: json['volumes'] as int?,
-      format: json['format'] as String?,
-      genres: genresList?.map((dynamic g) => g as String).toList(),
+      coverUrl:
+          _jsonString(coverMap?['extraLarge']) ??
+          _jsonString(coverMap?['large']),
+      coverUrlMedium: _jsonString(coverMap?['medium']),
+      averageScore: _jsonInt(json['averageScore']),
+      status: _jsonString(json['status']),
+      startYear: _jsonInt(dateMap?['year']),
+      startMonth: _jsonInt(dateMap?['month']),
+      startDay: _jsonInt(dateMap?['day']),
+      chapters: _jsonInt(json['chapters']),
+      volumes: _jsonInt(json['volumes']),
+      format: _jsonString(json['format']),
+      genres: genresList == null
+          ? null
+          : genresList
+                .map((Object? g) => g is String ? g : null)
+                .whereType<String>()
+                .toList(),
       tags: tags,
       authors: authors,
       externalUrl: 'https://anilist.co/manga/$id',
       updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      bannerUrl: json['bannerImage'] as String?,
+      bannerUrl: _jsonString(json['bannerImage']),
     );
   }
 
   /// MangaBaka's flat REST shape differs from AniList: top-level titles,
   /// string chapter / volume counts, a 0–100 rating, raw cover variant only.
   factory Manga.fromMangaBaka(Map<String, dynamic> json) {
-    final int id = (json['id'] as num).toInt();
+    final int id = _jsonInt(json['id']) ?? 0;
 
     final List<Map<String, dynamic>> titles =
-        (json['titles'] as List<dynamic>?)
-                ?.whereType<Map<String, dynamic>>()
-                .toList() ??
-            const <Map<String, dynamic>>[];
+        (_jsonList(
+          json['titles'],
+        )?.whereType<Map<String, dynamic>>().toList()) ??
+        const <Map<String, dynamic>>[];
 
     // Mapped onto AniList's romaji / english / native slots so the title-language
     // setting behaves alike. `ja-Latn` is the real romaji; the flat field is not.
     final String? romaji =
-        _bakaTitle(titles, 'ja-Latn') ?? json['romanized_title'] as String?;
+        _bakaTitle(titles, 'ja-Latn') ?? _jsonString(json['romanized_title']);
     final String? native =
-        _bakaTitle(titles, 'ja') ?? json['native_title'] as String?;
-    final String? english = _bakaTitle(titles, 'en') ?? json['title'] as String?;
+        _bakaTitle(titles, 'ja') ?? _jsonString(json['native_title']);
+    final String? english =
+        _bakaTitle(titles, 'en') ?? _jsonString(json['title']);
     final String title =
         _firstNonEmpty(<String?>[romaji, english, native]) ?? 'Unknown';
 
@@ -152,7 +162,7 @@ class Manga {
     if (cover is Map<String, dynamic>) {
       final Object? raw = cover['raw'];
       if (raw is Map<String, dynamic>) {
-        coverUrl = raw['url'] as String?;
+        coverUrl = _jsonString(raw['url']);
       } else if (raw is String) {
         coverUrl = raw;
       }
@@ -161,12 +171,12 @@ class Manga {
     int? startYear;
     final Object? published = json['published'];
     if (published is Map<String, dynamic>) {
-      final String? start = published['start_date'] as String?;
+      final String? start = _jsonString(published['start_date']);
       if (start != null && start.length >= 4) {
         startYear = int.tryParse(start.substring(0, 4));
       }
     }
-    startYear ??= (json['year'] as num?)?.toInt();
+    startYear ??= _jsonInt(json['year']);
 
     final List<String>? genres = _stringList(json['genres']);
     final List<String>? tags = _stringList(json['tags']);
@@ -176,9 +186,9 @@ class Manga {
       ...?_stringList(json['artists']),
     ];
 
-    final num? rating = json['rating'] as num?;
+    final num? rating = json['rating'] is num ? json['rating'] as num : null;
 
-    String? description = json['description'] as String?;
+    String? description = _jsonString(json['description']);
     if (description != null) description = _stripHtml(description);
 
     return Manga(
@@ -189,12 +199,12 @@ class Manga {
       titleNative: native,
       description: description,
       coverUrl: coverUrl,
-      averageScore: rating?.round(),
-      status: _mangaBakaStatus(json['status'] as String?),
+      averageScore: rating == null ? null : rating.round(),
+      status: _mangaBakaStatus(_jsonString(json['status'])),
       startYear: startYear,
       chapters: _parseIntOrNull(json['total_chapters']),
       volumes: _parseIntOrNull(json['final_volume']),
-      format: _mangaBakaFormat(json['type'] as String?),
+      format: _mangaBakaFormat(_jsonString(json['type'])),
       genres: genres,
       tags: tags,
       authors: authors.isEmpty ? null : authors,
@@ -206,19 +216,17 @@ class Manga {
   /// MangaDex ids are UUIDs, so [id] is an [fnv1a64] hash and the UUID survives
   /// in [externalUrl]. Chapter counts need `/aggregate`, so search rows lack them.
   factory Manga.fromMangaDex(Map<String, dynamic> json) {
-    final String uuid = json['id'] as String;
+    final String uuid = _jsonString(json['id']) ?? '';
     final Map<String, dynamic> attrs =
-        (json['attributes'] as Map<String, dynamic>?) ??
-            const <String, dynamic>{};
+        _jsonMap(json['attributes']) ?? const <String, dynamic>{};
 
     final Map<String, dynamic> titleMap =
-        (attrs['title'] as Map<String, dynamic>?) ??
-            const <String, dynamic>{};
+        _jsonMap(attrs['title']) ?? const <String, dynamic>{};
     final List<Map<String, dynamic>> altTitles =
-        (attrs['altTitles'] as List<dynamic>?)
-                ?.whereType<Map<String, dynamic>>()
-                .toList() ??
-            const <Map<String, dynamic>>[];
+        _jsonList(
+          attrs['altTitles'],
+        )?.whereType<Map<String, dynamic>>().toList() ??
+        const <Map<String, dynamic>>[];
 
     String? pickTitle(String lang) {
       final Object? primary = titleMap[lang];
@@ -235,24 +243,23 @@ class Manga {
     // and only about three records in five have one at all. Leading with it is
     // the point of this fork: searching 海贼王 should show 航海王, not
     // "One Piece". Records without one keep their romaji / English title.
-    final String? chinese = _firstNonEmpty(
-      <String?>[for (final String lang in _zhTitleKeys) pickTitle(lang)],
-    );
+    final String? chinese = _firstNonEmpty(<String?>[
+      for (final String lang in _zhTitleKeys) pickTitle(lang),
+    ]);
     final String? english = pickTitle('en');
     final String? romaji = pickTitle('ja-ro') ?? english;
     final String? native = pickTitle('ja') ?? pickTitle('ko');
     final String title =
         _firstNonEmpty(<String?>[chinese, romaji, english, native]) ??
-            'Unknown';
+        'Unknown';
 
     final List<dynamic> relationships =
-        (json['relationships'] as List<dynamic>?) ?? const <dynamic>[];
+        _jsonList(json['relationships']) ?? const <dynamic>[];
     String? coverUrl;
     final List<String> authors = <String>[];
     for (final Map<String, dynamic> rel
         in relationships.whereType<Map<String, dynamic>>()) {
-      final Map<String, dynamic>? relAttrs =
-          rel['attributes'] as Map<String, dynamic>?;
+      final Map<String, dynamic>? relAttrs = _jsonMap(rel['attributes']);
       switch (rel['type']) {
         case 'cover_art':
           final Object? file = relAttrs?['fileName'];
@@ -272,11 +279,9 @@ class Manga {
     final List<String> genres = <String>[];
     final List<String> tags = <String>[];
     for (final Map<String, dynamic> tag
-        in (attrs['tags'] as List<dynamic>?)
-                ?.whereType<Map<String, dynamic>>() ??
+        in _jsonList(attrs['tags'])?.whereType<Map<String, dynamic>>() ??
             const <Map<String, dynamic>>[]) {
-      final Map<String, dynamic>? tagAttrs =
-          tag['attributes'] as Map<String, dynamic>?;
+      final Map<String, dynamic>? tagAttrs = _jsonMap(tag['attributes']);
       final String? name = _localized(tagAttrs?['name']);
       if (name == null) continue;
       if (tagAttrs?['group'] == 'genre') {
@@ -294,13 +299,13 @@ class Manga {
       titleNative: native,
       description: _stripHtml(_localized(attrs['description'])),
       coverUrl: coverUrl,
-      status: _mangaDexStatus(attrs['status'] as String?),
-      startYear: (attrs['year'] as num?)?.toInt(),
+      status: _mangaDexStatus(_jsonString(attrs['status'])),
+      startYear: _jsonInt(attrs['year']),
       // Final numbers on the manga object itself, populated for completed series
       // — an inline counter without the `/aggregate` call. getByUuid refines them.
       chapters: _parseCount(attrs['lastChapter']),
       volumes: _parseCount(attrs['lastVolume']),
-      format: _mangaDexFormat(attrs['originalLanguage'] as String?),
+      format: _mangaDexFormat(_jsonString(attrs['originalLanguage'])),
       genres: genres.isEmpty ? null : genres,
       tags: tags.isEmpty ? null : tags,
       authors: authors.isEmpty ? null : authors,
@@ -312,34 +317,30 @@ class Manga {
   /// Genres are related JSON:API resources not requested here, so they stay
   /// null.
   factory Manga.fromKitsu(Map<String, dynamic> json) {
-    final int id = int.parse(json['id'] as String);
+    final int id = _jsonInt(json['id']) ?? 0;
     final Map<String, dynamic> attrs =
-        (json['attributes'] as Map<String, dynamic>?) ??
-            const <String, dynamic>{};
+        _jsonMap(json['attributes']) ?? const <String, dynamic>{};
 
     final Map<String, dynamic> titles =
-        (attrs['titles'] as Map<String, dynamic>?) ??
-            const <String, dynamic>{};
+        _jsonMap(attrs['titles']) ?? const <String, dynamic>{};
     final String? canonical = _nonEmpty(attrs['canonicalTitle']);
     final String? english = _nonEmpty(titles['en']);
     final String? romaji = _nonEmpty(titles['en_jp']) ?? canonical;
     final String? native = _nonEmpty(titles['ja_jp']);
     final String title =
         _firstNonEmpty(<String?>[romaji, english, native, canonical]) ??
-            'Unknown';
+        'Unknown';
 
-    final Map<String, dynamic>? poster =
-        attrs['posterImage'] as Map<String, dynamic>?;
-    final Map<String, dynamic>? banner =
-        attrs['coverImage'] as Map<String, dynamic>?;
+    final Map<String, dynamic>? poster = _jsonMap(attrs['posterImage']);
+    final Map<String, dynamic>? banner = _jsonMap(attrs['coverImage']);
 
     int? startYear;
-    final String? startDate = attrs['startDate'] as String?;
+    final String? startDate = _jsonString(attrs['startDate']);
     if (startDate != null && startDate.length >= 4) {
       startYear = int.tryParse(startDate.substring(0, 4));
     }
 
-    final String? rating = attrs['averageRating'] as String?;
+    final String? rating = _jsonString(attrs['averageRating']);
     final double? ratingValue = rating != null ? double.tryParse(rating) : null;
 
     final Object? slug = attrs['slug'];
@@ -351,18 +352,20 @@ class Manga {
       title: title,
       titleEnglish: english,
       titleNative: native,
-      description: _stripHtml(attrs['synopsis'] as String?),
-      coverUrl: (poster?['original'] ?? poster?['large']) as String?,
-      coverUrlMedium: poster?['medium'] as String?,
+      description: _stripHtml(_jsonString(attrs['synopsis'])),
+      coverUrl:
+          _jsonString(poster?['original']) ?? _jsonString(poster?['large']),
+      coverUrlMedium: _jsonString(poster?['medium']),
       // Kitsu's `coverImage` is the wide banner (its `posterImage` is the cover)
       // — mapped to bannerUrl like AniList's bannerImage.
-      bannerUrl: (banner?['original'] ?? banner?['large']) as String?,
+      bannerUrl:
+          _jsonString(banner?['original']) ?? _jsonString(banner?['large']),
       averageScore: ratingValue?.round(),
-      status: kitsuStatusVocab(attrs['status'] as String?),
+      status: kitsuStatusVocab(_jsonString(attrs['status'])),
       startYear: startYear,
-      chapters: (attrs['chapterCount'] as num?)?.toInt(),
-      volumes: (attrs['volumeCount'] as num?)?.toInt(),
-      format: _kitsuFormat(attrs['subtype'] as String?),
+      chapters: _jsonInt(attrs['chapterCount']),
+      volumes: _jsonInt(attrs['volumeCount']),
+      format: _kitsuFormat(_jsonString(attrs['subtype'])),
       externalUrl: 'https://kitsu.io/manga/$path',
       updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
     );
@@ -542,8 +545,7 @@ class Manga {
     return (last != null && last.isNotEmpty) ? last : null;
   }
 
-  double? get rating10 =>
-      averageScore != null ? averageScore! / 10.0 : null;
+  double? get rating10 => averageScore != null ? averageScore! / 10.0 : null;
 
   String? get formattedRating => rating10?.toStringAsFixed(1);
 
@@ -560,23 +562,23 @@ class Manga {
   /// Maps an AniList / MangaBaka manga [format] code to a display label.
   /// Returns the raw code for unrecognised values and `null` when absent.
   static String? mangaFormatLabel(String? format) => switch (format) {
-        'MANGA' => 'Manga',
-        'NOVEL' => 'Novel',
-        'ONE_SHOT' => 'One-shot',
-        'MANHWA' => 'Manhwa',
-        'MANHUA' => 'Manhua',
-        'LIGHT_NOVEL' => 'Light Novel',
-        _ => format,
-      };
+    'MANGA' => 'Manga',
+    'NOVEL' => 'Novel',
+    'ONE_SHOT' => 'One-shot',
+    'MANHWA' => 'Manhwa',
+    'MANHUA' => 'Manhua',
+    'LIGHT_NOVEL' => 'Light Novel',
+    _ => format,
+  };
 
   String? get statusLabel => switch (status) {
-        'FINISHED' => 'Finished',
-        'RELEASING' => 'Releasing',
-        'NOT_YET_RELEASED' => 'Not Yet Released',
-        'CANCELLED' => 'Cancelled',
-        'HIATUS' => 'Hiatus',
-        _ => status,
-      };
+    'FINISHED' => 'Finished',
+    'RELEASING' => 'Releasing',
+    'NOT_YET_RELEASED' => 'Not Yet Released',
+    'CANCELLED' => 'Cancelled',
+    'HIATUS' => 'Hiatus',
+    _ => status,
+  };
 
   String get progressString {
     final String ch = chapters != null ? '$chapters ch' : '? ch';
@@ -622,8 +624,7 @@ class Manga {
       'authors': authors != null ? jsonEncode(authors) : null,
       'external_url': externalUrl,
       'banner_url': bannerUrl,
-      'updated_at':
-          updatedAt ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      'updated_at': updatedAt ?? DateTime.now().millisecondsSinceEpoch ~/ 1000,
     };
   }
 
@@ -705,8 +706,10 @@ class Manga {
       return s;
     }
 
-    matches.sort((Map<String, dynamic> a, Map<String, dynamic> b) =>
-        score(b).compareTo(score(a)));
+    matches.sort(
+      (Map<String, dynamic> a, Map<String, dynamic> b) =>
+          score(b).compareTo(score(a)),
+    );
     final Object? title = matches.first['title'];
     return (title is String && title.isNotEmpty) ? title : null;
   }
@@ -739,23 +742,23 @@ class Manga {
   /// Maps MangaBaka `status` onto the AniList-style vocabulary used across the
   /// app ([statusLabel], progress UI).
   static String? _mangaBakaStatus(String? status) => switch (status) {
-        'releasing' => 'RELEASING',
-        'completed' => 'FINISHED',
-        'hiatus' => 'HIATUS',
-        'cancelled' => 'CANCELLED',
-        'upcoming' => 'NOT_YET_RELEASED',
-        _ => null,
-      };
+    'releasing' => 'RELEASING',
+    'completed' => 'FINISHED',
+    'hiatus' => 'HIATUS',
+    'cancelled' => 'CANCELLED',
+    'upcoming' => 'NOT_YET_RELEASED',
+    _ => null,
+  };
 
   /// Maps MangaBaka `type` onto the AniList-style format vocabulary.
   static String? _mangaBakaFormat(String? type) => switch (type) {
-        'manga' => 'MANGA',
-        'manhwa' => 'MANHWA',
-        'manhua' => 'MANHUA',
-        'novel' => 'LIGHT_NOVEL',
-        'other' => 'ONE_SHOT',
-        _ => null,
-      };
+    'manga' => 'MANGA',
+    'manhwa' => 'MANHWA',
+    'manhua' => 'MANHUA',
+    'novel' => 'LIGHT_NOVEL',
+    'other' => 'ONE_SHOT',
+    _ => null,
+  };
 
   /// Chinese keys on a MangaDex localized map, most specific first: `zh` is
   /// Simplified and `zh-hk` Traditional, and a record may carry either, both
@@ -791,6 +794,23 @@ class Manga {
   static String? _nonEmpty(Object? value) =>
       (value is String && value.isNotEmpty) ? value : null;
 
+  /// Defensive casts for untrusted API JSON: a wrong-shaped field reads as
+  /// null instead of throwing.
+  static Map<String, dynamic>? _jsonMap(Object? value) =>
+      value is Map<String, dynamic> ? value : null;
+
+  static List<dynamic>? _jsonList(Object? value) =>
+      value is List<dynamic> ? value : null;
+
+  static String? _jsonString(Object? value) => value is String ? value : null;
+
+  static int? _jsonInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
   /// Parses a MangaDex `lastChapter` / `lastVolume` number (a possibly-decimal
   /// string like `"700"` or `"215.5"`); empty / unparseable → null.
   static int? _parseCount(Object? value) {
@@ -800,30 +820,30 @@ class Manga {
 
   /// Maps MangaDex `status` onto the AniList-style vocabulary.
   static String? _mangaDexStatus(String? status) => switch (status) {
-        'ongoing' => 'RELEASING',
-        'completed' => 'FINISHED',
-        'hiatus' => 'HIATUS',
-        'cancelled' => 'CANCELLED',
-        _ => null,
-      };
+    'ongoing' => 'RELEASING',
+    'completed' => 'FINISHED',
+    'hiatus' => 'HIATUS',
+    'cancelled' => 'CANCELLED',
+    _ => null,
+  };
 
   /// Infers a format code from the MangaDex `originalLanguage`.
   static String? _mangaDexFormat(String? language) => switch (language) {
-        'ja' => 'MANGA',
-        'ko' => 'MANHWA',
-        'zh' || 'zh-hk' => 'MANHUA',
-        _ => null,
-      };
+    'ja' => 'MANGA',
+    'ko' => 'MANHWA',
+    'zh' || 'zh-hk' => 'MANHUA',
+    _ => null,
+  };
 
   /// Maps Kitsu manga `subtype` onto the AniList-style format vocabulary.
   static String? _kitsuFormat(String? subtype) => switch (subtype) {
-        'manga' => 'MANGA',
-        'novel' => 'LIGHT_NOVEL',
-        'manhwa' => 'MANHWA',
-        'manhua' => 'MANHUA',
-        'oneshot' => 'ONE_SHOT',
-        _ => null,
-      };
+    'manga' => 'MANGA',
+    'novel' => 'LIGHT_NOVEL',
+    'manhwa' => 'MANHWA',
+    'manhua' => 'MANHUA',
+    'oneshot' => 'ONE_SHOT',
+    _ => null,
+  };
 
   static final RegExp _htmlTagPattern = RegExp('<[^>]*>');
 

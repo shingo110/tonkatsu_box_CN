@@ -30,12 +30,14 @@ class WeReadSearchApi {
       );
       final List<Book> books = _parseBooks(resp.data);
 
-      // Neither `totalCount` nor `hasMore` can end the run: the former jumped
-      // from 59 to 10087 mid-scroll and the latter never left 1. A page that
-      // comes back empty is the real terminator — the browse provider already
-      // stops on one — and the offset ceiling bounds everything else.
-      final bool hasMore =
-          books.isNotEmpty && maxIdx + count <= kWeReadMaxOffset;
+      // `totalCount` did jump between requests for some queries, so it only
+      // shortens the run — it can never extend it, and an empty page is still
+      // the authoritative terminator. Dropping the old 400-offset ceiling lets
+      // searches with more than 400 results page all the way through.
+      final int? total = _parseTotal(resp.data);
+      final bool hasMore = total != null
+          ? books.isNotEmpty && maxIdx + count < total
+          : books.isNotEmpty;
 
       return (books, hasMore, hasMore ? page + 1 : page);
     } on DioException catch (e) {
@@ -76,5 +78,15 @@ class WeReadSearchApi {
       }
     }
     return out;
+  }
+
+  /// WeRead's total is named `totalCount` (older deployments answered `total`);
+  /// either is accepted and a missing one leaves pagination to empty pages.
+  static int? _parseTotal(Object? data) {
+    if (data is! Map<String, dynamic>) return null;
+    final Object? raw = data['totalCount'] ?? data['total'];
+    if (raw is num) return raw.toInt();
+    if (raw is String) return int.tryParse(raw);
+    return null;
   }
 }

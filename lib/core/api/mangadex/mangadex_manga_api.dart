@@ -18,8 +18,7 @@ class MangaDexMangaApi {
 
   /// Keys already carry `[]` (the PHP-array style MangaDex expects), so
   /// [ListFormat.multi] repeats them verbatim; multiCompatible adds a 2nd `[]`.
-  static final Options _arrayOptions =
-      Options(listFormat: ListFormat.multi);
+  static final Options _arrayOptions = Options(listFormat: ListFormat.multi);
 
   static const List<String> _includes = <String>[
     'cover_art',
@@ -72,10 +71,15 @@ class MangaDexMangaApi {
           (data['data'] as List<dynamic>?) ?? <dynamic>[];
       final List<Manga> mangas = _parseSeries(rows);
 
-      final int total = (data['total'] as num?)?.toInt() ?? rows.length;
+      final int? total = (data['total'] as num?)?.toInt();
       final int limit = (data['limit'] as num?)?.toInt() ?? perPage;
-      final bool hasMore = offset + rows.length < total;
-      final int totalPages = limit > 0 ? (total / limit).ceil() : 1;
+      // MangaDex always sends `total`; when it is missing (an upstream drift)
+      // a full page implies a next one instead of dying on page one.
+      final bool hasMore = total != null
+          ? offset + rows.length < total
+          : rows.length == limit;
+      final int effectiveTotal = total ?? offset + rows.length;
+      final int totalPages = limit > 0 ? (effectiveTotal / limit).ceil() : 1;
 
       return (mangas, hasMore, totalPages < 1 ? 1 : totalPages);
     } on DioException catch (e) {
@@ -110,8 +114,9 @@ class MangaDexMangaApi {
     int limit = 20,
   }) async {
     try {
-      final Response<dynamic> resp =
-          await _client.get('manga/$seedUuid/recommendation');
+      final Response<dynamic> resp = await _client.get(
+        'manga/$seedUuid/recommendation',
+      );
       final Map<String, dynamic> data =
           (resp.data as Map<String, dynamic>?) ?? <String, dynamic>{};
       final List<dynamic> rows =

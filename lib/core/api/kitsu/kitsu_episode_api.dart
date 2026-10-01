@@ -16,6 +16,11 @@ class KitsuEpisodeApi {
   /// In-flight page requests per anime.
   static const int _maxConcurrentPages = 6;
 
+  /// Highest page fetched when `meta.count` is missing — long anime can run to
+  /// hundreds of episodes, so the serially-walked path is bounded while the
+  /// meta.count-guided path keeps parallel batching.
+  static const int kMaxPages = 200;
+
   final KitsuHttpClient _client;
 
   /// Total episode count in one tiny request, for anime whose cached
@@ -38,14 +43,17 @@ class KitsuEpisodeApi {
       final int? total = _client.totalCount(firstPage);
 
       if (total == null) {
-        // No meta.count — crawl serially until links.next disappears.
+        // No meta.count — crawl serially until links.next disappears (or the
+        // hard page cap is hit, so a runaway series can't page forever).
         bool more = _client.hasNext(firstPage) ?? episodes.length == _pageLimit;
         int offset = _pageLimit;
-        while (more) {
+        int pageCount = 1;
+        while (more && pageCount < kMaxPages) {
           final Map<String, dynamic> page = await _page(animeId, offset);
           final List<TvEpisode> parsed = _parse(page, animeId);
           episodes.addAll(parsed);
           offset += _pageLimit;
+          pageCount++;
           more = _client.hasNext(page) ?? parsed.length == _pageLimit;
         }
       } else {
@@ -100,8 +108,7 @@ class KitsuEpisodeApi {
     final List<TvEpisode> out = <TvEpisode>[];
     for (final Map<String, dynamic> row
         in rows.whereType<Map<String, dynamic>>()) {
-      final TvEpisode? episode =
-          TvEpisode.tryFromKitsu(row, showId: animeId);
+      final TvEpisode? episode = TvEpisode.tryFromKitsu(row, showId: animeId);
       if (episode != null) out.add(episode);
     }
     return out;

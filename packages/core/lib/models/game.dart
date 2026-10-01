@@ -21,62 +21,92 @@ class Game {
 
   factory Game.fromJson(Map<String, dynamic> json) {
     String? coverUrl;
-    if (json['cover'] != null) {
-      final Map<String, dynamic> cover = json['cover'] as Map<String, dynamic>;
-      final String? imageId = cover['image_id'] as String?;
-      if (imageId != null) {
-        // cover_big is 264x374.
-        coverUrl = 'https://images.igdb.com/igdb/image/upload/t_cover_big/$imageId.jpg';
-      }
+    final Map<String, dynamic>? cover = _jsonMap(json['cover']);
+    final String? imageId = _jsonString(cover?['image_id']);
+    if (imageId != null) {
+      // cover_big is 264x374.
+      coverUrl =
+          'https://images.igdb.com/igdb/image/upload/t_cover_big/$imageId.jpg';
     }
 
+    // Genre entries arrive as `{name}` objects; a wrong-shaped one is dropped
+    // rather than thrown out of the parse.
     List<String>? genres;
-    if (json['genres'] != null) {
-      final List<dynamic> genresList = json['genres'] as List<dynamic>;
+    final List<dynamic>? genresList = _jsonList(json['genres']);
+    if (genresList != null && genresList.isNotEmpty) {
       genres = genresList
-          .map((dynamic g) => (g as Map<String, dynamic>)['name'] as String)
+          .map((Object? g) {
+            final Map<String, dynamic>? entry = _jsonMap(g);
+            return entry == null ? null : _jsonString(entry['name']);
+          })
+          .whereType<String>()
           .toList();
+      if (genres.isEmpty) genres = null;
     }
 
-    // Ids only; names are resolved from the platforms table.
+    // Ids only; names are resolved from the platforms table. Accepts
+    // List<int>, List<num>, List<Map{'id':?}> and List<String> — IGDB has
+    // drifted between these shapes.
     List<int>? platformIds;
-    if (json['platforms'] != null) {
-      final List<dynamic> platformsList = json['platforms'] as List<dynamic>;
-      platformIds = platformsList.map((dynamic p) => p as int).toList();
+    final Object? rawPlatforms = json['platforms'];
+    if (rawPlatforms is List) {
+      final List<int> parsed = <int>[];
+      for (final Object? p in rawPlatforms) {
+        if (p is int) {
+          parsed.add(p);
+        } else if (p is num) {
+          parsed.add(p.toInt());
+        } else if (p is Map) {
+          final Object? id = p['id'];
+          if (id is num) {
+            parsed.add(id.toInt());
+          } else if (id is String) {
+            final int? v = int.tryParse(id);
+            if (v != null && v >= 0) parsed.add(v);
+          }
+        } else if (p is String) {
+          final int? v = int.tryParse(p);
+          if (v != null && v >= 0) parsed.add(v);
+        }
+      }
+      platformIds = parsed;
     }
 
     DateTime? releaseDate;
-    if (json['first_release_date'] != null) {
-      releaseDate = DateTime.fromMillisecondsSinceEpoch(
-        (json['first_release_date'] as int) * 1000,
-      );
+    final Object? rawReleaseDate = json['first_release_date'];
+    if (rawReleaseDate != null) {
+      final int? epochSeconds = rawReleaseDate is num
+          ? rawReleaseDate.toInt()
+          : rawReleaseDate is String
+          ? int.tryParse(rawReleaseDate)
+          : null;
+      if (epochSeconds != null) {
+        releaseDate = DateTime.fromMillisecondsSinceEpoch(epochSeconds * 1000);
+      }
     }
 
     String? artworkUrl;
-    if (json['artworks'] != null) {
-      final List<dynamic> artworks = json['artworks'] as List<dynamic>;
-      if (artworks.isNotEmpty) {
-        final Map<String, dynamic> art =
-            artworks.first as Map<String, dynamic>;
-        final String? artImageId = art['image_id'] as String?;
-        if (artImageId != null) {
-          artworkUrl =
-              'https://images.igdb.com/igdb/image/upload/t_720p/$artImageId.jpg';
-        }
+    final List<dynamic>? artworks = _jsonList(json['artworks']);
+    if (artworks != null && artworks.isNotEmpty) {
+      final Map<String, dynamic>? art = _jsonMap(artworks.first);
+      final String? artImageId = _jsonString(art?['image_id']);
+      if (artImageId != null) {
+        artworkUrl =
+            'https://images.igdb.com/igdb/image/upload/t_720p/$artImageId.jpg';
       }
     }
 
     return Game(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      summary: json['summary'] as String?,
+      id: _jsonInt(json['id']) ?? 0,
+      name: _jsonString(json['name']) ?? 'Unknown',
+      summary: _jsonString(json['summary']),
       coverUrl: coverUrl,
       releaseDate: releaseDate,
-      rating: (json['rating'] as num?)?.toDouble(),
-      ratingCount: json['rating_count'] as int?,
+      rating: _ratingFromJson(json['rating']),
+      ratingCount: _jsonInt(json['rating_count']),
       genres: genres,
       platformIds: platformIds,
-      externalUrl: json['url'] as String?,
+      externalUrl: _jsonString(json['url']),
       cachedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
       artworkUrl: artworkUrl,
     );
@@ -176,6 +206,31 @@ class Game {
   /// Transient: fetched with search, never stored — excluded from [toDb] /
   /// [fromDb] / [fromJson].
   final GameTimeToBeat? timeToBeat;
+
+  /// IGDB has returned `rating` as num and (rarely) as a string; both are
+  /// accepted, anything else reads as null.
+  static double? _ratingFromJson(Object? raw) {
+    if (raw is num) return raw.toDouble();
+    if (raw is String) return double.tryParse(raw);
+    return null;
+  }
+
+  /// Defensive casts for untrusted API JSON: a wrong-shaped field reads as
+  /// null instead of throwing. Mirrors `Anime` / `Manga`.
+  static Map<String, dynamic>? _jsonMap(Object? value) =>
+      value is Map<String, dynamic> ? value : null;
+
+  static List<dynamic>? _jsonList(Object? value) =>
+      value is List<dynamic> ? value : null;
+
+  static String? _jsonString(Object? value) => value is String ? value : null;
+
+  static int? _jsonInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
 
   int? get releaseYear => releaseDate?.year;
 
