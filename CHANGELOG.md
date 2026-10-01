@@ -12,6 +12,52 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — a fourth palette theme: Eva azure
+
+The app shipped three palettes (dark, sakura, PS1 grey); a fourth is again data
+plus registration rather than new machinery: one palette file, four registration
+points, one texture and one l10n key per locale. No widget, no `packages/core`,
+no schema change.
+
+The palette comes from the Eva Design System shade card. Its values were
+**sampled off the supplied sheet, not recalled**: five columns x eight rows were
+located by scanning the pixels, and each cell read as the median of a centre
+patch — a single-pixel read returns `#87BA13` where the card prints `#87BA12`.
+That puts the sampled 500 row within 1/255 of every hex the card prints
+(`#3366FF`, `#87BA12`, `#00B6FF`, `#FFA100`, `#FF3236`). The sheet is cropped:
+800 is clipped and 900 is absent, so nothing above 800 is used and no value was
+extrapolated.
+
+The card is a set of colour ramps and carries no neutrals, so the theme is built
+the way the card is. The Primary column supplies the skeleton — background 100,
+border 200, text ramp 800 -> 700 — and the other four columns supply the semantic
+roles, each taken at the darkest step that still reads. At 500 the mid values are
+unusable as glyphs on the pale ground (Success `#87BA12` measures 1.81, Info
+`#00B6FF` 1.80, Warning `#FFA100` 1.58), so those run 600/700/800 instead; the
+500 row survives only where the colour is a fill under white text (brand
+`#3366FF` 4.68, badge `#FF3236` 3.64). Three hues the card does not carry are
+**mixed from two card colours** rather than invented — violet = Primary 600 +
+Danger 700, magenta = Danger 500 + Primary 600, teal = Info 600 + Success 700 —
+so every token still descends from the card. `textTertiary` cannot come off the
+ramp either: Primary 400 measures 2.34, under the 2.5 floor, so that tier is the
+Primary hue de-saturated to `#6C7A9C` (3.35).
+
+Measured, not eyeballed: textPrimary 9.53 on the background and 12.21 on a card,
+textSecondary 7.12, textTertiary 3.35, textPrimary on surfaceLight 10.84, onBrand
+4.68, onBadge 3.64. Every glyph accent clears 2.81; the three preceding themes
+sit between 2.33 and 3.4.
+
+- `lib/shared/theme/palettes/eva_palette.dart`: the 41 colour roles.
+- `lib/shared/theme/app_palette.dart`, `app_theme_id.dart`: `eva` alias and enum member.
+- `lib/features/settings/screens/settings_screen.dart`: `_themeLabel` arm.
+- `lib/shared/theme/app_assets.dart`: `backgroundTileEva`.
+- `assets/images/background_tile_eva.png`: the shared alpha mask, re-tinted `#3366FF`.
+- `tool/theme_tiles/make_theme_tile.py`: the Eva tint added to `TILES`.
+- `lib/l10n/app_{en,zh,es,fr,pt,ru}.arb`: `settingsThemeEva`.
+- `probe/eva_shades_probe.py`, `probe/eva_shades_sample.py`, `probe/eva_pick_tokens.py`,
+  `probe/eva_finalize_tokens.py`, `probe/apply_eva_registration.py`: the sampling,
+  measurement and registration worksheets behind the numbers above.
+
 ## [cn] Added — a third palette theme: PS1 retro grey
 
 The app shipped two palettes (dark, sakura); both are re-tints of one set of
