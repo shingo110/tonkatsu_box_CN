@@ -1311,7 +1311,27 @@ class ImportService {
           // files written before native_id can't be resolved.
           final String? uuid = ref.nativeId;
           return uuid != null ? await _mangaDexApi?.getByUuid(uuid) : null;
-        default:
+        case DataSource.igdb:
+        case DataSource.taptap:
+        case DataSource.tmdb:
+        case DataSource.tvmaze:
+        case DataSource.tvdb:
+        case DataSource.steamGridDb:
+        case DataSource.vgMaps:
+        case DataSource.vndb:
+        case DataSource.anilist:
+        case DataSource.openLibrary:
+        case DataSource.fantlab:
+        case DataSource.comicVine:
+        case DataSource.googleBooks:
+        case DataSource.hardcover:
+        case DataSource.neodb:
+        case DataSource.weread:
+        case DataSource.douban:
+        case DataSource.musicBrainz:
+        case DataSource.podcastIndex:
+        case DataSource.ximalaya:
+        case DataSource.local:
           return await _aniListApi?.getMangaById(ref.externalId);
       }
     } on Exception catch (e) {
@@ -1333,7 +1353,28 @@ class ImportService {
           return await _doubanApi?.getAnimeById(ref.externalId.toString());
         case DataSource.kitsu:
           return await _kitsuApi?.getAnimeById(ref.externalId);
-        default:
+        case DataSource.igdb:
+        case DataSource.taptap:
+        case DataSource.tmdb:
+        case DataSource.tvmaze:
+        case DataSource.tvdb:
+        case DataSource.steamGridDb:
+        case DataSource.vgMaps:
+        case DataSource.vndb:
+        case DataSource.anilist:
+        case DataSource.mangabaka:
+        case DataSource.mangadex:
+        case DataSource.openLibrary:
+        case DataSource.fantlab:
+        case DataSource.comicVine:
+        case DataSource.googleBooks:
+        case DataSource.hardcover:
+        case DataSource.neodb:
+        case DataSource.weread:
+        case DataSource.musicBrainz:
+        case DataSource.podcastIndex:
+        case DataSource.ximalaya:
+        case DataSource.local:
           return await _aniListApi?.getAnimeById(ref.externalId);
       }
     } on Exception catch (e) {
@@ -1397,7 +1438,23 @@ class ImportService {
           return null;
         case DataSource.douban:
           return await _doubanApi?.getBook(nativeId);
-        default:
+        case DataSource.igdb:
+        case DataSource.taptap:
+        case DataSource.tmdb:
+        case DataSource.tvmaze:
+        case DataSource.tvdb:
+        case DataSource.steamGridDb:
+        case DataSource.vgMaps:
+        case DataSource.vndb:
+        case DataSource.anilist:
+        case DataSource.bangumi:
+        case DataSource.mangabaka:
+        case DataSource.mangadex:
+        case DataSource.kitsu:
+        case DataSource.musicBrainz:
+        case DataSource.podcastIndex:
+        case DataSource.ximalaya:
+        case DataSource.local:
           return null;
       }
     } on Exception catch (e) {

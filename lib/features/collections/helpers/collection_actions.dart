@@ -661,7 +661,28 @@ class CollectionActions {
               anime = await ref
                   .read(doubanApiProvider)
                   .getAnimeById(item.externalId.toString());
-            default:
+            case DataSource.igdb:
+            case DataSource.taptap:
+            case DataSource.tmdb:
+            case DataSource.tvmaze:
+            case DataSource.tvdb:
+            case DataSource.steamGridDb:
+            case DataSource.vgMaps:
+            case DataSource.vndb:
+            case DataSource.anilist:
+            case DataSource.mangabaka:
+            case DataSource.mangadex:
+            case DataSource.openLibrary:
+            case DataSource.fantlab:
+            case DataSource.comicVine:
+            case DataSource.googleBooks:
+            case DataSource.hardcover:
+            case DataSource.neodb:
+            case DataSource.weread:
+            case DataSource.musicBrainz:
+            case DataSource.podcastIndex:
+            case DataSource.ximalaya:
+            case DataSource.local:
               anime = await ref
                   .read(aniListApiProvider)
                   .getAnimeById(item.externalId);
@@ -671,7 +692,8 @@ class CollectionActions {
         case MediaType.manga:
           final Manga? manga;
           switch (item.source) {
-            // Without this arm the default below spends a Bangumi id on AniList.
+            // Must stay explicit: the shared AniList arm further down would
+            // otherwise spend a Bangumi id on the wrong catalogue.
             case DataSource.bangumi:
               manga = await ref
                   .read(bangumiApiProvider)
@@ -688,7 +710,27 @@ class CollectionActions {
               manga = uuid != null
                   ? await ref.read(mangaDexApiProvider).getByUuid(uuid)
                   : null;
-            default:
+            case DataSource.igdb:
+            case DataSource.taptap:
+            case DataSource.tmdb:
+            case DataSource.tvmaze:
+            case DataSource.tvdb:
+            case DataSource.steamGridDb:
+            case DataSource.vgMaps:
+            case DataSource.vndb:
+            case DataSource.anilist:
+            case DataSource.openLibrary:
+            case DataSource.fantlab:
+            case DataSource.comicVine:
+            case DataSource.googleBooks:
+            case DataSource.hardcover:
+            case DataSource.neodb:
+            case DataSource.weread:
+            case DataSource.douban:
+            case DataSource.musicBrainz:
+            case DataSource.podcastIndex:
+            case DataSource.ximalaya:
+            case DataSource.local:
               manga = await ref
                   .read(aniListApiProvider)
                   .getMangaById(item.externalId);

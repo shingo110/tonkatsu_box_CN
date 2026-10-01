@@ -25,8 +25,9 @@ abstract class TvEpisodeSource {
   Future<List<TvEpisode>> getSeasonEpisodes(int showId, int seasonNumber);
 }
 
-/// Resolves the [TvEpisodeSource] for an item's [DataSource]. Unknown
-/// sources fall back to TMDB.
+/// Resolves the [TvEpisodeSource] for an item's [DataSource]. Every value is
+/// mapped explicitly, so a new [DataSource] fails to compile until it is routed;
+/// catalogues without their own episode API share the TMDB one.
 final Provider<TvEpisodeSource Function(DataSource)>
     tvEpisodeSourceResolverProvider =
     Provider<TvEpisodeSource Function(DataSource)>((Ref ref) {
@@ -46,6 +47,26 @@ final Provider<TvEpisodeSource Function(DataSource)>
         // Without this arm Douban would fall through to TMDB below and spend a
         // Douban id on an unrelated show.
         DataSource.douban => douban,
-        _ => tmdb,
+        DataSource.igdb ||
+        DataSource.taptap ||
+        DataSource.tmdb ||
+        DataSource.steamGridDb ||
+        DataSource.vgMaps ||
+        DataSource.vndb ||
+        DataSource.anilist ||
+        DataSource.bangumi ||
+        DataSource.mangabaka ||
+        DataSource.mangadex ||
+        DataSource.openLibrary ||
+        DataSource.fantlab ||
+        DataSource.comicVine ||
+        DataSource.googleBooks ||
+        DataSource.hardcover ||
+        DataSource.neodb ||
+        DataSource.weread ||
+        DataSource.musicBrainz ||
+        DataSource.podcastIndex ||
+        DataSource.ximalaya ||
+        DataSource.local => tmdb,
       };
 });
