@@ -244,13 +244,24 @@ flutter run -d windows   # 或 linux / android / chrome
 git clone https://github.com/shingo110/tonkatsu_box_CN.git
 cd tonkatsu_box_CN
 docker compose up -d --build
-# 首次构建需数分钟（容器内编译 Web 端），随后访问 http://<服务器IP>:8080
+# 首次构建需数分钟（容器内编译 Web 端）；端口默认只绑宿主 127.0.0.1
+# 本机访问 http://127.0.0.1:8080
+# 要从局域网其它设备访问：在 .env 里设 TONKATSU_BIND=0.0.0.0 重建，然后取令牌：
+#   docker compose logs tonkatsu | grep 'Auth token'
 ```
 
-配置项（`TONKATSU_DATA_PATH` / `TONKATSU_PORT` / `PUID` / `PGID` / API 密钥）见 [`.env.example`](.env.example)。服务端细节见 [`server/README.md`](server/README.md)，接口契约见 [`server/PROTOCOL.md`](server/PROTOCOL.md)。
+> [!IMPORTANT]
+> 服务端一旦监听到**回环地址之外**（含 Docker 默认的 `0.0.0.0`），就强制要求 bearer 令牌：
+> `/rpc` 与 `/proxy/*` 无令牌一律 401，而 `/health`、静态页面与封面图 `/img` 保持公开
+> （浏览器原生的 `Image` 请求无法携带请求头，封面必须匿名可取）。
+> 令牌在首次启动时生成并打印到日志，同时落在 `<TONKATSU_DATA_PATH>/auth_token`。
+> 浏览器端在**设置 → 凭证 → 密钥保存在服务器上**填入即可；只绑 `127.0.0.1` 时不校验，无需填写。
+> 令牌存在数据目录（`<TONKATSU_DATA_PATH>/auth_token`）里，容器重建不会改变，浏览器只需填一次。
+
+配置项（`TONKATSU_DATA_PATH` / `TONKATSU_BIND` / `TONKATSU_PORT` / `PUID` / `PGID` / API 密钥）见 [`.env.example`](.env.example)。服务端细节见 [`server/README.md`](server/README.md)，接口契约见 [`server/PROTOCOL.md`](server/PROTOCOL.md)。
 
 > [!WARNING]
-> Web 版没有账号与密码体系，**只应暴露在可信局域网内**。
+> Web 版没有账号体系，令牌即是全量读写凭据，**只应暴露在可信网络内**。
 >
 > 由于浏览器无法直连外部 API（跨域、User-Agent 被剥离、密钥不能下发到标签页），Web 端的所有外部请求都会经由服务端的 `/proxy/<slug>/…` 转发。可转发的目标在 [`packages/core/lib/api/proxy_targets.dart`](packages/core/lib/api/proxy_targets.dart) 中白名单化 —— 它是一张允许清单，不是开放中继。
 >

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 
 import '../../shared/constants/platform_features.dart';
+import '../selfhost/server_auth_token.dart';
 import 'host_rate_limiter.dart';
 import 'proxy_rewrite_interceptor.dart';
 
@@ -31,7 +32,12 @@ Dio createApiDio({
       receiveTimeout: kIsWebBuild ? _atLeastFloor(receiveTimeout) : receiveTimeout,
       // The browser refuses to let a page set User-Agent and logs an error for
       // every request; on web the proxy is the one that sends it anyway.
-      headers: kIsWebBuild ? _withoutUserAgent(headers) : headers,
+      headers: kIsWebBuild
+          ? ServerAuthToken.withToken(
+              _withoutUserAgent(headers) ?? const <String, String>{},
+              ServerAuthToken.current,
+            )
+          : headers,
       responseType: responseType,
     ),
   );
