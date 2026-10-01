@@ -44,10 +44,18 @@
    - `lib/features/settings/content/credentials_content.dart` —— 一节（`_buildSourceHeader(source: …)` 自动给出"获取密钥"链接 + 输入框 + 提示）
    - `lib/features/welcome/widgets/welcome_step_sources.dart` —— `_KeyEditor.build` 的 **switch 加一支**（漏 → 向导卡片整块空白，无输入框无链接无提示）与 `_KeyBadge._resolve` 的 **mandatory 分支加判定**（漏 → 落到 IGDB 的 `hasCredentials`，误报"密钥已保存"）
 
-**Web 端另加**：`packages/core/lib/api/proxy_targets.dart` 一行；带密钥的还在 `server/lib/src/proxy_handler.dart` 的 `ApiProxy._authorize` 加分支。
+**Web 端另加**：`packages/core/lib/api/proxy_targets.dart` 一行；带密钥的还在 `server/lib/src/proxy_handler.dart` 的 `ApiProxy._authorize` 加分支；**封面宿主登记进 `server/lib/src/image_handler.dart` 的 `_allowedImageHosts`**（后缀根一条即覆盖分片 CDN：`doubanio.com` 覆盖 `img1`–`img9`，`steamgriddb.com` 覆盖 `cdn`/`cdn2`）。
 
-**三个「漏了不报错、只静默降级」连带点**：
+**四个「漏了不报错、只静默降级」连带点**：
 
+- `server/lib/src/image_handler.dart` 的 `_allowedImageHosts` —— **新源的封面宿主必须登记**。
+  Web 端封面链路是：`isCacheEnabled()`（Web 恒 false）⇒ `getImageUri` 直接返回 remoteUrl
+  ⇒ `_buildNetworkImage` 包成 `/img/<folder>/<id>?src=<remote>`。白名单外一律 **403**，
+  而 `Image.network` 的 errorBuilder 只画 `Icons.broken_image`（**没有回落直连**）
+  ⇒ 漏登记 = 该源在 Web 端**所有封面都是裂图**，且**服务端日志与测试都不会报错**
+  （`cn-v0.44.6` 第三轮才发现：白名单只照抄了审查报告 P1-A5 举的例，境内六个源一个没登记）。
+  反向纪律：`probe/` 里的**探测候选**域名（`hdslb.com` / `iqyipic.com` /
+  `ykimg.alicdn.com` / `126.net`）**未装源就不加** —— 这是 SSRF 闸门，不是开放列表。
 - `lib/features/collections/helpers/collection_actions.dart` —— 该媒体类型刷新 switch，新源 id 必须发对的查询目标（例子：Bangumi id 发去 AniList 查）
 - 相似推荐等按源支配的穷尽 switch —— 不是我们源可用的端点，返回空即可
 - `lib/core/api/api_error_extract.dart` —— 新源的 `XxxApiException` 必须在 `extractApiError` 的
@@ -92,6 +100,14 @@
 | P10 | 构建日志刷 `this and base files have different roots: C:\Users\ZL\AppData\Local\Pub\Cache\… and D:\Projects\…\android` 的 suppressed 异常 | pub 缓存在 C:、项目在 D:，Kotlin 增量编译器无法跨盘相对化路径 | **不影响产物，APK 照常生成，可忽略**；实在碍眼就删 `build/<plugin>/kotlin/`，或把 `PUB_CACHE` 也挪到 D: |
 | P11 | 用 Python 补丁脚本改本仓库文件时，多行锚点**看着一模一样**却 `count == 0` | 工作树是 **CRLF**，而脚本里的锚点习惯按 `\n` 书写 | 替换函数里按目标文件**实际行尾**归一化（`eol = '\r\n' if '\r\n' in text else '\n'`，读文件用 `newline=''`）。逐行改写 JSON / arb 时**要保留行尾的 `\r`**，否则整文件行尾被改写。新写的 Dart 文件默认 LF，提交前转 CRLF。**注**：Edit 工具本身会保留 CRLF，只有手写脚本要自己管 |
 | P12 | 想校验 APK 签名，`cmd //c "…apksigner.bat …"` 一条输出都没有 | 同「PowerShell 无 stdout」一类，沙箱 shim 截断 | **直接用 POSIX 路径调用 `.bat`**：`"D:/Software/Android/build-tools/37.0.0/apksigner.bat" verify --print-certs <apk>`。另：`llvm-objcopy … Permission denied`（x86_64 符号表）**不致命** —— APK 照常产出、三 ABI 齐全，只少 Play 用的调试符号 |
+
+> **P13 起未回填本表**：P13–P22 的条目在 `.workbuddy/memory/MEMORY.md` 的环境坑表
+> （含 `flutter analyze` 是 CI 第一关而本机跑不了 P18、dart 子进程全崩 P19、
+> `dart <file>` 的牙齿边界 P20、整个仓库是旧版格式化风格 P21、重推 tag 逐字复刻 P22）。
+> 本表按同一编号继续追加。
+
+| P23 | `dart test` 报 `CreateFile failed 231`（ERROR_PIPE_BUSY），看着像「本机根本不能跑测试」 | `dart test` 走 `package:test` 的**命令行 runner**，它会再 spawn 子进程，而本沙箱的 dart 一创建管道就崩（`dart analyze` / `dart compile` 同理，`gen_kernel_aot`/`AnalysisServer._startProcess` 都是同一崩点） | **把单个测试文件当脚本直跑**：`cd server && dart test/image_handler_test.dart` ⇒ `+26: All tests passed!`。纯 Dart 侧（`server/`、`packages/core/`）就此**恢复本机测试能力**；Flutter 侧仍需引擎，本机仍不可用 |
+| P24 | 想端到端验证 handler 但没有可用的测试框架 | —— | 把探针 `.dart` **放进包目录**（如 `server/_probe.dart`），即可 `import 'package:tonkatsu_server/src/app_handler.dart'` 直调真实 `buildAppHandler`。坑：`Handler` 返回 `FutureOr<Response>`，探针里要包一层 `async` 才过 CFE；Python 的 `subprocess` 里 `dart` 不在 PATH，要用绝对路径 `C:\flutter\bin\cache\dart-sdk\bin\dart.exe`。**用后即删**（`flutter analyze` 会扫到；探针放仓库根外的 `probe/` 则解析不到包） |
 
 ## 五、测试设施坑（mocktail，都是血泪）
 
