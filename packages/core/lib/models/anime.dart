@@ -117,12 +117,10 @@ class Anime {
       duration: _jsonInt(json['duration']),
       format: _jsonString(json['format']),
       sourceMaterial: _jsonString(json['source']),
-      genres: genresList == null
-          ? null
-          : genresList
-                .map((Object? g) => g is String ? g : null)
-                .whereType<String>()
-                .toList(),
+      genres: genresList
+          ?.map((Object? g) => g is String ? g : null)
+          .whereType<String>()
+          .toList(),
       tags: tags,
       studios: studios,
       bannerUrl: _jsonString(json['bannerImage']),

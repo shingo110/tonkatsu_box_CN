@@ -121,12 +121,10 @@ class Manga {
       chapters: _jsonInt(json['chapters']),
       volumes: _jsonInt(json['volumes']),
       format: _jsonString(json['format']),
-      genres: genresList == null
-          ? null
-          : genresList
-                .map((Object? g) => g is String ? g : null)
-                .whereType<String>()
-                .toList(),
+      genres: genresList
+          ?.map((Object? g) => g is String ? g : null)
+          .whereType<String>()
+          .toList(),
       tags: tags,
       authors: authors,
       externalUrl: 'https://anilist.co/manga/$id',
@@ -141,9 +139,9 @@ class Manga {
     final int id = _jsonInt(json['id']) ?? 0;
 
     final List<Map<String, dynamic>> titles =
-        (_jsonList(
+        _jsonList(
           json['titles'],
-        )?.whereType<Map<String, dynamic>>().toList()) ??
+        )?.whereType<Map<String, dynamic>>().toList() ??
         const <Map<String, dynamic>>[];
 
     // Mapped onto AniList's romaji / english / native slots so the title-language
@@ -199,7 +197,7 @@ class Manga {
       titleNative: native,
       description: description,
       coverUrl: coverUrl,
-      averageScore: rating == null ? null : rating.round(),
+      averageScore: rating?.round(),
       status: _mangaBakaStatus(_jsonString(json['status'])),
       startYear: startYear,
       chapters: _parseIntOrNull(json['total_chapters']),

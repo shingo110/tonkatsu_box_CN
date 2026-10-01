@@ -35,8 +35,6 @@ class EpisodeTrackerSection extends ConsumerWidget {
     super.key,
   });
 
-  static final Logger _log = Logger('EpisodeTrackerSection');
-
   /// Collection id (null for uncategorized).
   final int? collectionId;
 
@@ -150,6 +148,8 @@ class SeasonsListWidget extends ConsumerStatefulWidget {
 }
 
 class _SeasonsListWidgetState extends ConsumerState<SeasonsListWidget> {
+  static final Logger _log = Logger('SeasonsListWidget');
+
   List<TvSeason> _seasons = <TvSeason>[];
   bool _loading = true;
   bool _refreshing = false;

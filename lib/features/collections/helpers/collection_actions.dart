@@ -661,6 +661,7 @@ class CollectionActions {
               anime = await ref
                   .read(doubanApiProvider)
                   .getAnimeById(item.externalId.toString());
+            case null:
             case DataSource.igdb:
             case DataSource.taptap:
             case DataSource.tmdb:
@@ -710,6 +711,7 @@ class CollectionActions {
               manga = uuid != null
                   ? await ref.read(mangaDexApiProvider).getByUuid(uuid)
                   : null;
+            case null:
             case DataSource.igdb:
             case DataSource.taptap:
             case DataSource.tmdb:

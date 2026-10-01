@@ -134,7 +134,7 @@ bool _isDataPath(String path) {
   if (path == _kHealthPath) return false;
   return path == _kRpcPath ||
       path.startsWith('$kProxyPathPrefix/') ||
-      path == _kRpcPath + '/';
+      path == '$_kRpcPath/';
 }
 
 /// A plain `Cascade` would answer "unknown upstream" with index.html and a 200,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:core/api/douban_constants.dart';
 import 'package:core/api/douban_signature.dart';
