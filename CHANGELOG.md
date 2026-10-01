@@ -12,6 +12,135 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Security — the selfhost server asks for a token once it leaves loopback
+
+`/rpc` and `GET/POST /proxy/keys` answered anyone who could open a socket to the
+server, and the default listen address was `0.0.0.0` — so a selfhost deployment
+on a home LAN handed every DAO (the whole database) and every stored API key to
+any device on that network, with no credential to present. The address now
+defaults to `127.0.0.1`, and listening beyond loopback switches on a
+bearer-token gate: `/rpc` and `/proxy/*` answer 401 without it, while `/health`,
+the static bundle and `/img` stay public — a browser's native `Image` request
+cannot carry a header, so covers must stay anonymous, and their surface is
+capped by the host allowlist and the body limit instead.
+
+Loopback installs are deliberately tokenless: whoever can reach a 127.0.0.1
+socket already owns the machine the data lives on, and the browser is loaded
+from that same server, so a token there would only lock the owner out. The token
+is 32 random bytes (base64url), minted on first boot, printed as `Auth token: …`,
+and persisted at `<data-dir>/auth_token` so a restart does not invalidate every
+browser; it is compared in constant time. The browser keeps it in
+`SharedPreferences`, attaches it to every server request, and the credentials
+screen gained a field to paste it into.
+
+Three more holes on the same surface are closed. The request log redacts
+`npsso` and `x_access_token`, so a PSN login no longer writes a
+password-equivalent into the container log. `/img?src=` no longer proxies an
+arbitrary host: the target must match the cover-host allowlist. And `/proxy` and
+`/img` both cap the bodies they will buffer, so a hostile or broken upstream can
+no longer OOM the process.
+
+- `server/lib/src/auth_token.dart` (new): `AuthToken.load`, `matches`, `bearerOf`.
+- `server/lib/src/app_handler.dart`: `_requireAuth`, `_isDataPath`, 401 body.
+- `server/lib/src/server_config.dart`: default `127.0.0.1`, `requiresAuth`.
+- `server/bin/server.dart`: mints, prints and wires the token.
+- `server/lib/src/request_log.dart`: `npsso`, `x_access_token` in `_redactKeys`.
+- `server/lib/src/image_handler.dart`: `_allowedImageHosts`, `_isAllowedImageHost`,
+  `_kMaxUploadBytes`.
+- `server/lib/src/upstream_client.dart`: `kUpstreamMaxBodyBytes`, `UpstreamBodyTooLarge`.
+- `server/lib/src/proxy_handler.dart`: `kMaxRequestBodyBytes`, 413 on overflow.
+- `lib/core/selfhost/server_auth_token.dart` (new), `lib/core/api/api_dio.dart`,
+  `lib/core/selfhost/server_credentials.dart`, `lib/main.dart`,
+  `lib/features/settings/content/credentials_content.dart`.
+- `docker-compose.yml`, `.env.example`, `Dockerfile`, `README.md`,
+  `server/README.md`: the host port binds to loopback by default, `TONKATSU_BIND`
+  opts into LAN exposure, and the token's round trip is documented.
+- `server/test/auth_token_test.dart` (new), `server/test/server_config_test.dart`.
+
+## [cn] Fixed — a migration interrupted mid-run left a database that could not boot
+
+`MigrationRunner` replays the whole chain whenever `user_version` lags the schema,
+which is exactly what an interrupted upgrade leaves behind: sqflite rolls the
+version back, but not the DDL. Eleven migrations were not safe to run twice — ten
+opened with a bare `CREATE TABLE`, v17 rebuilt `collection_items` with no guard,
+and v57/v60/v62 used `ALTER TABLE … RENAME`, which throws on the second pass. A
+re-run then failed on the first statement and the app would not open at all.
+
+Each is now re-run safe: `CREATE TABLE IF NOT EXISTS`, or a `Migration.tableExists`
+guard around the rebuild with the existing rows carried across. v24's platform
+rebuild also stopped discarding the platforms a user had added by hand — it
+reads them out before the drop and re-inserts them after the seed.
+
+- `packages/core/lib/database/migrations/migration_{v1,v3,v5,v6,v7,v8,v17,v18,`
+  `v24,v36,v37,v45,v46,v57,v60,v62}.dart`.
+
+## [cn] Fixed — one drifted field crashed a whole page
+
+`Game.fromJson` and `Anime.fromJson` / `Manga.fromJson` read IGDB and AniList
+fields with a bare `as int` / `as num`, so a single field arriving as a numeric
+string — or a nested node turning null — threw out of the parser and took the
+search or recommendation page down with it. The casts are now defensive: numbers
+go through extractors that accept a numeric string and fall back rather than
+throw, and every nested map or list is validated before it is used.
+
+- `packages/core/lib/models/game.dart`, `anime.dart`, `manga.dart`.
+
+## [cn] Fixed — search pagination stopped early, and one bad response ended the walk
+
+WeRead's search only stopped on an empty page and ignored `totalCount`, so a
+result set past its cap came back silently halved. MangaDex fell back to
+`rows.length` when `data['total']` was absent, which pins every search to the
+first page. Kitsu had no page cap, so importing a long series walked it serially
+and read as a hang. All three now terminate on the documented total with a
+bounded page count.
+
+- `lib/core/api/weread/weread_search_api.dart`,
+  `lib/core/api/mangadex/mangadex_manga_api.dart`,
+  `lib/core/api/kitsu/kitsu_episode_api.dart`.
+
+## [cn] Fixed — the episode tracker swallowed its failures and showed "0 episodes"
+
+Seven `on Exception catch (_)` blocks — five in the tracker, two in its section
+widget — returned with no log, so a failed fetch or cache read rendered as "this
+season has no episodes" and nothing in the log could tell a genuinely empty
+result from a broken one. Each now logs a warning with the error.
+
+The marks provider had the mirror problem on the write side: `_load()` was fired
+unawaited and the setters wrote straight through, so a fast double-tap could
+persist out of order, or a late read could clobber the fresh value. Writes are
+now serialized on a chain, and `_load()` discards its result when a write landed
+while it was reading.
+
+Two `assert`s guarded user input (the rating range, `rewatchCount >= 0`), and
+`assert` is stripped in release builds — an out-of-range value would have been
+written to the database and stayed there. They are runtime clamps now.
+
+Two periodic timers polled with no lifecycle check, so the service-status badges
+and the showcase clock kept rebuilding behind a backgrounded window. Both skip
+their work while the app is not resumed, and the canvas reset no longer touches
+its `InteractiveViewer` from a post-frame callback after the widget is gone.
+
+- `lib/features/collections/widgets/episode_tracker_section.dart`,
+  `lib/features/collections/providers/episode_tracker_provider.dart`,
+  `lib/features/collections/providers/item_marks_provider.dart`,
+  `lib/features/collections/providers/collections_provider.dart`,
+  `lib/features/collections/widgets/canvas_view.dart`.
+- `lib/shared/utils/app_lifecycle.dart` (new),
+  `lib/shared/navigation/service_status_provider.dart`,
+  `lib/features/showcase/providers/showcase_clock_provider.dart`.
+
+## [cn] Changed — every `DataSource` switch is now exhaustive
+
+Six switches over `DataSource` ended in a `default:` or `_ =>` arm that quietly
+routed anything unrecognised to AniList or TMDB. That is a trap for the next
+source: a new manga catalogue would have had its ids spent on AniList and come
+back with the wrong data, and no error. Each switch now spells out all 25
+values, so adding a source fails to compile until someone decides where it goes.
+
+- `lib/core/services/import_service.dart`,
+  `lib/features/collections/helpers/collection_actions.dart`,
+  `lib/core/api/episode_source/tv_episode_source.dart`.
+
 ## [cn] Added — a fourth palette theme: Eva azure
 
 The app shipped three palettes (dark, sakura, PS1 grey); a fourth is again data
