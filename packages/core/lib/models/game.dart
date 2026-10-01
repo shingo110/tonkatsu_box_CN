@@ -97,6 +97,8 @@ class Game {
     }
 
     return Game(
+      // Lenient on purpose: an IGDB page is mapped with no per-row catch,
+      // so throwing on a drifted id would lose the whole result set.
       id: _jsonInt(json['id']) ?? 0,
       name: _jsonString(json['name']) ?? 'Unknown',
       summary: _jsonString(json['summary']),

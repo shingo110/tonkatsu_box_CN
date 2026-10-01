@@ -93,6 +93,9 @@ class Anime {
       description = _stripHtml(description);
     }
 
+    // Identity is read leniently here: a whole AniList page is mapped with
+    // no per-row catch, so throwing would lose every row. Kitsu's page
+    // loop does skip, so its factory below requires an id.
     final int id = _jsonInt(json['id']) ?? 0;
     final Map<String, dynamic>? nextAiring = _jsonMap(
       json['nextAiringEpisode'],
@@ -134,7 +137,11 @@ class Anime {
   /// Builds an [Anime] from a Kitsu `/anime` JSON:API resource
   /// ({id, attributes}).
   factory Anime.fromKitsu(Map<String, dynamic> json) {
-    final int id = _jsonInt(json['id']) ?? 0;
+    // A Kitsu row without an id is not a record: every caller goes through
+    // a `_tryParse` that catches, so this skips the row instead of storing
+    // a phantom `id: 0` anime.
+    final int id = _jsonInt(json['id']) ??
+        (throw const FormatException('Kitsu anime row without an id'));
     final Map<String, dynamic> attrs =
         _jsonMap(json['attributes']) ?? const <String, dynamic>{};
 

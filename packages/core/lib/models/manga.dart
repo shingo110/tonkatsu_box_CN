@@ -101,6 +101,10 @@ class Manga {
       description = _stripHtml(description);
     }
 
+    // Identity is the one field read leniently here. This factory's
+    // callers map a whole AniList page with no per-row catch, so throwing
+    // on a drifted id would lose every row. Sources whose page loop does
+    // skip a bad row (Kitsu, MangaBaka) require an id instead.
     final int id = _jsonInt(json['id']) ?? 0;
 
     return Manga(
@@ -136,7 +140,11 @@ class Manga {
   /// MangaBaka's flat REST shape differs from AniList: top-level titles,
   /// string chapter / volume counts, a 0–100 rating, raw cover variant only.
   factory Manga.fromMangaBaka(Map<String, dynamic> json) {
-    final int id = _jsonInt(json['id']) ?? 0;
+    // A series without an id is not a record: `MangaBakaMangaApi`
+    // `_tryParseManga` turns this into "skip the row" rather than letting
+    // a phantom `id: 0` into the library.
+    final int id = _jsonInt(json['id']) ??
+        (throw const FormatException('MangaBaka series row without an id'));
 
     final List<Map<String, dynamic>> titles =
         _jsonList(
@@ -315,7 +323,10 @@ class Manga {
   /// Genres are related JSON:API resources not requested here, so they stay
   /// null.
   factory Manga.fromKitsu(Map<String, dynamic> json) {
-    final int id = _jsonInt(json['id']) ?? 0;
+    // Same contract as [Manga.fromMangaBaka]: `KitsuMangaApi._tryParse`
+    // skips the row instead of storing a phantom `id: 0`.
+    final int id = _jsonInt(json['id']) ??
+        (throw const FormatException('Kitsu manga row without an id'));
     final Map<String, dynamic> attrs =
         _jsonMap(json['attributes']) ?? const <String, dynamic>{};
 

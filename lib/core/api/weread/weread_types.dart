@@ -19,8 +19,10 @@ const int kWeReadMinQueryLength = 1;
 
 /// Result sets are fuzzy and effectively endless, and `totalCount` proved
 /// untrustworthy (59 for the first two pages, 10087 from the third) while
-/// `hasMore` stays pinned at 1 — so paging ends on an empty page. This ceiling
-/// only keeps a runaway scroll bounded.
+/// `hasMore` stays pinned at 1 — so paging ends on an empty page. This offset
+/// used to be a hard ceiling, which silently cut every search with more than
+/// 400 results short; the cap is gone and the boundary stays named only so a
+/// regression test can pin that a deeper page still goes out.
 const int kWeReadMaxOffset = 400;
 
 /// Error from the WeRead API. [detail] is a redacted, copyable debug string

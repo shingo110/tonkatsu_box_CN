@@ -46,9 +46,9 @@ void main() {
         'readingCount': 9933,
       };
 
-  /// The real answer always carries `totalCount` and `hasMore`, neither of
-  /// which the parser trusts — they are here so a regression that starts
-  /// trusting them would be caught.
+  /// The real answer always carries `totalCount` and `hasMore`. `hasMore`
+  /// is never trusted, and `totalCount` may only shorten a run once the
+  /// offset has reached it — so 59 is a plausible value, not a terminator.
   Map<String, dynamic> page(List<dynamic> rows) => <String, dynamic>{
         'books': rows,
         'totalCount': 59,
@@ -127,9 +127,10 @@ void main() {
       expect(totalPages, 3);
     });
 
-    test('ignores totalCount and hasMore, which the API misreports', () async {
-      // 10087 shown against 20 rows would be nonsense, and hasMore never
-      // leaves 1 — paging follows the offset ceiling instead.
+    test('a nonsense totalCount cannot cut a page short', () async {
+      // 10087 shown against 20 rows is nonsense and `hasMore` never leaves
+      // 1, so a reported total may only shorten a run when the offset has
+      // already reached it — never on its own say-so.
       stubGet(<String, dynamic>{
         'books': <dynamic>[bookRow('695233')],
         'totalCount': 10087,
@@ -143,19 +144,25 @@ void main() {
       expect(totalPages, 2);
     });
 
-    test('stops at the offset ceiling however many rows arrive', () async {
-      stubGet(page(<dynamic>[bookRow('695233')]));
+    test('pages past the old 400-offset ceiling (P1-C3)', () async {
+      // The ceiling silently cut every search with more than 400 results
+      // short. It is gone: the offset goes out as asked and a run ends on
+      // an empty page (or once a reported total is reached), never on a
+      // hard offset cap.
+      stubGet(<String, dynamic>{
+        'books': <dynamic>[bookRow('695233')],
+        'totalCount': 10087,
+        'hasMore': 1,
+      });
+
+      final int page = kWeReadMaxOffset ~/ 20 + 1;
 
       final (List<Book> _, bool hasMore, int totalPages) =
-          await api.searchBooks(query: '三体', page: kWeReadMaxOffset ~/ 20);
+          await api.searchBooks(query: '三体', page: page);
 
       expect(hasMore, isTrue);
-      expect(totalPages, kWeReadMaxOffset ~/ 20 + 1);
-
-      final (List<Book> _, bool pastCeiling, _) =
-          await api.searchBooks(query: '三体', page: kWeReadMaxOffset ~/ 20 + 1);
-
-      expect(pastCeiling, isFalse);
+      expect(totalPages, page + 1);
+      expect((captureGet()[1] as Map<String, dynamic>)['maxIdx'], 400);
     });
 
     test('reads an empty body as an empty page', () async {
