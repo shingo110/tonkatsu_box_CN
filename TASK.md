@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：D1–D32 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试）
+- **已完成**：D1–D32 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试；**`cn-v0.44.5` 三端发版**）
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面**本地**构建（缺 VS C++ 工作负载）—— 但发布走 CI 的 `windows-2022` 运行器，不阻塞出包
 
@@ -933,6 +933,45 @@ Info 青蓝呼应的主旋律。
 6 份 arb 键集合逐一致（1832 键）。
 
 **新增可重跑脚本**：`probe/eva_shades_probe.py`（定位网格）、`probe/eva_shades_sample.py`（采样 + 与卡面印字
+
+**发版**：`pubspec.yaml` bump 到 `0.44.5+46`（`feat` / `docs` / `release:` 三笔，annotated tag `cn-v0.44.5`
+显式指向那笔 `release:` 提交 `c6af9309` —— 这样打出来的包版本名才与 tag 一致）。
+
+**首推即红，而且正好红在本地永远看不到的那一关**：第一次推送后 Release 流水线的 Quality Gate **1 分 39 秒**
+就红了（run `36800893117`），后四个 job 全部 `skipped`，三端包一个都没出。唯一的问题是 `flutter analyze`
+的一条 info：`Instances of 'Color' should be created using an 8-digit hexadecimal integer (such as
+'0xFFFFFFFF')` —— `use_full_hex_values_for_flutter_colors`，`lib/shared/theme/palettes/eva_palette.dart:91:18`。
+
+`barrier` 被写成了 **10 位**的 `Color(0xFF73000000)`，等于在一个已经自带 alpha 的 8 位值前又叠了一层 `0xFF`；
+另三套主题的 barrier 分别是 `0x8A000000` / `0x73000000` / `0x73000000`，皆 8 位。`analysis_options.yaml:101`
+明写着 `use_full_hex_values_for_flutter_colors: true`，而流水线跑的是 `--fatal-infos --fatal-warnings`
+⇒ **一条 info 就能把整条发版链掐死在第一道卡口**。
+
+**这件事暴露了两个更值得记的问题**：
+① **本机 `flutter analyze` 崩在命令外壳 `_sendPostUsage`（ERROR_PIPE_BUSY 231），这一关在本地是空档**，
+而它恰恰是 CI 的第一道关 —— 直接推 tag 等于闭眼按发射。推前至少要做三件事：读 `analysis_options.yaml` 的
+`linter: rules:` 段**把项目额外开的规则逐条自查**（这次漏的就是它）、跑
+`dart format --output=none --set-exit-if-changed`（当语法检查器用）、把能在静态校验里替代 lint 的硬断言补上。
+② **断言不能把错误形态写成期望**：`probe/verify_eva_palette.py` 原先那条 barrier 断言写的是
+`"Color(0xFF73000000)" in text` —— 它把这个非法写法**固化成了期望值**，所以本地 20 条全绿、CI 一推就红。
+已改成 8 位正解，并补一条「全部 `Color` 字面量必须恰好 8 位十六进制」的位数检查（注入 10 位即两条同时转红、
+宽度报 `[8, 10]`，还原即全过 —— 有牙已自证）。
+
+**修复与重发**：`a5038a3c fix(cn-theme): barrier 改用 8 位字面量`；删本地与远端 tag 后**重打 `cn-v0.44.5`
+指向 `a5038a3c`** 再推。第二次 **run `36801884682` 五项全绿**（Quality Gate / Build Windows / Build Web /
+Build Android / Create GitHub Release），main 的 Tests `36801879092` 亦 success。这次坏在 build 之前，
+所以第一次失败**没有留下半成品 Release**，只需删 tag 重推。
+
+**包内容核验**：`0.44.4` 与 `0.44.5` 只差一张纹理、一个 palette 源文件与一个文案键，陈旧产物在体积上几乎
+无差，故逐包解出核对（可重跑脚本 `probe/verify_release_v0445.py`）—— 三端均含 `background_tile_eva.png`
+且 **sha256 与仓库一致**（`e1f22af8…`）；Windows `tonkatsu_box.exe` 版本资源为 `0.44.5+46` 且**不含**旧串
+`0.44.4+45`；六个品牌图标仍在。本版另加两条端到端断言：**三个 ABI 的 `libapp.so` 里都带
+`background_tile_eva` 常量**（证明主题真被编进产物，而不仅仅是把资源塞进包），且旧主题的
+`background_tile_ps1` 常量也都还在（防「新旧并存」的脏构建）；Web 的 `main.dart.js` 同样带该常量。
+
+sha256：apk `7e7a3375…`（100,116,530 B）/ win `a64c8f81…`（25,483,637 B）/ web `0681a999…`（23,061,627 B）；
+APK 签名 v2 验通，证书指纹 `f6d98b09…39cb` **与 `cn-v0.44.4` 完全一致** ⇒ 可直接覆盖安装，不会并存两份。
+真机验收件落 `D:\Projects\TonkatsuBoxCN\TonkatsuBoxCN-0.44.5.apk`。
 自校）、`probe/eva_pick_tokens.py`（候选色对比度测量）、`probe/eva_finalize_tokens.py`（定稿 41 色 + 预跑护栏）、
 `probe/apply_eva_registration.py`（注册点一次落定，锚点唯一性断言）、`probe/verify_eva_palette.py`（静态校验）。
 
