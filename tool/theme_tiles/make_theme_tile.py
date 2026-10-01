@@ -35,6 +35,7 @@ MASK_FILE = "background_tile.png"
 TILES: dict[str, tuple[int, int, int]] = {
     "background_tile_sakura.png": (0xC2, 0x5B, 0x77),
     "background_tile_ps1.png": (0x6E, 0x6E, 0x6E),
+    "background_tile_eva.png": (0x33, 0x66, 0xFF),
 }
 
 

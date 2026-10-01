@@ -11,6 +11,10 @@ abstract final class AppAssets {
   static const String backgroundTilePs1 =
       'assets/images/background_tile_ps1.png';
 
+  /// [backgroundTile] tinted to the Eva card's Primary blue.
+  static const String backgroundTileEva =
+      'assets/images/background_tile_eva.png';
+
   static const String iconDiscord = 'assets/images/icon_discord.svg';
   static const String iconDiscordColor = 'assets/images/icon_discord_color.png';
 

@@ -891,6 +891,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         AppThemeId.dark => l.settingsThemeDark,
         AppThemeId.sakura => l.settingsThemeSakura,
         AppThemeId.ps1 => l.settingsThemePs1,
+        AppThemeId.eva => l.settingsThemeEva,
       };
 
   void _showThemePicker(SettingsState settings) {

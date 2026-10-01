@@ -652,6 +652,9 @@ class SRu extends S {
   String get settingsThemePs1 => 'PS1 Ретро';
 
   @override
+  String get settingsThemeEva => 'Eva Лазурь';
+
+  @override
   String get settingsAppLanguageSubtitle => 'Язык интерфейса';
 
   @override

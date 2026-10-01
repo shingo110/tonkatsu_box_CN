@@ -1203,6 +1203,12 @@ abstract class S {
   /// **'PS1 Retro'**
   String get settingsThemePs1;
 
+  /// No description provided for @settingsThemeEva.
+  ///
+  /// In en, this message translates to:
+  /// **'Eva Azure'**
+  String get settingsThemeEva;
+
   /// No description provided for @settingsAppLanguageSubtitle.
   ///
   /// In en, this message translates to:

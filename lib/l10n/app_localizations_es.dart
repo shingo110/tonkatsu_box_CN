@@ -645,6 +645,9 @@ class SEs extends S {
   String get settingsThemePs1 => 'PS1 Retro';
 
   @override
+  String get settingsThemeEva => 'Eva Azul';
+
+  @override
   String get settingsAppLanguageSubtitle => 'Idioma de la interfaz';
 
   @override
