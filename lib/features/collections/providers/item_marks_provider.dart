@@ -55,6 +55,14 @@ class ItemMarksNotifier extends FamilyNotifier<ItemMarksState, int> {
   late DatabaseService _db;
   late int _itemId;
 
+  /// Serializes writes so two quick taps persist in the order they were made,
+  /// instead of racing and letting the later-arriving write win.
+  Future<void> _writeChain = Future<void>.value();
+
+  /// Bumped on every write; a `_load()` whose read resolves after a write is
+  /// discarded rather than clobbering the fresher local patch.
+  int _writeSeq = 0;
+
   @override
   ItemMarksState build(int itemId) {
     _itemId = itemId;
@@ -64,8 +72,10 @@ class ItemMarksNotifier extends FamilyNotifier<ItemMarksState, int> {
   }
 
   Future<void> _load() async {
+    final int seq = _writeSeq;
     final List<ItemMark> marks =
         await _db.itemMarkDao.getMarksForItem(_itemId);
+    if (seq != _writeSeq) return; // A write landed while we were reading.
     state = ItemMarksState(
       marks: <UnitKey, ItemMark>{
         for (final ItemMark m in marks)
@@ -75,8 +85,19 @@ class ItemMarksNotifier extends FamilyNotifier<ItemMarksState, int> {
     );
   }
 
+  /// Runs [body] after every previously queued write has settled, so DB writes
+  /// land in call order even when the UI fires them without awaiting.
+  Future<void> _serialize(Future<void> Function() body) {
+    final Future<void> run = _writeChain.then((_) => body());
+    _writeChain = run.then<void>((_) {}, onError: (Object _) {});
+    return run;
+  }
+
   /// Toggles the like flag on a unit.
   Future<void> toggleFavorite(String unitType, int parent, int unit) async {
+    // Wait for any in-flight write first: reading the flag before the previous
+    // tap has landed would make two quick taps compute the same target.
+    await _writeChain;
     await setFavorite(
       unitType,
       parent,
@@ -91,15 +112,19 @@ class ItemMarksNotifier extends FamilyNotifier<ItemMarksState, int> {
     int parent,
     int unit, {
     required bool value,
-  }) async {
-    final ItemMark? merged = await _db.itemMarkDao.setFavorite(
-      _itemId,
-      unitType,
-      parent,
-      unit,
-      isFavorite: value,
-    );
-    _apply((unitType: unitType, parent: parent, unit: unit), merged);
+  }) {
+    _writeSeq++;
+    final UnitKey key = (unitType: unitType, parent: parent, unit: unit);
+    return _serialize(() async {
+      final ItemMark? merged = await _db.itemMarkDao.setFavorite(
+        _itemId,
+        unitType,
+        parent,
+        unit,
+        isFavorite: value,
+      );
+      _apply(key, merged);
+    });
   }
 
   /// Sets the note on a unit (empty/null clears it).
@@ -108,16 +133,24 @@ class ItemMarksNotifier extends FamilyNotifier<ItemMarksState, int> {
     int parent,
     int unit,
     String? comment,
-  ) async {
-    final ItemMark? merged = await _db.itemMarkDao
-        .setComment(_itemId, unitType, parent, unit, comment);
-    _apply((unitType: unitType, parent: parent, unit: unit), merged);
+  ) {
+    _writeSeq++;
+    final UnitKey key = (unitType: unitType, parent: parent, unit: unit);
+    return _serialize(() async {
+      final ItemMark? merged = await _db.itemMarkDao
+          .setComment(_itemId, unitType, parent, unit, comment);
+      _apply(key, merged);
+    });
   }
 
   /// Deletes a mark outright.
-  Future<void> deleteMark(String unitType, int parent, int unit) async {
-    await _db.itemMarkDao.deleteMark(_itemId, unitType, parent, unit);
-    _apply((unitType: unitType, parent: parent, unit: unit), null);
+  Future<void> deleteMark(String unitType, int parent, int unit) {
+    _writeSeq++;
+    final UnitKey key = (unitType: unitType, parent: parent, unit: unit);
+    return _serialize(() async {
+      await _db.itemMarkDao.deleteMark(_itemId, unitType, parent, unit);
+      _apply(key, null);
+    });
   }
 
   /// Patches one unit in local state with the mark the DAO returned (null =

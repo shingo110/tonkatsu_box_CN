@@ -172,8 +172,9 @@ class EpisodeTrackerNotifier
       if (total > 0 && state.totalEpisodes == null) {
         state = state.copyWith(totalEpisodes: total);
       }
-    } on Exception catch (_) {
+    } on Exception catch (e) {
       // Cache read failed — totals stay unknown, badges show bare counts.
+      _log.warning('Failed to load cached show totals', e);
     }
   }
 
@@ -206,8 +207,9 @@ class EpisodeTrackerNotifier
           ...state.episodesBySeason,
         },
       );
-    } on Exception catch (_) {
+    } on Exception catch (e) {
       // Cache read failed — non-fatal; seasons still load lazily on expand.
+      _log.warning('Failed to load cached episodes', e);
     }
   }
 
@@ -429,8 +431,9 @@ class EpisodeTrackerNotifier
           }
         }
         if (totalInShow > 0) _cachedTotalEpisodes = totalInShow;
-      } on Exception catch (_) {
+      } on Exception catch (e) {
         // Totals stay unknown; auto-status keeps the current status.
+        _log.warning('Failed to load cached season counts', e);
       }
     }
 

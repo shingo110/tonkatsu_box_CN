@@ -1194,21 +1194,20 @@ class CollectionItemsNotifier
     ref.invalidate(allItemsNotifierProvider);
   }
 
-  /// [rating] is 1.0-10.0 (step 0.1), or null to clear.
+  /// [rating] is 1.0-10.0 (step 0.1), or null to clear. Out-of-range input is
+  /// clamped rather than asserted: `assert` is stripped in release builds, so a
+  /// bad caller would otherwise write dirty data straight into the database.
   Future<void> updateUserRating(int id, double? rating) async {
-    assert(
-      rating == null || (rating >= 1.0 && rating <= 10.0),
-      'Rating must be 1.0-10.0 or null, got $rating',
-    );
+    final double? safeRating = rating?.clamp(1.0, 10.0).toDouble();
     final DateTime now = DateTime.now();
-    await _repository.updateItemUserRating(id, rating);
+    await _repository.updateItemUserRating(id, safeRating);
     await _stampActivity(id, now);
 
     _patchItem(
       id,
-      (CollectionItem i) => rating == null
+      (CollectionItem i) => safeRating == null
           ? i.copyWith(clearUserRating: true, lastActivityAt: now)
-          : i.copyWith(userRating: rating, lastActivityAt: now),
+          : i.copyWith(userRating: safeRating, lastActivityAt: now),
       affects: const <CollectionSortMode>{
         CollectionSortMode.rating,
         CollectionSortMode.lastActivity,
@@ -1254,16 +1253,17 @@ class CollectionItemsNotifier
   }
 
   /// Manual override; null clears back to "not tracked". Transitions into
-  /// `completed` bump the count automatically (see [updateStatus]).
+  /// `completed` bump the count automatically (see [updateStatus]). A negative
+  /// count is clamped to 0 rather than asserted away (see [updateUserRating]).
   Future<void> setRewatchCount(int id, int? count) async {
-    assert(count == null || count >= 0, 'Count must be >= 0 or null');
-    await _repository.updateItemRewatchCount(id, count);
+    final int? safeCount = count == null || count >= 0 ? count : 0;
+    await _repository.updateItemRewatchCount(id, safeCount);
 
     _patchItem(
       id,
-      (CollectionItem i) => count == null
+      (CollectionItem i) => safeCount == null
           ? i.copyWith(clearRewatchCount: true)
-          : i.copyWith(rewatchCount: count),
+          : i.copyWith(rewatchCount: safeCount),
       affects: const <CollectionSortMode>{},
     );
     ref.invalidate(allItemsNotifierProvider);

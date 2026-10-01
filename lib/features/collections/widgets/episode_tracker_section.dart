@@ -5,6 +5,7 @@ import 'package:core/models/tv_season.dart';
 import 'package:core/models/tv_show.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 
 import '../../../core/api/episode_source/tv_episode_source.dart';
 import '../../../core/database/database_service.dart';
@@ -33,6 +34,8 @@ class EpisodeTrackerSection extends ConsumerWidget {
     required this.accentColor,
     super.key,
   });
+
+  static final Logger _log = Logger('EpisodeTrackerSection');
 
   /// Collection id (null for uncategorized).
   final int? collectionId;
@@ -176,8 +179,9 @@ class _SeasonsListWidgetState extends ConsumerState<SeasonsListWidget> {
         if (seasons.isNotEmpty) {
           await db.tvShowDao.upsertTvSeasons(seasons);
         }
-      } on Exception catch (_) {
+      } on Exception catch (e) {
         // Source API unavailable — show empty season list, not critical.
+        _log.warning('Failed to load seasons from source', e);
         // User can retry via pull-to-refresh.
       }
     }
@@ -224,8 +228,9 @@ class _SeasonsListWidgetState extends ConsumerState<SeasonsListWidget> {
           _refreshing = false;
         });
       }
-    } on Exception catch (_) {
+    } on Exception catch (e) {
       // Season refresh failed (network/API error) — stop spinner, keep existing data.
+      _log.warning('Failed to refresh seasons', e);
       if (mounted) {
         setState(() => _refreshing = false);
       }

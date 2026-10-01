@@ -6,6 +6,7 @@ import '../../core/services/discord_rpc_service.dart';
 import '../../core/services/kodi_sync_service.dart';
 import '../../features/settings/providers/kodi_settings_provider.dart';
 import '../../shared/constants/platform_features.dart';
+import '../../shared/utils/app_lifecycle.dart';
 
 class ServiceStatus {
   const ServiceStatus({
@@ -67,6 +68,9 @@ final AutoDisposeStreamProvider<ServiceStatus> serviceStatusProvider =
   final Timer timer = Timer.periodic(
     const Duration(seconds: 2),
     (_) {
+      // Skip the scan while the app is backgrounded: the badges are not on
+      // screen, and a 2s poll would otherwise keep the CPU warm for nothing.
+      if (!isAppInForeground()) return;
       if (!controller.isClosed) {
         controller.add(snapshot());
       }

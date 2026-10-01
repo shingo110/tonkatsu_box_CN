@@ -408,6 +408,9 @@ class _CanvasViewState extends ConsumerState<CanvasView> {
         if (!_hasScrolledToItems && canvasState.isInitialized) {
           _hasScrolledToItems = true;
           SchedulerBinding.instance.addPostFrameCallback((_) {
+            // The frame may land after the user already left the canvas; the
+            // transformation controller is disposed with the widget.
+            if (!mounted) return;
             _centerViewOnItems(
               viewportWidth,
               viewportHeight,
@@ -582,6 +585,7 @@ class _CanvasViewState extends ConsumerState<CanvasView> {
                     onPressed: () {
                       _readNotifier().resetPositions(viewportWidth);
                       SchedulerBinding.instance.addPostFrameCallback((_) {
+                        if (!mounted) return;
                         final List<CanvasItem> items =
                             _watchCanvasState().items;
                         _centerViewOnItems(
