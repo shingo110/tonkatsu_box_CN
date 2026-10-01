@@ -88,7 +88,7 @@ const AppPalette evaPalette = AppPalette(
   ratingGold: Color(0xFF944C00), // Warning 800
   scrim: Color(0xFF000000),
   onOverlay: Color(0xFFFFFFFF),
-  barrier: Color(0xFF73000000),
+  barrier: Color(0x73000000),
   shadow: Color(0xFF000000),
   rowFade: Color(0xFFC2D6FF), // midway, background -> surfaceBorder
   // Danger 500 as printed: a filled counter badge, white reads 3.64.
