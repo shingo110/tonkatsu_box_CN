@@ -4,7 +4,6 @@ import 'package:shelf/shelf.dart';
 import 'package:test/test.dart';
 import 'package:tonkatsu_server/src/app_handler.dart';
 import 'package:tonkatsu_server/src/auth_token.dart';
-import 'package:tonkatsu_server/src/upstream_client.dart';
 
 /// A no-op logger so the request line does not pollute test output.
 Middleware silent() =>
