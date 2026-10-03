@@ -167,7 +167,7 @@ SearchSource（抽象端口）
 | **M4c** 影视线补强 · 豆瓣电影 / 剧集 | 豆瓣影视源（`douban_movie` / `douban_tv`）：混合池按 `target_type` 分流、`Movie` / `TvShow.fromDoubanItem`、`DoubanEpisodeSource` 防串源 | ✅ 2026-09-20 |
 | **M5** 影视线余项 | 优酷 / 爱奇艺 | 📋 下一步候选 |
 | **M6** 漫画线 | Bangumi 书籍类型（`bangumi_manga`）：`type=1` + 「漫画」meta 标签、`Manga.fromBangumi`、`bangumi_json.dart` 共用解析、搜索客户端泛型化、`bangumi_filter_utils.dart` 共用筛选转换 | ✅ 2026-09-20 |
-| **M7** 发布 | Windows / Android / Web 打包与分发 | 🟡 2026-09-21 打包就绪（Android + Web 本地产出，Windows 走 CI）；`release-cn.yml` 就位，首个 Release 待推 `cn-v*` 标签 |
+| **M7** 发布 | Windows / Android / Web 打包与分发 | ✅ 已发七版（`cn-v0.44.0` … `cn-v0.44.6`），`release-cn.yml` 出包，Android 三 secret 齐备、CI 产物与本地验收件同签名 |
 | **M8** 自托管 Web 链路验证 | `/proxy` 全链路：真 socket 集成测试 + 客户端改写 / 服务端还原往返契约 + 真实自托管活体复核（响应体与直连逐字节比对） | ✅ 2026-09-20 |
 
 ## 8. 关键决策记录
@@ -207,5 +207,8 @@ SearchSource（抽象端口）
 
 - **Windows 是本分支的开发环境。** Flutter 命令直接在本机执行，无 WSL 中转。
 - **`flutter run -d windows` 当前不可用**：缺 Visual Studio C++ 工作负载，且插件符号链接创建受限。**写码、分析、测试均不受影响**；Android（SDK 36.1.0 / JDK 21）与 Web（Chrome）工具链齐备。
+- ⚠️ **`flutter analyze` 与 `flutter test` 在本机亦不可用**（2026-10-02 实测）：`dart` 一创建子进程管道就崩（`CreateFile failed 231` / ERROR_PIPE_BUSY），`dart analyze` / `dart test` / `dart compile` 全数中招。**可用的替代**：`dart format --output=none <file>` 当解析器；**`dart <单个测试文件>.dart` 直跑**（绕过 `package:test` 的命令行 runner），纯 Dart 侧（`server/` / `packages/core/`）因此仍可在本机跑测试。
+  ⇒ **推论：「本机四关全绿」在本仓库是伪命题** —— CI 的第一关正是 `flutter analyze`，本机跑不了，**收工判据只能是 CI**。逐条坑位见 [`RULES.md`](RULES.md) §四。
+- ⚠️ **重推已推过的 `cn-v*` 标签会把整条流水线重跑一遍**（约 19 分钟），且远端若已存在同名 Release 则 `create-release` 会报已存在。**推 tag 前先确认质量闸门能过**，否则就是白烧一轮 CI。动作要领见 [`RULES.md`](RULES.md) 与技能 `tonkatsu-three-platform-release` §4.5。
 - 四个会把环境问题伪装成代码问题的坑（代理打死测试、子包依赖、桌面构建、并发测试）逐条记在 [`RULES.md`](RULES.md)。
 - 上游没有为"新增数据源"预留插件机制，加源必然触碰第 3 节列出的那几处上游文件 —— 这是设计使然，不是可绕过的。

@@ -57,6 +57,47 @@ no longer OOM the process.
   opts into LAN exposure, and the token's round trip is documented.
 - `server/test/auth_token_test.dart` (new), `server/test/server_config_test.dart`.
 
+## [cn] Fixed — the selfhost auth gate compared a path that could never match
+
+The bearer-token gate added above never actually gated anything. `_requireAuth`
+called `_isDataPath(request.url.path)` and compared the result against `'/rpc'`,
+but shelf hands out a `Request.url.path` with **no leading slash** — a request for
+`/rpc` arrives as `rpc` — so every comparison was false and `/rpc` answered
+anyone who could open a socket, exactly as before. Two lines in the same file
+already normalised it (`'/${request.url.path}'` in `_withWebFallback`, and
+`request_log.redactedTarget`), which is what pinned the bug down.
+
+The path is now normalised inside `_isDataPath`, so the gate finally engages:
+`/rpc` and `/proxy/*` answer 401 without a token while `/health`, the static
+bundle and `/img` stay public. Verified end to end against a real
+`buildAppHandler` (82 assertions), with the fix temporarily reverted to confirm
+the probe actually fails on the old shape.
+
+- `server/lib/src/app_handler.dart`: `_isDataPath` normalises the leading slash.
+- `server/test/auth_token_test.dart`: the three unauthenticated cases now assert
+  401 rather than falling through to the static handler's 404.
+
+## [cn] Fixed — every cover outside the host allowlist was a broken image on Web
+
+`/img` refuses to proxy an arbitrary host, but the allowlist was seeded from the
+examples in a review report rather than from the sources this app actually
+ships. Since `isCacheEnabled()` is always false on Web, `getImageUri` returns
+the remote URL untouched and `_buildNetworkImage` routes every cover through
+`/img/<folder>/<id>?src=…`; anything unlisted gets a 403, and `Image.network`'s
+`errorBuilder` draws `Icons.broken_image` with **no fallback to a direct fetch**.
+The result was that desktop and Android looked fine while the Web build showed
+broken covers for all six domestic sources and a dozen international ones.
+
+The allowlist now covers every installed source's cover host, keyed by registrable
+domain so one entry spans a CDN's shards (`doubanio.com` covers `img1`–`img9`).
+Hosts belonging to *candidate* sources that are not installed were deliberately
+left out — this is an SSRF boundary, not an open relay.
+
+- `server/lib/src/image_handler.dart`: `_allowedImageHosts` completed.
+- `server/test/image_handler_test.dart`: three guards added — an unlisted host is
+  403 **and issues no upstream request**, a look-alike suffix is 403, and a
+  registered source's shard is allowed.
+
 ## [cn] Fixed — a migration interrupted mid-run left a database that could not boot
 
 `MigrationRunner` replays the whole chain whenever `user_version` lags the schema,

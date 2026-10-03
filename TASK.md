@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：D1–D32 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试；**`cn-v0.44.5` 三端发版**）
+- **已完成**：D1–D32 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试；**`cn-v0.44.5` 三端发版**）；**D33 审查报告 P0/P1 全修与 `cn-v0.44.6` 四轮发版**（自托管鉴权闸门**补上前导斜杠归一才真正生效** + `/img` 封面宿主白名单补齐已装源 + 解析器 id 契约回归 + WeRead 偏移上限；**四轮才出包，逐轮都是真缺陷**）
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面**本地**构建（缺 VS C++ 工作负载）—— 但发布走 CI 的 `windows-2022` 运行器，不阻塞出包
 
@@ -975,6 +975,54 @@ APK 签名 v2 验通，证书指纹 `f6d98b09…39cb` **与 `cn-v0.44.4` 完全�
 自校）、`probe/eva_pick_tokens.py`（候选色对比度测量）、`probe/eva_finalize_tokens.py`（定稿 41 色 + 预跑护栏）、
 `probe/apply_eva_registration.py`（注册点一次落定，锚点唯一性断言）、`probe/verify_eva_palette.py`（静态校验）。
 
+### D33 · 审查报告 P0/P1 全修与 `cn-v0.44.6` 四轮发版（2026-10-02）
+
+一份外部审查报告的 P0/P1 全部落地。**四轮才出包，逐轮都是真缺陷** —— 记在这里是因为
+**「前两轮全绿」曾被误当成「快好了」**，而第 3 轮才第一次真正跑到 `dart test`。
+
+**第 1–2 轮（Quality Gate / `flutter analyze`，26 条 13 类 → 1 条 → 0）**：lint 债清零。三处可空枚举
+switch 补 `case null:` 穷尽化（`collection_actions.dart`，**实证过 CI 原话**「The type 'DS?' is not
+exhaustively matched」）、构造器排序、未用 import、`Colors.` 十位字面量等。第二轮那条孤儿 import
+**被上一轮的 `undefined_class` 错误掩盖**，修好才现形 —— 一条一条来，别批量删。
+
+**第 3 轮（首次真跑到 `dart test` server，10 条失败 ⇒ 两个生产级缺陷）**：
+
+- **P0 · 鉴权闸门在生产环境从未生效。** `_requireAuth` 调 `_isDataPath(request.url.path)`，而 shelf 给的
+  `Request.url.path` **没有前导斜杠**（请求 `/rpc` 拿到的是 `rpc`），比较目标却是 `'/rpc'` ⇒ 恒假。
+  同文件 `_withWebFallback` 里的 `'/${request.url.path}'` 早就是反证，`request_log.redactedTarget(Uri.parse('rpc'))`
+  也归一成 `'/rpc'`。⇒ `89f4c496` 引入的 bearer 闸门一直是空转：能碰到端口的人可直接读 `/rpc` 的全部数据
+  与 `/proxy/keys` 里的密钥。**修法**：在 `_isDataPath` 内部归一。
+  **落刀前的反面检查（必做）**：闸门一旦真生效，客户端会不会自己被挡成全线 401？—— 已确认
+  Web 端 `/rpc`（`DioRpcTransport`）与 `/proxy/*` 都经唯一出口 `createApiDio`，令牌由
+  `ServerAuthToken.withToken` 注入 BaseOptions；`/img` 由 `Image.network` 加载、浏览器加不了头，故仍留公开面。
+- **P1 · Web 端封面全裂。** 链路：`isCacheEnabled()` 在 Web 上恒 `false` ⇒ `getImageUri` 直返 remoteUrl
+  ⇒ `_buildNetworkImage` 包成 `/img/<folder>/<id>?src=<remote>`。白名单外一律 **403**，而 `Image.network`
+  的 `errorBuilder` 只画 `Icons.broken_image`、**没有回落直连** ⇒ **除 13 个宿主外所有封面都是裂图**，
+  含境内六个源与十余个国际源。白名单当初只照抄了审查报告 P1-A5 举的例子。**按仓内可核证据逐条补齐**
+  （后缀根一条覆盖整条 CDN：`doubanio.com` 覆盖 `img1`–`img9`）；`probe/` 里**未装源**的探测候选域
+  （`hdslb.com` / `iqyipic.com` / `ykimg.alicdn.com` / `126.net`）**一个没加** ——
+  这是 SSRF 闸门，不是开放列表。ComicVine 一条按厂商惯例推定（夹具用桩域，仓内无法实证），已在提交信息里明示。
+  同步补三条护栏：未登记宿主 403 **且零上游请求**、仿冒后缀 403、已登记源分片放行。
+
+**第 3 轮另有两处测试修复**：解析器防御化把 `id` 改成 `?? 0`，**打断了既有的「抛异常 + `_tryParse` 跳过畸形行」
+机制** ⇒ 三个**有兜底**的工厂（Kitsu ×2 / MangaBaka）恢复 id 必填、抛 `FormatException`；
+三个**无兜底**的页面级工厂（AniList ×2 / IGDB 走裸 `.map().toList()`）保持宽容并加注释说明原因。
+WeRead 那条是**测试钉住了被判为 bug 的旧行为**（400 偏移上限），按报告 P1-C3「去掉上限 + 按 totalCount 收敛」
+两条都实现了 ⇒ 改测试而非改实现。
+
+**第 4 轮：全绿。** run `36908562902` 五项全 success，headSha `f4538ab9`；Release 三端产物
+apk `100132914` / web `23066332` / win `25487773` 字节。
+**Release 说明溯源已验**：body 前 3844 字节与 tag 原文 `cmp` 逐字节相同（多 2 字节是 GitHub 给 body 补的
+尾随换行）⇒ 证明抓的是**重建后的新 tag**。
+
+**本机新增能力**：`dart test/<单个文件>.dart` **可以直跑** —— `dart test` 走 `package:test` 的命令行 runner
+（要 spawn 子进程 ⇒ 崩在 `CreateFile failed 231`），但把测试文件当脚本执行可用。服务端
+**14 个文件 133 项全绿**（含此前 CI 红的那两组）。探针放进包目录（`server/_probe.dart`）即可 import 真实模块
+做端到端验证 —— 82/82 全绿，且**做过有牙验证**（把闸门改回旧写法，探针恰好红在 CI 报的那 4 条）。
+
+**文档与技能同步**：`RULES.md` §三 增列「封面宿主登记」为第四个静默降级连带点、§四 补 P23/P24；
+技能 `tonkatsu-three-platform-release` 新增 §4.5（重推 tag 全流程 + 四轮定性表）、
+`tonkatsu-box-add-source` 补封面宿主连带点。
 
 ## 📋 候选（下一步从这里挑）
 
@@ -1137,3 +1185,11 @@ D13 把 NeoDB 超时的病根钉死了：**境外源在无代理网络下不可�
     `tileAsset` 必须真在 `pubspec.yaml` 的 assets 树里、三套调色板两两互异、九组关键前景/背景
     （textPrimary/textSecondary/textTertiary × 背景三档、onBrand/brand、onBadge/badge、onOverlay/scrim）
     对比度不低于下限。**加第四套主题若漏配纹理或对比度不达标即炸**（D31 加）。
+17. **`server/lib/src/image_handler.dart` 的 `_allowedImageHosts` —— 封面宿主允许列表。** 新源的封面宿主
+    **必须登记**，漏了只有 Web 端裂图（桌面 / Android 全正常，服务端日志与测试都不报错）。
+    登记判据：只加**已装源**的真实宿主，后缀根一条即覆盖分片 CDN；`probe/` 里的**探测候选**域未装源不加
+    （D33 加，技能 `tonkatsu-box-add-source` §1 有完整清单）。
+18. **`server/lib/src/app_handler.dart` 的 `_isDataPath` —— 自托管鉴权闸门。** shelf 的
+    `Request.url.path` **没有前导斜杠**，比较前必须归一，否则闸门恒假（整个自托管鉴权形同虚设且**不报任何错**）。
+    改这个函数后必须真跑 `server/test/auth_token_test.dart`（401 ≠ 404）；本机用
+    `dart test/auth_token_test.dart` 逐文件直跑即可（D33 加）。

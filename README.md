@@ -257,6 +257,8 @@ docker compose up -d --build
 > 令牌在首次启动时生成并打印到日志，同时落在 `<TONKATSU_DATA_PATH>/auth_token`。
 > 浏览器端在**设置 → 凭证 → 密钥保存在服务器上**填入即可；只绑 `127.0.0.1` 时不校验，无需填写。
 > 令牌存在数据目录（`<TONKATSU_DATA_PATH>/auth_token`）里，容器重建不会改变，浏览器只需填一次。
+> 浏览器会自动把令牌附加到每一个服务端请求上（`/rpc` 与 `/proxy/*` 统一经唯一的 HTTP 出口），
+> 所以填一次即可全站可用，无需逐个界面操作。
 
 配置项（`TONKATSU_DATA_PATH` / `TONKATSU_BIND` / `TONKATSU_PORT` / `PUID` / `PGID` / API 密钥）见 [`.env.example`](.env.example)。服务端细节见 [`server/README.md`](server/README.md)，接口契约见 [`server/PROTOCOL.md`](server/PROTOCOL.md)。
 
@@ -267,6 +269,13 @@ docker compose up -d --build
 >
 > 这条链路已被证明可用：真实自托管实测 7/7，Bangumi / NeoDB 的代理响应与直连**逐字节相同**；豆瓣
 > 无密钥返 503、非白名单目标返 404 均在服务端拦下。复现步骤见 [`TASK.md`](TASK.md) 的 D10。
+
+> [!TIP]
+> **封面图同理走白名单**：`/img` 不会代理任意主机，目标必须落在
+> `server/lib/src/image_handler.dart` 的封面宿主允许列表内，否则一律 403。
+> 该列表覆盖应用内**所有**已接入源的封面宿主（含豆瓣 `doubanio.com`、微信读书、TapTap、喜马拉雅、
+> Bangumi、NeoDB 等）；新增数据源时若忘记登记，**只有 Web 端**的封面会显示为裂图，桌面端与
+> Android 均正常 —— 这是本项目少数「漏了不报错」的地方之一。
 
 
 ## 数据安全
@@ -297,6 +306,13 @@ flutter test
 ```bash
 cd packages/core && dart run tool/generate_rpc.dart
 ```
+
+> [!NOTE]
+> **Windows 本机的能力边界**（2026-10-02 实测）：`flutter analyze` / `flutter test` / `dart test`
+> 在本机会因 `dart` 无法创建子进程管道（`CreateFile failed 231`）而失败，**所以「本地四关全绿」并不足以
+> 保证 CI 绿** —— 上面第一条正是 CI 质量闸门的第一关。纯 Dart 侧仍可本机验证：
+> `cd server && dart test/<某个>_test.dart`（把单个测试文件当脚本直跑，绕过 `package:test` 的命令行 runner），
+> 语法检查用 `dart format --output=none <file>`。完整坑表见 [`RULES.md`](RULES.md) §四。
 
 改到 `/proxy`、`proxy_targets.dart` 或 Web 端改写逻辑时，另有两条**离线**护栏（已并入上面两关，
 这里点明）：`server/test/proxy_serve_integration_test.dart`（真 socket 全链路）与
