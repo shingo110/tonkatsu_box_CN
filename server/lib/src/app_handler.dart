@@ -24,6 +24,10 @@ const String _kRpcPath = '/rpc';
 /// When [authToken] carries a non-empty token, every data-bearing endpoint
 /// (`/rpc`, `/proxy/*`) demands `Authorization: Bearer <token>`. Static assets,
 /// `/health` and `/img` stay open — see [_isDataPath] for why covers are exempt.
+///
+/// [rpcFailureLogger] receives the RPC handler's failure lines. It defaults to
+/// the same `print` the request log uses, so both streams stay interleaved in
+/// one container log; a host that collects logs elsewhere can redirect just this.
 Handler buildAppHandler({
   required int schemaVersion,
   DaoRegistry? daos,
@@ -32,6 +36,7 @@ Handler buildAppHandler({
   String? webRoot,
   Middleware? logger,
   AuthToken? authToken,
+  void Function(String)? rpcFailureLogger,
 }) {
   final Router api = Router()
     ..get(_kHealthPath, (Request request) {
@@ -46,7 +51,17 @@ Handler buildAppHandler({
         },
       );
     });
-  if (daos != null) api.post(_kRpcPath, buildRpcHandler(daos));
+  // The RPC handler keeps SQL statements and bound values out of its client-facing
+  // errors, but its failure line still says what failed — that is the operator's
+  // only clue, so it goes to the same output as the request log rather than a
+  // second stream. `_printLine` (upstream's default) is `print`; wiring it to the
+  // same sink keeps Docker/Caddy log collection in one place.
+  if (daos != null) {
+    api.post(
+      _kRpcPath,
+      buildRpcHandler(daos, log: rpcFailureLogger ?? _printRpcFailure),
+    );
+  }
   if (proxy != null) {
     api.get('$kProxyPathPrefix/keys', (Request request) {
       return Response.ok(
@@ -205,3 +220,6 @@ bool _isAppShell(String path) {
   if (path.isEmpty || path.endsWith('/')) return true;
   return path.endsWith('.html') || path.endsWith('.js') || path.endsWith('.json');
 }
+
+// ignore: avoid_print — the container log IS the server's output.
+void _printRpcFailure(String line) => print(line);

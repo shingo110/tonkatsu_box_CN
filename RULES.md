@@ -62,6 +62,14 @@
   switch 里占一支。**这张表是手写枚举，漏了不报编译错**，后果是搜索错误条直接显示
   `XxxApiException: … (status: null)`（内部类名 + 内部字段）而不是一句人话，且 `detail` 一并丢失、
   Tooltip 空白。D13 一次补齐 9 个（新源 NeoDB / Bangumi / WeRead + 上游本就漏的 6 个）。
+- `server/lib/src/image_handler.dart` 的 `_allowedImageHosts` ——
+  **新源的封面宿主必须登记**，漏了**只有 Web 端裂图**（桌面与 Android 全正常，
+  服务端日志与测试都不报错）。链路是 `isCacheEnabled()` 在 Web 上恒`false`
+  ⇒ `getImageUri` 直返 remoteUrl ⇒ `_buildNetworkImage` 包成 `/img/<folder>/<id>?src=…`；
+  白名单外一律 403，而 `Image.network` 的 `errorBuilder` 只画 `Icons.broken_image`、
+  **没有回落直连**。后缀根一条即覆盖分片 CDN（`doubanio.com` 覆盖 `img1`–`img9`）。
+  `probe/` 里的**探测候选**域（`hdslb.com` / `iqyipic.com` / `ykimg.alicdn.com` / `126.net`）
+  **未装源就不加** —— 这是 SSRF 闸门，不是开放列表（D33 加）。
 
 **「加了必炸」护栏速查**（不写条数 —— 数字会烂，这份清单不会）：
 
@@ -108,6 +116,9 @@
 
 | P23 | `dart test` 报 `CreateFile failed 231`（ERROR_PIPE_BUSY），看着像「本机根本不能跑测试」 | `dart test` 走 `package:test` 的**命令行 runner**，它会再 spawn 子进程，而本沙箱的 dart 一创建管道就崩（`dart analyze` / `dart compile` 同理，`gen_kernel_aot`/`AnalysisServer._startProcess` 都是同一崩点） | **把单个测试文件当脚本直跑**：`cd server && dart test/image_handler_test.dart` ⇒ `+26: All tests passed!`。纯 Dart 侧（`server/`、`packages/core/`）就此**恢复本机测试能力**；Flutter 侧仍需引擎，本机仍不可用 |
 | P24 | 想端到端验证 handler 但没有可用的测试框架 | —— | 把探针 `.dart` **放进包目录**（如 `server/_probe.dart`），即可 `import 'package:tonkatsu_server/src/app_handler.dart'` 直调真实 `buildAppHandler`。坑：`Handler` 返回 `FutureOr<Response>`，探针里要包一层 `async` 才过 CFE；Python 的 `subprocess` 里 `dart` 不在 PATH，要用绝对路径 `C:\flutter\bin\cache\dart-sdk\bin\dart.exe`。**用后即删**（`flutter analyze` 会扫到；探针放仓库根外的 `probe/` 则解析不到包） |
+| P25 | 同步上游时想先看看会撞几处 | —— | **`git merge-tree --write-tree main upstream/main`**：只写对象库，**不碰工作区与索引**，可反复跑。⚠️ 它的输出**混着** `Auto-merging X` 行与纯路径行，**只取 `Merge conflict in ` 那一段**才是冲突清单（误取会报出接近三倍的数字）。⚠️ 若本地从未 `fetch upstream`，`git log upstream/main` 会报 `unknown revision` —— 那是空引用不是真实状态，先 `git fetch upstream`。D34 用它预判 20 个冲突，实际 merge 也是 20 个，逐字相符 |
+| P26 | 以为文档冲突看 `numstat` 就够了 | —— | **文件级 `numstat` 会掩盖「整篇重写」**。D34 评估时 `README` 显示上游 `+3 −1`，实际是上游把README 从中文直写式**整个重写成英文目录式**（401 行、中文只剩 1 行），三处冲突中一块**横跨 227 行**。⇒ **判文档冲突强度要看「冲突块的行跨度」，不是净变化量**；重写型必须单独决策（本仓取「保留中文、只取实质链接」） |
+| P27 | 合并后以为「自动合并 = 没风险」 | —— | 自动合并成功**不代表语义正确**，凡「双方都改过同一文件」即便无冲突也要复核。D34 就在 `server/lib/src/app_handler.dart` 逮到一处真缺口：上游给 `buildRpcHandler` 新增了 `log` 参数（错误信息脱敏），而本 fork 调用时**未传 `log`** ⇒ RPC 失败行走默认 `print`，**绕过了本 fork 的容器日志通道**。修法：给 `buildAppHandler` 加可选 `rpcFailureLogger`（默认仍是 `print`，不改动上游签名与既有调用方） |
 
 ## 五、测试设施坑（mocktail，都是血泪）
 
