@@ -1051,7 +1051,19 @@ apk `100132914` / web `23066332` / win `25487773` 字节。
 
 **语义叠加复核**：发现一处真缺口 —— 上游给 `buildRpcHandler` 新增了 `log` 参数（错误信息脱敏、失败行仍记日志），而本 fork `app_handler.dart` 调用时**未传 `log`** ⇒ RPC 失败行走默认 `print`，**绕过了本 fork 的容器日志通道**。已修：`buildAppHandler` 新增可选 `rpcFailureLogger`，默认 `_printRpcFailure`（仍是 `print`，与请求日志同流），不改变上游签名、不影响既有调用方。
 
-**验证**：`dart format` 解析通过（"Changed" 是旧版风格，不算错）；server **14 文件 134 项全绿**；packages/core 迁移链 23 文件全绿。
+**验证**：`dart format` 解析通过（"Changed" 是旧版风格，不算错）；server **14 文件 134 项全绿**；packages/core **154 文件 0 失败**；迁移链 23 文件全绿。
+
+**CI 第一轮就红在 `Analyze`（P27 的第一个实例）**：上游给 `AppPalette` 加了**必填**的
+`brandContainer` / `onBrandContainer`（M3 的 hover / chip / badge 容器色），上游的 dark 与
+sakura 都填了，**本 fork 自建的 PS1 复古灰与 Eva 蔚蓝没跟上** ⇒ 4 条
+`missing_required_argument`。**这两处没产生任何合并冲突** —— 纯新增必填字段、两侧各自独立，
+git 全程绿、merge 全成功，**只有 `flutter analyze` 才红**。
+色值按各palette 自身背景的 WCAG 亮度定方向（PS1 背景亮度 0.418、Eva 0.770，均为浅底
+⇒ 取 brand 的浅档作容器、暗档作文字），不凭记忆；结果
+PS1 `0xFFD9E5F2`/`0xFF0D1F32`、Eva `0xFFDAE3FF`/`0xFF0E1D47`，
+四套主题实测对比度 dark 9.05 / sakura 12.87 / ps1 13.06 / eva 12.77。
+护栏同步补强`theme_palette_guard_test`（新增「`onBrandContainer` on `brandContainer` ≥ 4.5」
+与「`brandContainer` ≠ `brand`」两条），并用「故意让 Eva 文字与容器同色」验证护栏有牙。
 
 **未做**：bump 到 `0.45.0+48`、发版。`main` 与 `cn-v0.44.6` 均未动。
 
