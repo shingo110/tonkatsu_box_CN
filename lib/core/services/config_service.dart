@@ -115,6 +115,7 @@ class ConfigService {
     SettingsKeys.proxyType,
     SettingsKeys.proxyHost,
     SettingsKeys.proxyPort,
+    SettingsKeys.showAllCardTags,
   ];
 
   /// Keys whose values are ints, not strings.
@@ -139,6 +140,7 @@ class ConfigService {
     SettingsKeys.richCollectionsEnabled,
     SettingsKeys.hideEmptyMediaTypeChevrons,
     SettingsKeys.proxyEnabled,
+    SettingsKeys.showAllCardTags,
   ];
 
   Map<String, Object> collectSettings() {

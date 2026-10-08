@@ -23,6 +23,10 @@ const Map<String, Duration> kHostMinRequestGap = <String, Duration>{
   'taptap.cn': Duration(milliseconds: 200),
   // Ximalaya answered twelve in a row; same reason, same light touch.
   'ximalaya.com': Duration(milliseconds: 200),
+  // IGDB: 4 requests per second per client id.
+  'api.igdb.com': Duration(milliseconds: 260),
+  // AniList: 90 requests per minute, 429 with Retry-After past that.
+  'graphql.anilist.co': Duration(milliseconds: 700),
 };
 
 /// A host that answers a burst by banning the caller needs a breaker in front

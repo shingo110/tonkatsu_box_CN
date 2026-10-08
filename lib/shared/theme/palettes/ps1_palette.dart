@@ -40,6 +40,8 @@ const AppPalette ps1Palette = AppPalette(
   // Atlantis Blue, published value: a fill, so white on it clears 5.30.
   brand: Color(0xFF2E6DB4),
   onBrand: Color(0xFFFFFFFF),
+  brandContainer: Color(0xFFD9E5F2),
+  onBrandContainer: Color(0xFF0D1F32),
   // Manganese Green, darkened from #00AC9F (1.26 on grey) to 2.33.
   gameAccent: Color(0xFF007A70),
   // Spanish Red, darkened from #DF0024 (2.25 on grey) to 2.80.

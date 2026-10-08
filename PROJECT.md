@@ -167,7 +167,7 @@ SearchSource（抽象端口）
 | **M4c** 影视线补强 · 豆瓣电影 / 剧集 | 豆瓣影视源（`douban_movie` / `douban_tv`）：混合池按 `target_type` 分流、`Movie` / `TvShow.fromDoubanItem`、`DoubanEpisodeSource` 防串源 | ✅ 2026-09-20 |
 | **M5** 影视线余项 | 优酷 / 爱奇艺 | 📋 下一步候选 |
 | **M6** 漫画线 | Bangumi 书籍类型（`bangumi_manga`）：`type=1` + 「漫画」meta 标签、`Manga.fromBangumi`、`bangumi_json.dart` 共用解析、搜索客户端泛型化、`bangumi_filter_utils.dart` 共用筛选转换 | ✅ 2026-09-20 |
-| **M7** 发布 | Windows / Android / Web 打包与分发 | ✅ 已发七版（`cn-v0.44.0` … `cn-v0.44.6`），`release-cn.yml` 出包，Android 三 secret 齐备、CI 产物与本地验收件同签名 |
+| **M7** 发布 | Windows / Android / Web 打包与分发 | ✅ 已发七版（`cn-v0.44.0` … `cn-v0.44.6`），`release-cn.yml` 出包，Android 三 secret 齐备、CI 产物与本地验收件同签名。**已同步上游 v0.45.0**（D34）|
 | **M8** 自托管 Web 链路验证 | `/proxy` 全链路：真 socket 集成测试 + 客户端改写 / 服务端还原往返契约 + 真实自托管活体复核（响应体与直连逐字节比对） | ✅ 2026-09-20 |
 
 ## 8. 关键决策记录

@@ -55,6 +55,8 @@ const AppPalette evaPalette = AppPalette(
   // Primary 500 exactly as the card prints it: a fill, so white clears 4.68.
   brand: Color(0xFF3366FF),
   onBrand: Color(0xFFFFFFFF),
+  brandContainer: Color(0xFFDAE3FF),
+  onBrandContainer: Color(0xFF0E1D47),
   // Primary 600 — darkened from 500 (3.66) to 5.16 for glyph duty.
   gameAccent: Color(0xFF254EDA),
   // Danger 700 — 500 measures 2.85 on the pale ground.

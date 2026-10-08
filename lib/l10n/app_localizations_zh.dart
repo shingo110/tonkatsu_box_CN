@@ -250,6 +250,12 @@ class SZh extends S {
   String get sortCompletionDateShort => '完成';
 
   @override
+  String get sortReleaseDateDisplay => '发行日期';
+
+  @override
+  String get sortReleaseDateShort => '发行';
+
+  @override
   String get sortDateOldest => '最早优先';
 
   @override
@@ -535,8 +541,7 @@ class SZh extends S {
   String get credentialsMissingHint => '请先填写 Client ID 与 Client Secret';
 
   @override
-  String get settingsErrorNetworkHint =>
-      '请求失败。请检查网络连接或代理设置（设置 → 数据源 → 代理设置）。技术详情：';
+  String get settingsErrorNetworkHint => '请求失败。请检查网络连接或代理设置（设置 → 数据源 → 代理设置）。技术详情：';
 
   @override
   String get settingsAppLanguage => '应用语言';
@@ -560,8 +565,7 @@ class SZh extends S {
   String get credentialsServerManagedTitle => '密钥保存在服务器上';
 
   @override
-  String get credentialsServerManagedBody =>
-      '下面填写的内容会保存到自托管服务器，而不是这个浏览器——对 API 的请求正是从那里发出的。你也可以从桌面端导出的配置文件加载它们。';
+  String get credentialsServerManagedBody => '下面填写的内容会保存到自托管服务器，而不是这个浏览器——对 API 的请求正是从那里发出的。你也可以从桌面端导出的配置文件加载它们。';
 
   @override
   String get credentialsUploadFromConfig => '从配置文件加载密钥';
@@ -719,8 +723,7 @@ class SZh extends S {
   String get credentialsWelcome => '欢迎使用 Tonkatsu Box！';
 
   @override
-  String get credentialsWelcomeHint =>
-      '首先，您需要设置 IGDB API 凭证。请从 Twitch 开发者控制台获取 Client ID 和 Client Secret。';
+  String get credentialsWelcomeHint => '首先，您需要设置 IGDB API 凭证。请从 Twitch 开发者控制台获取 Client ID 和 Client Secret。';
 
   @override
   String get credentialsCopyTwitchUrl => '复制 Twitch 控制台地址';
@@ -988,8 +991,7 @@ class SZh extends S {
   String get databaseDangerZone => '危险区域';
 
   @override
-  String get databaseDangerZoneMessage =>
-      '清除所有收藏、游戏、电影、电视剧和看板数据。设置和 API 密钥将被保留。';
+  String get databaseDangerZoneMessage => '清除所有收藏、游戏、电影、电视剧和看板数据。设置和 API 密钥将被保留。';
 
   @override
   String get databaseResetDatabase => '重置数据库';
@@ -998,8 +1000,7 @@ class SZh extends S {
   String get databaseResetTitle => '重置数据库？';
 
   @override
-  String get databaseResetMessage =>
-      '这将永久删除您的所有收藏、游戏、电影、电视剧、剧集进度和看板数据。\n\n您的 API 密钥和设置将被保留。\n\n此操作无法撤销。';
+  String get databaseResetMessage => '这将永久删除您的所有收藏、游戏、电影、电视剧、剧集进度和看板数据。\n\n您的 API 密钥和设置将被保留。\n\n此操作无法撤销。';
 
   @override
   String databaseConfigExported(String path) {
@@ -1016,8 +1017,7 @@ class SZh extends S {
   String get storageLocationTitle => '数据位置';
 
   @override
-  String get storageLocationSubtitle =>
-      '存储数据库和配置的文件夹。请避免使用云服务实时同步的文件夹（OneDrive、Syncthing）：数据库可能在写入过程中损坏。要在设备间传输数据，请使用导出功能。';
+  String get storageLocationSubtitle => '存储数据库和配置的文件夹。请避免使用云服务实时同步的文件夹（OneDrive、Syncthing）：数据库可能在写入过程中损坏。要在设备间传输数据，请使用导出功能。';
 
   @override
   String get storageLocationDangerWarning => '警告：更改数据文件夹可能导致数据丢失。风险自负。';
@@ -1046,12 +1046,10 @@ class SZh extends S {
   String get storageLocationPermissionTitle => '需要存储权限';
 
   @override
-  String get storageLocationPermissionMessage =>
-      'Android 需要「所有文件访问」权限才能使用自定义数据文件夹。在打开的列表中找到 Tonkatsu Box，启用访问权限，然后返回重新选择文件夹。';
+  String get storageLocationPermissionMessage => 'Android 需要「所有文件访问」权限才能使用自定义数据文件夹。在打开的列表中找到 Tonkatsu Box，启用访问权限，然后返回重新选择文件夹。';
 
   @override
-  String get storageLocationLegacyPermissionMessage =>
-      '自定义数据文件夹需要存储权限。请在应用设置中启用，然后返回重新选择文件夹。';
+  String get storageLocationLegacyPermissionMessage => '自定义数据文件夹需要存储权限。请在应用设置中启用，然后返回重新选择文件夹。';
 
   @override
   String get storageLocationOpenSettings => '打开设置';
@@ -1060,8 +1058,7 @@ class SZh extends S {
   String get storageLocationDbTooNew => '此文件夹中的数据库由更新版本的应用创建。请先在此设备上更新应用。';
 
   @override
-  String get storageLocationDbCorrupted =>
-      '此文件夹中的数据库已损坏或不完整。如果有同步工具正在复制，请稍后重试。';
+  String get storageLocationDbCorrupted => '此文件夹中的数据库已损坏或不完整。如果有同步工具正在复制，请稍后重试。';
 
   @override
   String get storageLocationUseExistingTitle => '发现现有数据';
@@ -1076,8 +1073,7 @@ class SZh extends S {
   String get storageLocationCopyTitle => '复制当前数据？';
 
   @override
-  String get storageLocationCopyMessage =>
-      '所选文件夹为空。您的收藏将被复制到该处；保存的图片将在需要时重新下载。旧文件夹中的数据不会被修改。';
+  String get storageLocationCopyMessage => '所选文件夹为空。您的收藏将被复制到该处；保存的图片将在需要时重新下载。旧文件夹中的数据不会被修改。';
 
   @override
   String get copy => '复制';
@@ -1086,8 +1082,7 @@ class SZh extends S {
   String get storageLocationCopyImages => '同时复制图片缓存';
 
   @override
-  String get storageLocationCopyImagesHint =>
-      '横幅和已保存的封面——文件较大，但新文件夹可离线使用无需重新下载';
+  String get storageLocationCopyImagesHint => '横幅和已保存的封面——文件较大，但新文件夹可离线使用无需重新下载';
 
   @override
   String get storageLocationCopyError => '复制数据到所选文件夹失败';
@@ -1096,8 +1091,7 @@ class SZh extends S {
   String get storageLocationResetTitle => '重置数据文件夹？';
 
   @override
-  String get storageLocationResetMessage =>
-      '应用将在重启后切换回默认数据文件夹。自定义文件夹中的数据不会被修改。';
+  String get storageLocationResetMessage => '应用将在重启后切换回默认数据文件夹。自定义文件夹中的数据不会被修改。';
 
   @override
   String get storageLocationRestartTitle => '需要重启';
@@ -1149,8 +1143,7 @@ class SZh extends S {
   }
 
   @override
-  String get lanSyncNoDevices =>
-      '未找到设备。请在连接到同一 Wi-Fi 网络的两台设备上打开此屏幕。接入点隔离和 VPN 会阻止发现。';
+  String get lanSyncNoDevices => '未找到设备。请在连接到同一 Wi-Fi 网络的两台设备上打开此屏幕。接入点隔离和 VPN 会阻止发现。';
 
   @override
   String get lanSyncPull => '点击获取其数据';
@@ -1159,12 +1152,7 @@ class SZh extends S {
   String get lanSyncReceiveTitle => '替换数据？';
 
   @override
-  String lanSyncReceiveMessage(
-    String device,
-    String date,
-    int collections,
-    int items,
-  ) {
+  String lanSyncReceiveMessage(String device, String date, int collections, int items) {
     return '来自 $device（$date）的数据：$collections 个收藏，$items 个项目。\n\n当前数据将被替换。备份副本将保存在数据库旁边。';
   }
 
@@ -1263,8 +1251,7 @@ class SZh extends S {
   String get traktImportFrom => '从 Trakt.tv 导入';
 
   @override
-  String get traktImportDescription =>
-      '从 trakt.tv/users/您的用户名/data 下载数据，然后选择下方的 ZIP 文件。';
+  String get traktImportDescription => '从 trakt.tv/users/您的用户名/data 下载数据，然后选择下方的 ZIP 文件。';
 
   @override
   String get traktZipFile => 'ZIP 文件';
@@ -1329,8 +1316,7 @@ class SZh extends S {
   String get importStart => '开始导入';
 
   @override
-  String get traktRequiresOwnTmdbKey =>
-      'Trakt 导入需要您自己的 TMDB API 密钥。请在设置 → 凭证中添加。';
+  String get traktRequiresOwnTmdbKey => 'Trakt 导入需要您自己的 TMDB API 密钥。请在设置 → 凭证中添加。';
 
   @override
   String get traktInvalidExport => '无效的 Trakt 导出';
@@ -1339,8 +1325,7 @@ class SZh extends S {
   String get kinoriumImportFrom => '从 Kinorium 导入';
 
   @override
-  String get kinoriumImportDescription =>
-      '从 Kinorium 导出您的列表（通过邮件收到 CSV 文件），然后选择下方的文件。';
+  String get kinoriumImportDescription => '从 Kinorium 导出您的列表（通过邮件收到 CSV 文件），然后选择下方的文件。';
 
   @override
   String get kinoriumSelectCsvFile => '选择 CSV 文件';
@@ -1364,8 +1349,7 @@ class SZh extends S {
   String get kinoriumImporting => '正在从 Kinorium 导入...';
 
   @override
-  String get kinoriumRecommendOwnTmdbKey =>
-      '提示：大型导入建议使用个人 TMDB API 密钥（设置 → API 密钥），但这不是必须的——内置密钥也可以使用。';
+  String get kinoriumRecommendOwnTmdbKey => '提示：大型导入建议使用个人 TMDB API 密钥（设置 → API 密钥），但这不是必须的——内置密钥也可以使用。';
 
   @override
   String get kinoriumReasonNotFound => '在 TMDB 上未找到';
@@ -1428,8 +1412,7 @@ class SZh extends S {
   String get creditsKitsuAttribution => '漫画数据由 Kitsu 提供。';
 
   @override
-  String get creditsOpenLibraryAttribution =>
-      '书籍数据来自 Open Library（CC0 / ODbL）。';
+  String get creditsOpenLibraryAttribution => '书籍数据来自 Open Library（CC0 / ODbL）。';
 
   @override
   String get creditsFantlabAttribution => '书籍数据来自 Fantlab。';
@@ -1438,8 +1421,7 @@ class SZh extends S {
   String get creditsComicVineAttribution => '漫画数据来自 ComicVine（非商业用途）。';
 
   @override
-  String get creditsMusicBrainzAttribution =>
-      '音乐数据来自 MusicBrainz，封面来自 Cover Art Archive，收听数据来自 ListenBrainz。';
+  String get creditsMusicBrainzAttribution => '音乐数据来自 MusicBrainz，封面来自 Cover Art Archive，收听数据来自 ListenBrainz。';
 
   @override
   String get creditsGoogleBooksAttribution => '书籍数据来自 Google Books。';
@@ -2126,6 +2108,24 @@ class SZh extends S {
   String get noEpisodesFound => '未找到剧集';
 
   @override
+  String get undo => '撤销';
+
+  @override
+  String get episodeUnmarkedSnack => '已取消标记该集';
+
+  @override
+  String get seasonUnmarkedSnack => '已取消标记该季';
+
+  @override
+  String get episodesClearedSnack => '已清除剧集标记';
+
+  @override
+  String get episodeWatchedDateEdit => '观看日期';
+
+  @override
+  String get episodeWatchedDateSelect => '何时观看？';
+
+  @override
   String episodeWatchedDate(String date) {
     return '观看于 $date';
   }
@@ -2787,8 +2787,7 @@ class SZh extends S {
   String get welcomeApiEnterKeysHint => '设置完成后在设置 → 凭证中输入密钥';
 
   @override
-  String get welcomeApiRateLimitHint =>
-      '内置密钥在所有用户间共享，有速率限制。为了获得最佳体验，请使用自己的密钥——免费且只需几分钟。';
+  String get welcomeApiRateLimitHint => '内置密钥在所有用户间共享，有速率限制。为了获得最佳体验，请使用自己的密钥——免费且只需几分钟。';
 
   @override
   String get welcomeHowTitle => '工作原理';
@@ -2890,8 +2889,7 @@ class SZh extends S {
   String get welcomeSourcesTvdbKeyHint => '必填——没有密钥时 TheTVDB 搜索保持关闭。';
 
   @override
-  String get welcomeSourcesHardcoverTokenHint =>
-      '必填——没有令牌无法搜索和导入。令牌每年 1 月 1 日重置。';
+  String get welcomeSourcesHardcoverTokenHint => '必填——没有令牌无法搜索和导入。令牌每年 1 月 1 日重置。';
 
   @override
   String get welcomeSourceDescTmdb => '电影、电视剧和动画。';
@@ -2933,8 +2931,7 @@ class SZh extends S {
   String get welcomeSourceDescComicVine => '庞大的漫画和图像小说目录。';
 
   @override
-  String get welcomeSourceDescGoogleBooks =>
-      '来自 Google 图书目录的数百万版本，可按标题、作者或 ISBN 搜索。';
+  String get welcomeSourceDescGoogleBooks => '来自 Google 图书目录的数百万版本，可按标题、作者或 ISBN 搜索。';
 
   @override
   String get welcomeSourceDescHardcover => '社区图书目录：系列、类型、氛围和评分。需要免费的个人令牌。';
@@ -2974,8 +2971,7 @@ class SZh extends S {
   String get updateWarningTitle => '更新前须知';
 
   @override
-  String get updateWarningBody =>
-      '此应用正在积极开发中。更新可能包含更改数据格式的数据库迁移。\n\n请在更新前创建备份（设置 → 备份）。这样如果出现问题，您可以恢复数据。';
+  String get updateWarningBody => '此应用正在积极开发中。更新可能包含更改数据格式的数据库迁移。\n\n请在更新前创建备份（设置 → 备份）。这样如果出现问题，您可以恢复数据。';
 
   @override
   String get updateWarningProceed => '前往发布页';
@@ -3075,8 +3071,7 @@ class SZh extends S {
   String get allItemsNoMatch => '没有匹配筛选的项目';
 
   @override
-  String get allItemsAddViaCollections =>
-      '前往收藏 → 新建收藏 → 通过搜索添加项目。\n它们将自动出现在此处。';
+  String get allItemsAddViaCollections => '前往收藏 → 新建收藏 → 通过搜索添加项目。\n它们将自动出现在此处。';
 
   @override
   String get allItemsFailedToLoad => '加载项目失败';
@@ -3361,22 +3356,25 @@ class SZh extends S {
   String get settingsHideEmptyMediaTypeChevrons => '隐藏空的媒体类型筛选';
 
   @override
-  String get settingsHideEmptyMediaTypeChevronsSubtitle =>
-      '当没有该类型的项目时，隐藏媒体类型筛选（游戏、电影等）';
+  String get settingsHideEmptyMediaTypeChevronsSubtitle => '当没有该类型的项目时，隐藏媒体类型筛选（游戏、电影等）';
 
   @override
   String get settingsAlwaysShowSubcategories => '始终显示子分类';
 
   @override
-  String get settingsAlwaysShowSubcategoriesSubtitle =>
-      '无需先选择媒体类型即可显示子分类筛选（游戏平台、动漫/漫画类型）';
+  String get settingsAlwaysShowSubcategoriesSubtitle => '无需先选择媒体类型即可显示子分类筛选（游戏平台、动漫/漫画类型）';
+
+  @override
+  String get settingsShowAllCardTags => '在卡片上显示所有标签';
+
+  @override
+  String get settingsShowAllCardTagsSubtitle => '在海报上列出全部标签，而不是只显示第一个标签和 +N 计数';
 
   @override
   String get settingsShowPlatformOverlay => '游戏平台封面';
 
   @override
-  String get settingsShowPlatformOverlaySubtitle =>
-      '在游戏海报上显示平台标识（PS5、Switch 等）';
+  String get settingsShowPlatformOverlaySubtitle => '在游戏海报上显示平台标识（PS5、Switch 等）';
 
   @override
   String get settingsShowBlurayOverlay => '蓝光封面';
@@ -3456,8 +3454,7 @@ class SZh extends S {
   String get collectionEditHeroImage => '封面图片';
 
   @override
-  String get collectionEditHeroImageHint =>
-      '推荐 2560×1080（21:9）。主体靠右——左侧被标题覆盖，底部融入背景';
+  String get collectionEditHeroImageHint => '推荐 2560×1080（21:9）。主体靠右——左侧被标题覆盖，底部融入背景';
 
   @override
   String get collectionEditHeroPick => '选择图片';
@@ -3484,8 +3481,7 @@ class SZh extends S {
   String get settingsDiscordRaSync => '同步 RetroAchievements';
 
   @override
-  String get settingsDiscordRaSyncSubtitle =>
-      '在 Discord 中显示您的 RetroAchievements 活动';
+  String get settingsDiscordRaSyncSubtitle => '在 Discord 中显示您的 RetroAchievements 活动';
 
   @override
   String get uncategorizedBanner => '添加到收藏以解锁看板和剧集追踪';
@@ -3919,8 +3915,7 @@ class SZh extends S {
   String get igdbImportTitle => '导入 IGDB 列表';
 
   @override
-  String get igdbImportDescription =>
-      '选择从 IGDB 导出的 CSV 列表。游戏通过 IGDB ID 匹配；IGDB 上不再存在的将加入愿望单。';
+  String get igdbImportDescription => '选择从 IGDB 导出的 CSV 列表。游戏通过 IGDB ID 匹配；IGDB 上不再存在的将加入愿望单。';
 
   @override
   String get igdbImportSelectCsvFile => '选择 CSV 文件';
@@ -4048,6 +4043,30 @@ class SZh extends S {
   String get collectionCopyToCollection => '复制到收藏';
 
   @override
+  String get duplicateAsCustom => '复制为自定义项目';
+
+  @override
+  String get coverOverrideChange => '更换封面';
+
+  @override
+  String get coverOverrideReset => '恢复原始封面';
+
+  @override
+  String get coverOverrideSaveFailed => '无法保存封面';
+
+  @override
+  String get coverOverrideSetFromGallery => '设为封面';
+
+  @override
+  String get coverPickerLoadFailed => '无法加载封面';
+
+  @override
+  String get coverPickerEmpty => '未找到封面';
+
+  @override
+  String get coverSourceIgdb => 'IGDB';
+
+  @override
   String collectionItemCopiedTo(Object collection, Object name) {
     return '$name 已复制到 $collection';
   }
@@ -4168,8 +4187,7 @@ class SZh extends S {
   String get raImportTitle => 'RetroAchievements 导入';
 
   @override
-  String get raGetApiKey =>
-      '在 retroachievements.org/controlpanel.php 获取您的 API 密钥';
+  String get raGetApiKey => '在 retroachievements.org/controlpanel.php 获取您的 API 密钥';
 
   @override
   String get raImportOptionWishlist => '将未匹配的游戏加入愿望单';
@@ -4594,8 +4612,7 @@ class SZh extends S {
   String get malImportPickFiles => '添加 XML 文件';
 
   @override
-  String get malImportFilesHint =>
-      '从 myanimelist.net/panel.php?go=export 导出 XML';
+  String get malImportFilesHint => '从 myanimelist.net/panel.php?go=export 导出 XML';
 
   @override
   String get importAnimeList => '动漫列表';
@@ -4626,8 +4643,7 @@ class SZh extends S {
   String get malImportOverwriteExisting => '覆盖现有条目';
 
   @override
-  String get malImportOverwriteExistingHint =>
-      '关闭时，收藏中已有的项目将保留您的本地状态、评分、进度、日期和备注。新项目仍会被导入。';
+  String get malImportOverwriteExistingHint => '关闭时，收藏中已有的项目将保留您的本地状态、评分、进度、日期和备注。新项目仍会被导入。';
 
   @override
   String malImportFailedLookup(int count) {
@@ -4662,12 +4678,10 @@ class SZh extends S {
   String get hardcoverImportTitle => 'Hardcover 导入';
 
   @override
-  String get hardcoverImportSubtitle =>
-      '从 hardcover.app 获取用户书库——他人仅公开部分，自己的账户则全部获取';
+  String get hardcoverImportSubtitle => '从 hardcover.app 获取用户书库——他人仅公开部分，自己的账户则全部获取';
 
   @override
-  String get hardcoverImportTokenMissing =>
-      '未设置 Hardcover API 令牌。请在设置 → API 凭据中添加。';
+  String get hardcoverImportTokenMissing => '未设置 Hardcover API 令牌。请在设置 → API 凭据中添加。';
 
   @override
   String get aniListImportTitle => 'AniList 导入';
@@ -4721,8 +4735,7 @@ class SZh extends S {
   String get customImportTitle => '导入自定义卡片';
 
   @override
-  String get customImportDescription =>
-      '加载由您自己的脚本或解析器生成的 JSON 或 CSV 文件——每行将成为一张自定义卡片。下载模板以查看所有支持的字段和值。';
+  String get customImportDescription => '加载由你自己的脚本或解析器生成的 JSON 或 CSV 文件。每一行会成为一张自定义卡片；开启来源查找后则成为真实卡片。下载模板以查看所有支持的字段和取值。';
 
   @override
   String get customImportSelectFile => '选择 JSON/CSV 文件';
@@ -4893,8 +4906,7 @@ class SZh extends S {
   String get moodGridCaptionTemplate => '行标题';
 
   @override
-  String get moodGridCaptionTemplateHint =>
-      '应用于每个单元格的模板。可用占位符：name、year、genre、rating。';
+  String get moodGridCaptionTemplateHint => '应用于每个单元格的模板。可用占位符：name、year、genre、rating。';
 
   @override
   String get moodGridCellLabelTemplate => '单元格标题';
@@ -4921,8 +4933,7 @@ class SZh extends S {
   String get screenScraperSourceDesc => '游戏元数据 + 媒体（封面、截图、美术）';
 
   @override
-  String get screenScraperDevCredsHint =>
-      '开发者凭证（devid / devpassword）。服务器用它们签署每个请求；缺少时 ScreenScraper 会拒绝。';
+  String get screenScraperDevCredsHint => '开发者凭证（devid / devpassword）。服务器用它们签署每个请求；缺少时 ScreenScraper 会拒绝。';
 
   @override
   String get screenScraperDevIdLabel => 'devid';
@@ -5483,13 +5494,8 @@ class SZh extends S {
   String get statsMetricLikedUnits => '点赞的剧集';
 
   @override
-  String statsHoursShort(String hours) {
-    return '$hours 小时';
-  }
-
-  @override
-  String statsHoursBreakdown(int manual, int tracker, int estimated) {
-    return '时长：手动 $manual 小时 · 追踪器 $tracker 小时 · 估算 $estimated 小时';
+  String statsHoursBreakdown(String manual, String tracker, String estimated) {
+    return '时长：手动 $manual · 追踪器 $tracker · 估算 $estimated';
   }
 
   @override
@@ -5523,7 +5529,7 @@ class SZh extends S {
 
   @override
   String statsPlatformsSummary(String hours, int games) {
-    return '$hours 小时 · $games 款游戏';
+    return '$hours · $games 款游戏';
   }
 
   @override
@@ -5730,12 +5736,10 @@ class SZh extends S {
   String get credentialsPodcastIndexKeyValid => 'Podcast Index 密钥有效';
 
   @override
-  String get credentialsPodcastIndexKeyInvalid =>
-      'Podcast Index 拒绝了密钥。请检查密钥对和系统时间';
+  String get credentialsPodcastIndexKeyInvalid => 'Podcast Index 拒绝了密钥。请检查密钥对和系统时间';
 
   @override
-  String get welcomeApiPodcastIndexDesc =>
-      '播客搜索与单集追踪。使用 api.podcastindex.org 的免费密钥对。';
+  String get welcomeApiPodcastIndexDesc => '播客搜索与单集追踪。使用 api.podcastindex.org 的免费密钥对。';
 
   @override
   String get welcomeSourceDescMusicBrainz => '开放的音乐百科：专辑、艺术家与版本。无需密钥。';
@@ -5768,8 +5772,7 @@ class SZh extends S {
   String get settingsProxySubtitle => '通过本地代理转发应用流量以访问被屏蔽的数据源';
 
   @override
-  String get settingsProxyHint =>
-      '填写你 VPN 应用暴露的本地端口（Clash 混合端口通常为 HTTP 7890、SOCKS5 7891）。关闭即直连，与修改前一致。';
+  String get settingsProxyHint => '填写你 VPN 应用暴露的本地端口（Clash 混合端口通常为 HTTP 7890、SOCKS5 7891）。关闭即直连，与修改前一致。';
 
   @override
   String get settingsProxyEnabled => '启用代理';
@@ -5837,12 +5840,10 @@ class SZh extends S {
   String get psnImportTitle => 'PlayStation Network';
 
   @override
-  String get psnImportDescription =>
-      '在任何浏览器里登录 playstation.com，然后在同一浏览器中打开下面的 NPSSO 页面，把它显示的字符串粘贴到这里，应用即可读取该账号已购的游戏。';
+  String get psnImportDescription => '在任何浏览器里登录 playstation.com，然后在同一浏览器中打开下面的 NPSSO 页面，把它显示的字符串粘贴到这里，应用即可读取该账号已购的游戏。';
 
   @override
-  String get psnImportHowTo =>
-      'NPSSO 是登录会话凭据，等同于账号密码。它只被使用一次、绝不保存；只有勾选「保持登录」时，本机才会留存约两个月的刷新令牌。';
+  String get psnImportHowTo => 'NPSSO 是登录会话凭据，等同于账号密码。它只被使用一次、绝不保存；只有勾选「保持登录」时，本机才会留存约两个月的刷新令牌。';
 
   @override
   String get psnImportNpssoLabel => 'NPSSO';
@@ -5876,8 +5877,7 @@ class SZh extends S {
   }
 
   @override
-  String get credentialsIgdbAuthHint =>
-      '无法连接 Twitch 授权服务器（id.twitch.tv）在境内属正常。只需在能出国的网络下完成一次授权：令牌约 60 天有效，此后搜索直连 api.igdb.com，无需代理。';
+  String get credentialsIgdbAuthHint => '无法连接 Twitch 授权服务器（id.twitch.tv）在境内属正常。只需在能出国的网络下完成一次授权：令牌约 60 天有效，此后搜索直连 api.igdb.com，无需代理。';
 
   @override
   String get psnImportEmpty => '该账号没有返回已购游戏';
@@ -5901,8 +5901,7 @@ class SZh extends S {
   String get gameListImportTitle => '游戏名列表';
 
   @override
-  String get gameListImportDescription =>
-      '粘贴你的游戏库，每行一个游戏名。可直接从 PS App、奖杯网站或记事本复制——行首编号、项目符号与行尾平台标记会自动清理。';
+  String get gameListImportDescription => '粘贴你的游戏库，每行一个游戏名。可直接从 PS App、奖杯网站或记事本复制——行首编号、项目符号与行尾平台标记会自动清理。';
 
   @override
   String get gameListImportFieldHint => '每行一个游戏名…';
@@ -5971,8 +5970,7 @@ class SZh extends S {
   String get gameListImportQualityNone => '未匹配';
 
   @override
-  String get gameListImportIgdbMissing =>
-      '未连接 IGDB：中文名仍可通过 TapTap 匹配，英文名将无法匹配。';
+  String get gameListImportIgdbMissing => '未连接 IGDB：中文名仍可通过 TapTap 匹配，英文名将无法匹配。';
 
   @override
   String get gameListImportPlatformHint => '仅影响条目上显示的平台';
@@ -5987,4 +5985,74 @@ class SZh extends S {
 
   @override
   String get gameListImportStatusLabel => '导入后的状态';
+
+  @override
+  String get importStageReading => '正在读取文件...';
+
+  @override
+  String get importStageFetchingGames => '正在获取游戏数据...';
+
+  @override
+  String get importStageFetchingMovies => '正在获取电影数据...';
+
+  @override
+  String get importStageFetchingTvShows => '正在获取剧集数据...';
+
+  @override
+  String get importStageFetchingVisualNovels => '正在获取视觉小说数据...';
+
+  @override
+  String get importStageFetchingManga => '正在获取漫画数据...';
+
+  @override
+  String get importStageFetchingAnime => '正在获取动画数据...';
+
+  @override
+  String get importStageFetchingBooks => '正在获取图书数据...';
+
+  @override
+  String get importStageCachingMedia => '正在缓存媒体...';
+
+  @override
+  String get importStageCreatingCollection => '正在创建收藏...';
+
+  @override
+  String get importStageResolvingTitles => '正在搜索来源...';
+
+  @override
+  String get importStageAddingItems => '正在添加条目...';
+
+  @override
+  String get importStageImportingCanvas => '正在导入画板...';
+
+  @override
+  String get importStageRestoringMedia => '正在恢复媒体数据...';
+
+  @override
+  String get importStageImportingImages => '正在恢复图片...';
+
+  @override
+  String get importStageCompleted => '导入完成';
+
+  @override
+  String importBreadcrumb(String title, String source) {
+    return '$title → $source';
+  }
+
+  @override
+  String importTallies(int found, int custom, int ambiguous) {
+    return '已找到 $found · 自定义卡片 $custom · 不明确 $ambiguous';
+  }
+
+  @override
+  String get customImportResolveTitle => '在来源中查找卡片';
+
+  @override
+  String get customImportResolveHint => '按标题在同类型来源（TMDB、IGDB、Kitsu 等）中搜索每一行。恰好一个匹配时创建真实卡片，否则创建自定义卡片。custom 和 audio 行不会被搜索。';
+
+  @override
+  String get importResultUnresolved => '匹配到多条记录，已保留为自定义卡片';
+
+  @override
+  String get importResultUnresolvedCopied => '已复制标题';
 }

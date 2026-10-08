@@ -30,8 +30,7 @@ class SEn extends S {
   String get releasesEmpty => 'No tracked shows yet';
 
   @override
-  String get releasesEmptyHint =>
-      'Tap the bell on a TV show or anime to track new episodes.';
+  String get releasesEmptyHint => 'Tap the bell on a TV show or anime to track new episodes.';
 
   @override
   String get releasesTrackShow => 'Track releases';
@@ -249,6 +248,12 @@ class SEn extends S {
 
   @override
   String get sortCompletionDateShort => 'Finished';
+
+  @override
+  String get sortReleaseDateDisplay => 'Release Date';
+
+  @override
+  String get sortReleaseDateShort => 'Released';
 
   @override
   String get sortDateOldest => 'Oldest first';
@@ -524,8 +529,7 @@ class SEn extends S {
   String get settingsKinoriumImport => 'Kinorium Import';
 
   @override
-  String get settingsKinoriumImportSubtitle =>
-      'Movies & shows from a CSV export';
+  String get settingsKinoriumImportSubtitle => 'Movies & shows from a CSV export';
 
   @override
   String get settingsDebug => 'Debug';
@@ -534,8 +538,7 @@ class SEn extends S {
   String get settingsDebugSubtitle => 'Developer tools';
 
   @override
-  String get settingsDebugSubtitleNoKey =>
-      'Set SteamGridDB key first for some tools';
+  String get settingsDebugSubtitleNoKey => 'Set SteamGridDB key first for some tools';
 
   @override
   String get settingsLaboratory => 'Laboratory';
@@ -544,8 +547,7 @@ class SEn extends S {
   String get settingsLaboratoryCardDesigns => 'Card banner designs';
 
   @override
-  String get settingsLaboratoryCardDesignsSubtitle =>
-      'Experimental poster card layouts';
+  String get settingsLaboratoryCardDesignsSubtitle => 'Experimental poster card layouts';
 
   @override
   String get settingsHelp => 'Help';
@@ -554,8 +556,7 @@ class SEn extends S {
   String get settingsWelcomeGuide => 'Welcome Guide';
 
   @override
-  String get settingsWelcomeGuideSubtitle =>
-      'Getting started with Tonkatsu Box';
+  String get settingsWelcomeGuideSubtitle => 'Getting started with Tonkatsu Box';
 
   @override
   String get settingsAbout => 'About';
@@ -573,19 +574,16 @@ class SEn extends S {
   String get settingsChangelogEmpty => 'No release notes available';
 
   @override
-  String get settingsCreditsLicensesSubtitle =>
-      'TMDB, IGDB, SteamGridDB, open-source licenses';
+  String get settingsCreditsLicensesSubtitle => 'TMDB, IGDB, SteamGridDB, open-source licenses';
 
   @override
   String get settingsError => 'Error';
 
   @override
-  String get credentialsMissingHint =>
-      'Please enter Client ID and Client Secret';
+  String get credentialsMissingHint => 'Please enter Client ID and Client Secret';
 
   @override
-  String get settingsErrorNetworkHint =>
-      'The request failed. Check your network or proxy settings (Settings → Data sources → Proxy). Technical details:';
+  String get settingsErrorNetworkHint => 'The request failed. Check your network or proxy settings (Settings → Data sources → Proxy). Technical details:';
 
   @override
   String get settingsAppLanguage => 'App Language';
@@ -600,8 +598,7 @@ class SEn extends S {
   String get credentialsServerTokenLabel => 'Server access token';
 
   @override
-  String get credentialsServerTokenHint =>
-      'Paste the token the server printed at startup. Only needed when the server listens beyond this machine.';
+  String get credentialsServerTokenHint => 'Paste the token the server printed at startup. Only needed when the server listens beyond this machine.';
 
   @override
   String get credentialsServerTokenSave => 'Save token';
@@ -610,8 +607,7 @@ class SEn extends S {
   String get credentialsServerManagedTitle => 'Keys are stored on the server';
 
   @override
-  String get credentialsServerManagedBody =>
-      'Anything entered below is saved on the selfhost server, not in this browser — that is where requests to the APIs are made from. You can also load them from a config file exported on desktop.';
+  String get credentialsServerManagedBody => 'Anything entered below is saved on the selfhost server, not in this browser — that is where requests to the APIs are made from. You can also load them from a config file exported on desktop.';
 
   @override
   String get credentialsUploadFromConfig => 'Load keys from a config file';
@@ -657,8 +653,7 @@ class SEn extends S {
   String get settingsAppLanguageSubtitle => 'Interface language';
 
   @override
-  String get settingsContentLanguageSubtitle =>
-      'For now TMDB only (movies and TV shows)';
+  String get settingsContentLanguageSubtitle => 'For now TMDB only (movies and TV shows)';
 
   @override
   String get settingsDataSources => 'Data Sources';
@@ -685,8 +680,7 @@ class SEn extends S {
   String get settingsBackupAll => 'Backup All Data';
 
   @override
-  String get settingsBackupAllSubtitle =>
-      'All collections, wishlist, and settings';
+  String get settingsBackupAllSubtitle => 'All collections, wishlist, and settings';
 
   @override
   String get settingsRestoreBackup => 'Restore from Backup';
@@ -728,8 +722,7 @@ class SEn extends S {
   String get restoreProgressTitle => 'Restoring backup';
 
   @override
-  String get restoreProgressWarning =>
-      'Do not close the app. This may take several minutes for large backups.';
+  String get restoreProgressWarning => 'Do not close the app. This may take several minutes for large backups.';
 
   @override
   String get restoreStageReading => 'Reading archive…';
@@ -752,8 +745,7 @@ class SEn extends S {
   String get settingsImport => 'Import';
 
   @override
-  String get settingsImportSubtitle =>
-      'Import collections from external services';
+  String get settingsImportSubtitle => 'Import collections from external services';
 
   @override
   String get settingsContentLanguage => 'Content Language';
@@ -773,8 +765,7 @@ class SEn extends S {
   String get credentialsWelcome => 'Welcome to Tonkatsu Box!';
 
   @override
-  String get credentialsWelcomeHint =>
-      'To get started, you need to set up your IGDB API credentials. Get your Client ID and Client Secret from the Twitch Developer Console.';
+  String get credentialsWelcomeHint => 'To get started, you need to set up your IGDB API credentials. Get your Client ID and Client Secret from the Twitch Developer Console.';
 
   @override
   String get credentialsCopyTwitchUrl => 'Copy Twitch Console URL';
@@ -851,8 +842,7 @@ class SEn extends S {
   String get credentialsGoogleBooksSection => 'Google Books API (Books)';
 
   @override
-  String get credentialsEnterGoogleBooksKey =>
-      'Enter your Google Books API key (optional)';
+  String get credentialsEnterGoogleBooksKey => 'Enter your Google Books API key (optional)';
 
   @override
   String get credentialsHardcoverSection => 'Hardcover API (Books)';
@@ -861,12 +851,10 @@ class SEn extends S {
   String get credentialsEnterHardcoverKey => 'Enter your Hardcover API token';
 
   @override
-  String get credentialsOwnKeyHint =>
-      'For better rate limits we recommend using your own API key.';
+  String get credentialsOwnKeyHint => 'For better rate limits we recommend using your own API key.';
 
   @override
-  String get credentialsKeyRequiredHint =>
-      'Required — this source stays off until a key is set.';
+  String get credentialsKeyRequiredHint => 'Required — this source stays off until a key is set.';
 
   @override
   String get credentialsConnected => 'Connected';
@@ -881,15 +869,13 @@ class SEn extends S {
   String get credentialsNotConnected => 'Not Connected';
 
   @override
-  String get credentialsEnterBoth =>
-      'Please enter both Client ID and Client Secret';
+  String get credentialsEnterBoth => 'Please enter both Client ID and Client Secret';
 
   @override
   String get credentialsConnectedSynced => 'Connected & platforms synced!';
 
   @override
-  String get credentialsConnectedSyncFailed =>
-      'Connected, but platform sync failed';
+  String get credentialsConnectedSyncFailed => 'Connected, but platform sync failed';
 
   @override
   String get credentialsPlatformsSyncedOk => 'Platforms synced successfully!';
@@ -918,8 +904,7 @@ class SEn extends S {
   String get credentialsSteamGridDbKeyValid => 'SteamGridDB API key is valid';
 
   @override
-  String get credentialsSteamGridDbKeyInvalid =>
-      'SteamGridDB API key is invalid';
+  String get credentialsSteamGridDbKeyInvalid => 'SteamGridDB API key is invalid';
 
   @override
   String get credentialsTmdbKeyValid => 'TMDB API key is valid';
@@ -943,19 +928,16 @@ class SEn extends S {
   String get credentialsGoogleBooksKeyValid => 'Google Books API key is valid';
 
   @override
-  String get credentialsGoogleBooksKeyInvalid =>
-      'Google Books API key is invalid';
+  String get credentialsGoogleBooksKeyInvalid => 'Google Books API key is invalid';
 
   @override
   String get credentialsHardcoverKeyValid => 'Hardcover API token is valid';
 
   @override
-  String get credentialsHardcoverKeyInvalid =>
-      'Hardcover API token is invalid or expired';
+  String get credentialsHardcoverKeyInvalid => 'Hardcover API token is invalid or expired';
 
   @override
-  String get credentialsEnterSteamGridDbKeyError =>
-      'Please enter a SteamGridDB API key';
+  String get credentialsEnterSteamGridDbKeyError => 'Please enter a SteamGridDB API key';
 
   @override
   String get credentialsEnterTmdbKeyError => 'Please enter a TMDB API key';
@@ -1032,8 +1014,7 @@ class SEn extends S {
   String get cacheClearCacheTitle => 'Remove unused images?';
 
   @override
-  String get cacheClearCacheMessage =>
-      'Deletes downloaded covers for media that is no longer in any collection. Your custom covers and board images are kept.';
+  String get cacheClearCacheMessage => 'Deletes downloaded covers for media that is no longer in any collection. Your custom covers and board images are kept.';
 
   @override
   String get cacheFolderUpdated => 'Cache folder updated';
@@ -1058,8 +1039,7 @@ class SEn extends S {
   String get databaseConfiguration => 'Configuration';
 
   @override
-  String get databaseConfigSubtitle =>
-      'Export or import your API keys and settings.';
+  String get databaseConfigSubtitle => 'Export or import your API keys and settings.';
 
   @override
   String get databaseExportConfig => 'Export Config';
@@ -1071,8 +1051,7 @@ class SEn extends S {
   String get databaseDangerZone => 'Danger Zone';
 
   @override
-  String get databaseDangerZoneMessage =>
-      'Clears all collections, games, movies, TV shows and board data. Settings and API keys will be preserved.';
+  String get databaseDangerZoneMessage => 'Clears all collections, games, movies, TV shows and board data. Settings and API keys will be preserved.';
 
   @override
   String get databaseResetDatabase => 'Reset Database';
@@ -1081,8 +1060,7 @@ class SEn extends S {
   String get databaseResetTitle => 'Reset Database?';
 
   @override
-  String get databaseResetMessage =>
-      'This will permanently delete all your collections, games, movies, TV shows, episode progress, and board data.\n\nYour API keys and settings will be preserved.\n\nThis action cannot be undone.';
+  String get databaseResetMessage => 'This will permanently delete all your collections, games, movies, TV shows, episode progress, and board data.\n\nYour API keys and settings will be preserved.\n\nThis action cannot be undone.';
 
   @override
   String databaseConfigExported(String path) {
@@ -1099,19 +1077,16 @@ class SEn extends S {
   String get storageLocationTitle => 'Data Location';
 
   @override
-  String get storageLocationSubtitle =>
-      'Folder that stores the database and profiles. Avoid folders that a cloud service syncs live (OneDrive, Syncthing): the database can get corrupted mid-write. To move data between devices, use export instead.';
+  String get storageLocationSubtitle => 'Folder that stores the database and profiles. Avoid folders that a cloud service syncs live (OneDrive, Syncthing): the database can get corrupted mid-write. To move data between devices, use export instead.';
 
   @override
-  String get storageLocationDangerWarning =>
-      'Warning: changing the data folder can lead to data loss. You do this at your own risk.';
+  String get storageLocationDangerWarning => 'Warning: changing the data folder can lead to data loss. You do this at your own risk.';
 
   @override
   String get storageLocationFolder => 'Data folder';
 
   @override
-  String get storageLocationFallbackWarning =>
-      'Selected folder is unavailable, using the default one';
+  String get storageLocationFallbackWarning => 'Selected folder is unavailable, using the default one';
 
   @override
   String get storageLocationChange => 'Change Folder';
@@ -1131,30 +1106,25 @@ class SEn extends S {
   String get storageLocationPermissionTitle => 'Storage Access Needed';
 
   @override
-  String get storageLocationPermissionMessage =>
-      'Android requires the \"All files access\" permission for a custom data folder. In the list that opens, find Tonkatsu Box, enable the access, then come back and pick the folder again.';
+  String get storageLocationPermissionMessage => 'Android requires the \"All files access\" permission for a custom data folder. In the list that opens, find Tonkatsu Box, enable the access, then come back and pick the folder again.';
 
   @override
-  String get storageLocationLegacyPermissionMessage =>
-      'A custom data folder needs the Storage permission. Enable it in the app settings, then come back and pick the folder again.';
+  String get storageLocationLegacyPermissionMessage => 'A custom data folder needs the Storage permission. Enable it in the app settings, then come back and pick the folder again.';
 
   @override
   String get storageLocationOpenSettings => 'Open Settings';
 
   @override
-  String get storageLocationDbTooNew =>
-      'The database in this folder was made by a newer app version. Update the app on this device first.';
+  String get storageLocationDbTooNew => 'The database in this folder was made by a newer app version. Update the app on this device first.';
 
   @override
-  String get storageLocationDbCorrupted =>
-      'The database in this folder is corrupted or incomplete. If a sync tool is still copying it, try again later.';
+  String get storageLocationDbCorrupted => 'The database in this folder is corrupted or incomplete. If a sync tool is still copying it, try again later.';
 
   @override
   String get storageLocationUseExistingTitle => 'Existing Data Found';
 
   @override
-  String get storageLocationUseExistingMessage =>
-      'The selected folder already contains a database. The app will switch to that data after restart.';
+  String get storageLocationUseExistingMessage => 'The selected folder already contains a database. The app will switch to that data after restart.';
 
   @override
   String get storageLocationUseExistingConfirm => 'Use It';
@@ -1163,8 +1133,7 @@ class SEn extends S {
   String get storageLocationCopyTitle => 'Copy Current Data?';
 
   @override
-  String get storageLocationCopyMessage =>
-      'The selected folder is empty. Your collections will be copied there; saved images will download again as needed. Data in the old folder stays untouched.';
+  String get storageLocationCopyMessage => 'The selected folder is empty. Your collections will be copied there; saved images will download again as needed. Data in the old folder stays untouched.';
 
   @override
   String get copy => 'Copy';
@@ -1173,33 +1142,28 @@ class SEn extends S {
   String get storageLocationCopyImages => 'Copy the image cache too';
 
   @override
-  String get storageLocationCopyImagesHint =>
-      'Hero banners and saved covers — larger, but the new folder works offline without re-downloading';
+  String get storageLocationCopyImagesHint => 'Hero banners and saved covers — larger, but the new folder works offline without re-downloading';
 
   @override
-  String get storageLocationCopyError =>
-      'Failed to copy data to the selected folder';
+  String get storageLocationCopyError => 'Failed to copy data to the selected folder';
 
   @override
   String get storageLocationResetTitle => 'Reset Data Folder?';
 
   @override
-  String get storageLocationResetMessage =>
-      'The app will switch back to the default data folder after restart. Data in the custom folder stays untouched.';
+  String get storageLocationResetMessage => 'The app will switch back to the default data folder after restart. Data in the custom folder stays untouched.';
 
   @override
   String get storageLocationRestartTitle => 'Restart Required';
 
   @override
-  String get storageLocationRestartMessage =>
-      'The new data folder will be used after restart. Restart now?';
+  String get storageLocationRestartMessage => 'The new data folder will be used after restart. Restart now?';
 
   @override
   String get storageLocationRestartNow => 'Restart';
 
   @override
-  String get storageLocationRestartLater =>
-      'The change will take effect after restart';
+  String get storageLocationRestartLater => 'The change will take effect after restart';
 
   @override
   String get backupRestoreTile => 'Restore the previous database';
@@ -1222,8 +1186,7 @@ class SEn extends S {
   String get backupRestoreError => 'Failed to restore the backup';
 
   @override
-  String get backupRestartMessage =>
-      'The restored data will be used after restart. Restart now?';
+  String get backupRestartMessage => 'The restored data will be used after restart. Restart now?';
 
   @override
   String get lanSyncTitle => 'Network Sync';
@@ -1232,8 +1195,7 @@ class SEn extends S {
   String get lanSyncOpenTile => 'Nearby devices';
 
   @override
-  String get lanSyncTileSubtitle =>
-      'Transfer data directly between devices on the same Wi-Fi network';
+  String get lanSyncTileSubtitle => 'Transfer data directly between devices on the same Wi-Fi network';
 
   @override
   String lanSyncVisibleAs(String name) {
@@ -1241,8 +1203,7 @@ class SEn extends S {
   }
 
   @override
-  String get lanSyncNoDevices =>
-      'No devices found. Open this screen on both devices connected to the same Wi-Fi network. Access point isolation and VPNs block discovery.';
+  String get lanSyncNoDevices => 'No devices found. Open this screen on both devices connected to the same Wi-Fi network. Access point isolation and VPNs block discovery.';
 
   @override
   String get lanSyncPull => 'Tap to get its data';
@@ -1251,12 +1212,7 @@ class SEn extends S {
   String get lanSyncReceiveTitle => 'Replace Data?';
 
   @override
-  String lanSyncReceiveMessage(
-    String device,
-    String date,
-    int collections,
-    int items,
-  ) {
+  String lanSyncReceiveMessage(String device, String date, int collections, int items) {
     return 'Data from $device, $date: $collections collections, $items items.\n\nCurrent data will be REPLACED. A backup copy stays next to the database.';
   }
 
@@ -1286,19 +1242,16 @@ class SEn extends S {
   String get lanSyncManifestError => 'The device did not respond';
 
   @override
-  String get lanSyncStartError =>
-      'Could not start network sharing. Check the network connection and reopen this screen.';
+  String get lanSyncStartError => 'Could not start network sharing. Check the network connection and reopen this screen.';
 
   @override
   String get lanSyncReceiveError => 'Failed to get the data';
 
   @override
-  String get lanSyncTooNew =>
-      'The data on that device was made by a newer app version. Update the app on this device first.';
+  String get lanSyncTooNew => 'The data on that device was made by a newer app version. Update the app on this device first.';
 
   @override
-  String get lanSyncCorrupted =>
-      'The transfer came through damaged. Try again.';
+  String get lanSyncCorrupted => 'The transfer came through damaged. Try again.';
 
   @override
   String get lanSyncReceived => 'Data received';
@@ -1313,20 +1266,16 @@ class SEn extends S {
   String get lanSyncImportConfig => 'Also transfer settings';
 
   @override
-  String get lanSyncImportConfigSubtitle =>
-      'Includes API keys. All or nothing.';
+  String get lanSyncImportConfigSubtitle => 'Includes API keys. All or nothing.';
 
   @override
-  String get lanSyncImagesWarning =>
-      'Database received, but the images could not be transferred';
+  String get lanSyncImagesWarning => 'Database received, but the images could not be transferred';
 
   @override
-  String get lanSyncRestartMessage =>
-      'The received data will be used after restart. Restart now?';
+  String get lanSyncRestartMessage => 'The received data will be used after restart. Restart now?';
 
   @override
-  String get lanSyncFirewallNote =>
-      'Windows may ask for firewall permission on first start - allow access on private networks.';
+  String get lanSyncFirewallNote => 'Windows may ask for firewall permission on first start - allow access on private networks.';
 
   @override
   String get folderPickerNewFolder => 'New folder';
@@ -1362,8 +1311,7 @@ class SEn extends S {
   String get traktImportFrom => 'Import from Trakt.tv';
 
   @override
-  String get traktImportDescription =>
-      'Download your data from trakt.tv/users/YOU/data and select the ZIP file below.';
+  String get traktImportDescription => 'Download your data from trakt.tv/users/YOU/data and select the ZIP file below.';
 
   @override
   String get traktZipFile => 'ZIP File';
@@ -1428,8 +1376,7 @@ class SEn extends S {
   String get importStart => 'Start Import';
 
   @override
-  String get traktRequiresOwnTmdbKey =>
-      'Trakt import requires your own TMDB API key. Add it in Settings → Credentials.';
+  String get traktRequiresOwnTmdbKey => 'Trakt import requires your own TMDB API key. Add it in Settings → Credentials.';
 
   @override
   String get traktInvalidExport => 'Invalid Trakt export';
@@ -1438,8 +1385,7 @@ class SEn extends S {
   String get kinoriumImportFrom => 'Import from Kinorium';
 
   @override
-  String get kinoriumImportDescription =>
-      'Export your list from Kinorium (it arrives by email as a CSV) and select the file below.';
+  String get kinoriumImportDescription => 'Export your list from Kinorium (it arrives by email as a CSV) and select the file below.';
 
   @override
   String get kinoriumSelectCsvFile => 'Select CSV File';
@@ -1451,29 +1397,25 @@ class SEn extends S {
   String get kinoriumIsWatchlist => 'This is a \"Watchlist\" file';
 
   @override
-  String get kinoriumIsWatchlistDesc =>
-      'Import every title as planned instead of watched';
+  String get kinoriumIsWatchlistDesc => 'Import every title as planned instead of watched';
 
   @override
   String get kinoriumImportNotes => 'Import cast & crew';
 
   @override
-  String get kinoriumImportNotesDesc =>
-      'Add directors and actors to the item note';
+  String get kinoriumImportNotesDesc => 'Add directors and actors to the item note';
 
   @override
   String get kinoriumImporting => 'Importing from Kinorium...';
 
   @override
-  String get kinoriumRecommendOwnTmdbKey =>
-      'Tip: a personal TMDB API key is recommended for large imports (Settings → API Keys), but it\'s optional — the built-in key works too.';
+  String get kinoriumRecommendOwnTmdbKey => 'Tip: a personal TMDB API key is recommended for large imports (Settings → API Keys), but it\'s optional — the built-in key works too.';
 
   @override
   String get kinoriumReasonNotFound => 'Not found on TMDB';
 
   @override
-  String get kinoriumReasonApiError =>
-      'TMDB error or rate limit — try again later';
+  String get kinoriumReasonApiError => 'TMDB error or rate limit — try again later';
 
   @override
   String kinoriumReasonUnsupportedType(String type) {
@@ -1500,12 +1442,10 @@ class SEn extends S {
   String get creditsDataProviders => 'Data Providers';
 
   @override
-  String get creditsTmdbAttribution =>
-      'This product uses the TMDB API but is not endorsed or certified by TMDB.';
+  String get creditsTmdbAttribution => 'This product uses the TMDB API but is not endorsed or certified by TMDB.';
 
   @override
-  String get creditsTvdbAttribution =>
-      'Metadata provided by TheTVDB. Please consider adding missing information or subscribing.';
+  String get creditsTvdbAttribution => 'Metadata provided by TheTVDB. Please consider adding missing information or subscribing.';
 
   @override
   String get creditsTvMazeAttribution => 'TV series data provided by TVmaze.';
@@ -1514,8 +1454,7 @@ class SEn extends S {
   String get creditsIgdbAttribution => 'Game data provided by IGDB.';
 
   @override
-  String get creditsSteamGridDbAttribution =>
-      'Artwork provided by SteamGridDB.';
+  String get creditsSteamGridDbAttribution => 'Artwork provided by SteamGridDB.';
 
   @override
   String get creditsVndbAttribution => 'Visual novel data provided by VNDB.';
@@ -1533,19 +1472,16 @@ class SEn extends S {
   String get creditsKitsuAttribution => 'Manga data provided by Kitsu.';
 
   @override
-  String get creditsOpenLibraryAttribution =>
-      'Book data from Open Library (CC0 / ODbL).';
+  String get creditsOpenLibraryAttribution => 'Book data from Open Library (CC0 / ODbL).';
 
   @override
   String get creditsFantlabAttribution => 'Book data from Fantlab.';
 
   @override
-  String get creditsComicVineAttribution =>
-      'Comic data from ComicVine (non-commercial use).';
+  String get creditsComicVineAttribution => 'Comic data from ComicVine (non-commercial use).';
 
   @override
-  String get creditsMusicBrainzAttribution =>
-      'Music data from MusicBrainz, covers from the Cover Art Archive, listen counts from ListenBrainz.';
+  String get creditsMusicBrainzAttribution => 'Music data from MusicBrainz, covers from the Cover Art Archive, listen counts from ListenBrainz.';
 
   @override
   String get creditsGoogleBooksAttribution => 'Book data from Google Books.';
@@ -1557,8 +1493,7 @@ class SEn extends S {
   String get creditsOpenSource => 'Open Source';
 
   @override
-  String get creditsOpenSourceDesc =>
-      'Tonkatsu Box is free and open source software, released under the MIT License.';
+  String get creditsOpenSourceDesc => 'Tonkatsu Box is free and open source software, released under the MIT License.';
 
   @override
   String get creditsViewLicenses => 'View Open Source Licenses';
@@ -1573,8 +1508,7 @@ class SEn extends S {
   String get collectionsNoCollectionsYet => 'No Collections Yet';
 
   @override
-  String get collectionsNoCollectionsHint =>
-      'Tap + to create your first collection and start\norganizing your media library.';
+  String get collectionsNoCollectionsHint => 'Tap + to create your first collection and start\norganizing your media library.';
 
   @override
   String get collectionsFailedToLoad => 'Failed to load collections';
@@ -1664,15 +1598,13 @@ class SEn extends S {
   String get importModeNewOnly => 'Add new only';
 
   @override
-  String get importModeNewOnlySubtitle =>
-      'Skip items already in the collection';
+  String get importModeNewOnlySubtitle => 'Skip items already in the collection';
 
   @override
   String get importModeOverwrite => 'Overwrite existing';
 
   @override
-  String get importModeOverwriteSubtitle =>
-      'Update progress, status and dates from the source';
+  String get importModeOverwriteSubtitle => 'Update progress, status and dates from the source';
 
   @override
   String get importNewCollectionName => 'Collection name';
@@ -1744,15 +1676,13 @@ class SEn extends S {
   String get collectionEmpty => 'Empty Collection';
 
   @override
-  String get collectionEmptyAddHint =>
-      'Add items to start building your collection.';
+  String get collectionEmptyAddHint => 'Add items to start building your collection.';
 
   @override
   String get collectionEmptyReadonly => 'This collection is empty.';
 
   @override
-  String get collectionDeleteEmptyPrompt =>
-      'This collection is now empty. Delete it?';
+  String get collectionDeleteEmptyPrompt => 'This collection is now empty. Delete it?';
 
   @override
   String get collectionRemoveItemTitle => 'Remove Item?';
@@ -1787,8 +1717,7 @@ class SEn extends S {
   String get collectionExportIncludeUserData => 'Include personal data';
 
   @override
-  String get collectionExportIncludeUserDataDesc =>
-      'Status, dates, notes, episode progress';
+  String get collectionExportIncludeUserDataDesc => 'Status, dates, notes, episode progress';
 
   @override
   String get customItemCreate => 'Create Custom Item';
@@ -1886,8 +1815,7 @@ class SEn extends S {
   String get customItemCoverSource => 'Cover source';
 
   @override
-  String get customItemCoverRatio =>
-      'Recommended aspect ratio: 2:3 (e.g. 600×900)';
+  String get customItemCoverRatio => 'Recommended aspect ratio: 2:3 (e.g. 600×900)';
 
   @override
   String get customItemCoverFromFile => 'From file';
@@ -2009,8 +1937,7 @@ class SEn extends S {
   String get tierListExportFailed => 'Failed to export image';
 
   @override
-  String get browseCollectionsDownloadFailedGeneric =>
-      'Failed to download collection';
+  String get browseCollectionsDownloadFailedGeneric => 'Failed to download collection';
 
   @override
   String get tagFilterAll => 'All tags';
@@ -2056,8 +1983,7 @@ class SEn extends S {
   String get raUnlinkTitle => 'Unlink RetroAchievements';
 
   @override
-  String get raUnlinkConfirm =>
-      'Remove RetroAchievements link and achievement data for this game?';
+  String get raUnlinkConfirm => 'Remove RetroAchievements link and achievement data for this game?';
 
   @override
   String get collectionFilterByType => 'Filter by type';
@@ -2254,6 +2180,24 @@ class SEn extends S {
   String get noEpisodesFound => 'No episodes found';
 
   @override
+  String get undo => 'Undo';
+
+  @override
+  String get episodeUnmarkedSnack => 'Episode unmarked';
+
+  @override
+  String get seasonUnmarkedSnack => 'Season unmarked';
+
+  @override
+  String get episodesClearedSnack => 'Episode marks cleared';
+
+  @override
+  String get episodeWatchedDateEdit => 'Watched date';
+
+  @override
+  String get episodeWatchedDateSelect => 'When did you watch it?';
+
+  @override
   String episodeWatchedDate(String date) {
     return 'watched $date';
   }
@@ -2271,15 +2215,13 @@ class SEn extends S {
   String get createCollectionEnterName => 'Please enter a name';
 
   @override
-  String get createCollectionNameTooShort =>
-      'Name must be at least 2 characters';
+  String get createCollectionNameTooShort => 'Name must be at least 2 characters';
 
   @override
   String get createCollectionHiddenLabel => 'Hidden collection';
 
   @override
-  String get createCollectionHiddenHint =>
-      'No covers on the card, and its items stay out of All Items';
+  String get createCollectionHiddenHint => 'No covers on the card, and its items stay out of All Items';
 
   @override
   String get collectionHide => 'Hide collection';
@@ -2332,8 +2274,7 @@ class SEn extends S {
   String get canvasDeleteElement => 'Delete element';
 
   @override
-  String get canvasDeleteElementMessage =>
-      'Are you sure you want to delete this element?';
+  String get canvasDeleteElementMessage => 'Are you sure you want to delete this element?';
 
   @override
   String get canvasAddToBoard => 'Add to Board';
@@ -2598,12 +2539,10 @@ class SEn extends S {
   String get searchWhatToFind => 'What to find';
 
   @override
-  String get searchSortNeedsSingleSource =>
-      'Sorting is available with a single source';
+  String get searchSortNeedsSingleSource => 'Sorting is available with a single source';
 
   @override
-  String get searchSortUnavailableInSearch =>
-      'This source does not sort search results';
+  String get searchSortUnavailableInSearch => 'This source does not sort search results';
 
   @override
   String get searchSourcesLabel => 'Sources';
@@ -2638,8 +2577,7 @@ class SEn extends S {
   String get searchFailed => 'Search failed';
 
   @override
-  String get searchCheckConnection =>
-      'Check your internet connection and try again.';
+  String get searchCheckConnection => 'Check your internet connection and try again.';
 
   @override
   String get copyErrorDetails => 'Copy error details';
@@ -2754,8 +2692,7 @@ class SEn extends S {
   String get wishlistTagOptional => 'Tag (optional)';
 
   @override
-  String get wishlistTagHint =>
-      'Group entries — e.g. an import batch or a source';
+  String get wishlistTagHint => 'Group entries — e.g. an import batch or a source';
 
   @override
   String get wishlistTagUntagged => 'Untagged';
@@ -2829,8 +2766,7 @@ class SEn extends S {
   String get welcomeNameTitle => 'What\'s your name?';
 
   @override
-  String get welcomeNameSubtitle =>
-      'This name will appear as the author on collections you create';
+  String get welcomeNameSubtitle => 'This name will appear as the author on collections you create';
 
   @override
   String get welcomeChangeLaterHint => 'You can change this later in Settings';
@@ -2845,19 +2781,16 @@ class SEn extends S {
   String get welcomeTitle => 'Welcome to Tonkatsu Box';
 
   @override
-  String get welcomeSubtitle =>
-      'Organize your collections of games, movies,\nTV shows, anime, visual novels, manga & books';
+  String get welcomeSubtitle => 'Organize your collections of games, movies,\nTV shows, anime, visual novels, manga & books';
 
   @override
   String get welcomeWhatYouCanDo => 'What you can do';
 
   @override
-  String get welcomeFeatureCollections =>
-      'Create collections by platform, genre, or any theme';
+  String get welcomeFeatureCollections => 'Create collections by platform, genre, or any theme';
 
   @override
-  String get welcomeFeatureSearch =>
-      'Search games, movies, TV shows, anime, visual novels, manga & books via APIs';
+  String get welcomeFeatureSearch => 'Search games, movies, TV shows, anime, visual novels, manga & books via APIs';
 
   @override
   String get welcomeFeatureTracking => 'Track progress, rate 1-10, add notes';
@@ -2866,8 +2799,7 @@ class SEn extends S {
   String get welcomeFeatureBoards => 'Visual canvas boards with artwork';
 
   @override
-  String get welcomeFeatureExport =>
-      'Export & import — share collections with friends';
+  String get welcomeFeatureExport => 'Export & import — share collections with friends';
 
   @override
   String get welcomeWorksWithoutKeys => 'Works without API keys';
@@ -2882,8 +2814,7 @@ class SEn extends S {
   String get welcomeChipRatings => 'Ratings & notes';
 
   @override
-  String get welcomeApiKeysHint =>
-      'API keys are only needed for searching new games, movies & TV shows. You can import collections and work with them offline.';
+  String get welcomeApiKeysHint => 'API keys are only needed for searching new games, movies & TV shows. You can import collections and work with them offline.';
 
   @override
   String get welcomeChipGames => 'Games (IGDB)';
@@ -2934,8 +2865,7 @@ class SEn extends S {
   String get welcomeApiGoogleBooksDesc => 'Google\'s global book catalog';
 
   @override
-  String get welcomeApiHardcoverDesc =>
-      'Community book catalog, needs a personal token';
+  String get welcomeApiHardcoverDesc => 'Community book catalog, needs a personal token';
 
   @override
   String get welcomeApiRecommended => 'RECOMMENDED';
@@ -2953,16 +2883,13 @@ class SEn extends S {
   String get welcomeApiBuiltInKey => 'BUILT-IN KEY';
 
   @override
-  String get welcomeApiOwnKeyHint =>
-      'You can add your own key later in Settings for higher rate limits';
+  String get welcomeApiOwnKeyHint => 'You can add your own key later in Settings for higher rate limits';
 
   @override
-  String get welcomeApiEnterKeysHint =>
-      'Enter keys in Settings → Credentials after setup';
+  String get welcomeApiEnterKeysHint => 'Enter keys in Settings → Credentials after setup';
 
   @override
-  String get welcomeApiRateLimitHint =>
-      'Built-in keys are shared between all users and have rate limits. For the best experience, use your own keys — it\'s free and takes just a few minutes.';
+  String get welcomeApiRateLimitHint => 'Built-in keys are shared between all users and have rate limits. For the best experience, use your own keys — it\'s free and takes just a few minutes.';
 
   @override
   String get welcomeHowTitle => 'How it works';
@@ -2971,32 +2898,25 @@ class SEn extends S {
   String get welcomeHowAppStructure => 'App structure';
 
   @override
-  String get welcomeHowMainDesc =>
-      'All items from all collections in one view. Filter by type, sort by rating.';
+  String get welcomeHowMainDesc => 'All items from all collections in one view. Filter by type, sort by rating.';
 
   @override
-  String get welcomeHowCollectionsDesc =>
-      'Your collections. Create, organize, manage. Grid or list view per collection.';
+  String get welcomeHowCollectionsDesc => 'Your collections. Create, organize, manage. Grid or list view per collection.';
 
   @override
-  String get welcomeHowTierListsDesc =>
-      'Rank and compare items across collections with customizable tier lists.';
+  String get welcomeHowTierListsDesc => 'Rank and compare items across collections with customizable tier lists.';
 
   @override
-  String get welcomeHowWishlistDesc =>
-      'Quick list of items to check out later. No API needed.';
+  String get welcomeHowWishlistDesc => 'Quick list of items to check out later. No API needed.';
 
   @override
-  String get welcomeHowSearchDesc =>
-      'Find games, movies, TV shows, visual novels & manga via API. Add to any collection.';
+  String get welcomeHowSearchDesc => 'Find games, movies, TV shows, visual novels & manga via API. Add to any collection.';
 
   @override
-  String get welcomeHowSettingsDesc =>
-      'API keys, cache, database export/import, debug tools.';
+  String get welcomeHowSettingsDesc => 'API keys, cache, database export/import, debug tools.';
 
   @override
-  String get welcomeHowPersonalizationDesc =>
-      'Your taste in one place: a cloud of your favourite genres plus recommendations picked from what you\'ve rated.';
+  String get welcomeHowPersonalizationDesc => 'Your taste in one place: a cloud of your favourite genres plus recommendations picked from what you\'ve rated.';
 
   @override
   String get welcomeHowQuickStart => 'Quick Start';
@@ -3005,8 +2925,7 @@ class SEn extends S {
   String get welcomeHowStep1 => 'Go to Settings → Credentials, enter API keys';
 
   @override
-  String get welcomeHowStep2 =>
-      'Click Verify Connection, wait for platforms sync';
+  String get welcomeHowStep2 => 'Click Verify Connection, wait for platforms sync';
 
   @override
   String get welcomeHowStep3 => 'Go to Collections → + New Collection';
@@ -3015,8 +2934,7 @@ class SEn extends S {
   String get welcomeHowStep4 => 'Name it, then Add Items → Search → Add';
 
   @override
-  String get welcomeHowStep5 =>
-      'Rate, track progress, add notes — you\'re set!';
+  String get welcomeHowStep5 => 'Rate, track progress, add notes — you\'re set!';
 
   @override
   String get welcomeHowSharing => 'Sharing';
@@ -3028,22 +2946,19 @@ class SEn extends S {
   String get welcomeHowSharingDesc2 => ' (light, metadata only) or ';
 
   @override
-  String get welcomeHowSharingDesc3 =>
-      ' (full, with images & canvas — works offline). Import from friends — no API needed!';
+  String get welcomeHowSharingDesc3 => ' (full, with images & canvas — works offline). Import from friends — no API needed!';
 
   @override
   String get welcomeReadyTitle => 'You\'re all set!';
 
   @override
-  String get welcomeReadyMessage =>
-      'Head to Settings → Credentials to enter your API keys, or start by importing a collection.';
+  String get welcomeReadyMessage => 'Head to Settings → Credentials to enter your API keys, or start by importing a collection.';
 
   @override
   String get welcomeReadySkip => 'Skip — explore on my own';
 
   @override
-  String get welcomeReadyReturnHint =>
-      'You can always return here from Settings';
+  String get welcomeReadyReturnHint => 'You can always return here from Settings';
 
   @override
   String get welcomeStepSources => 'Sources';
@@ -3058,8 +2973,7 @@ class SEn extends S {
   String get welcomeSourcesTitle => 'Where the data comes from';
 
   @override
-  String get welcomeSourcesSubtitle =>
-      'These providers power search across the app. Most work right away — only a couple ask for a free key.';
+  String get welcomeSourcesSubtitle => 'These providers power search across the app. Most work right away — only a couple ask for a free key.';
 
   @override
   String get welcomeSourcesNoKeyNeeded => 'NO KEY NEEDED';
@@ -3071,16 +2985,13 @@ class SEn extends S {
   String get welcomeSourcesGetKey => 'Get a key';
 
   @override
-  String get welcomeSourcesKeyOptionalHint =>
-      'Optional — your own key raises rate limits. Search works without it.';
+  String get welcomeSourcesKeyOptionalHint => 'Optional — your own key raises rate limits. Search works without it.';
 
   @override
-  String get welcomeSourcesTvdbKeyHint =>
-      'Required — TheTVDB search stays off without a key.';
+  String get welcomeSourcesTvdbKeyHint => 'Required — TheTVDB search stays off without a key.';
 
   @override
-  String get welcomeSourcesHardcoverTokenHint =>
-      'Required — search and import stay disabled without it. Tokens expire every January 1st.';
+  String get welcomeSourcesHardcoverTokenHint => 'Required — search and import stay disabled without it. Tokens expire every January 1st.';
 
   @override
   String get welcomeSourceDescTmdb => 'Movies, TV shows and animation.';
@@ -3089,8 +3000,7 @@ class SEn extends S {
   String get welcomeSourceDescTvMaze => 'TV series.';
 
   @override
-  String get welcomeSourceDescTvdb =>
-      'Movies and TV series, with its own episode data.';
+  String get welcomeSourceDescTvdb => 'Movies and TV series, with its own episode data.';
 
   @override
   String get welcomeSourceDescIgdb => 'Video games across every platform.';
@@ -3099,69 +3009,55 @@ class SEn extends S {
   String get welcomeSourceDescAniList => 'Anime and manga with rich metadata.';
 
   @override
-  String get welcomeSourceDescBangumi =>
-      'A Chinese-community anime catalog with Chinese titles and tags.';
+  String get welcomeSourceDescBangumi => 'A Chinese-community anime catalog with Chinese titles and tags.';
 
   @override
-  String get welcomeSourceDescMangaBaka =>
-      'Manga, manhwa, manhua and light novels.';
+  String get welcomeSourceDescMangaBaka => 'Manga, manhwa, manhua and light novels.';
 
   @override
-  String get welcomeSourceDescMangaDex =>
-      'A large manga catalog with localized titles and chapter counts.';
+  String get welcomeSourceDescMangaDex => 'A large manga catalog with localized titles and chapter counts.';
 
   @override
-  String get welcomeSourceDescKitsu =>
-      'An independent manga catalog with ratings and covers.';
+  String get welcomeSourceDescKitsu => 'An independent manga catalog with ratings and covers.';
 
   @override
   String get welcomeSourceDescVndb => 'The visual novel database.';
 
   @override
-  String get welcomeSourceDescOpenLibrary =>
-      'An open catalog of millions of books.';
+  String get welcomeSourceDescOpenLibrary => 'An open catalog of millions of books.';
 
   @override
-  String get welcomeSourceDescFantlab =>
-      'A detailed book catalog with ratings, awards and series.';
+  String get welcomeSourceDescFantlab => 'A detailed book catalog with ratings, awards and series.';
 
   @override
-  String get welcomeSourceDescComicVine =>
-      'A vast catalog of comics and graphic novels.';
+  String get welcomeSourceDescComicVine => 'A vast catalog of comics and graphic novels.';
 
   @override
-  String get welcomeSourceDescGoogleBooks =>
-      'Millions of editions from Google\'s book catalog, searchable by title, author or ISBN.';
+  String get welcomeSourceDescGoogleBooks => 'Millions of editions from Google\'s book catalog, searchable by title, author or ISBN.';
 
   @override
-  String get welcomeSourceDescHardcover =>
-      'Community book catalog with series, genres, moods and ratings. Requires a free personal token.';
+  String get welcomeSourceDescHardcover => 'Community book catalog with series, genres, moods and ratings. Requires a free personal token.';
 
   @override
-  String get welcomeSourceDescNeoDB =>
-      'A Chinese community catalog. Covers books here, with Chinese titles, descriptions and tags.';
+  String get welcomeSourceDescNeoDB => 'A Chinese community catalog. Covers books here, with Chinese titles, descriptions and tags.';
 
   @override
-  String get welcomeSourceDescWeRead =>
-      'The Chinese e-book store. Covers books here, including web novels and digital-first editions.';
+  String get welcomeSourceDescWeRead => 'The Chinese e-book store. Covers books here, including web novels and digital-first editions.';
 
   @override
-  String get welcomeSourceDescDouban =>
-      'The Chinese catalogue for books, films and series. Signs with a key the app ships, so there is nothing to set up.';
+  String get welcomeSourceDescDouban => 'The Chinese catalogue for books, films and series. Signs with a key the app ships, so there is nothing to set up.';
 
   @override
   String get welcomeTourTitle => 'Get to know the menu';
 
   @override
-  String get welcomeTourSubtitle =>
-      'A quick tour of the main navigation — tap Next to step through it.';
+  String get welcomeTourSubtitle => 'A quick tour of the main navigation — tap Next to step through it.';
 
   @override
   String get welcomeTourStart => 'Start exploring';
 
   @override
-  String get welcomeHowReleasesDesc =>
-      'New episodes and releases for the shows and games you track.';
+  String get welcomeHowReleasesDesc => 'New episodes and releases for the shows and games you track.';
 
   @override
   String updateAvailable(String version) {
@@ -3177,8 +3073,7 @@ class SEn extends S {
   String get updateWarningTitle => 'Before updating';
 
   @override
-  String get updateWarningBody =>
-      'This app is in active development. Updates may include database migrations that change data format.\n\nPlease create a backup before updating (Settings → Backup). This way you can restore your data if anything goes wrong.';
+  String get updateWarningBody => 'This app is in active development. Updates may include database migrations that change data format.\n\nPlease create a backup before updating (Settings → Backup). This way you can restore your data if anything goes wrong.';
 
   @override
   String get updateWarningProceed => 'Go to release';
@@ -3210,8 +3105,7 @@ class SEn extends S {
   String get detailWriteReviewHint => 'Write your review...';
 
   @override
-  String get detailReviewVisibility =>
-      'Visible to others when shared. Your review of this title.';
+  String get detailReviewVisibility => 'Visible to others when shared. Your review of this title.';
 
   @override
   String get detailNoReviewEditable => 'No review yet. Tap Edit to add one.';
@@ -3229,8 +3123,7 @@ class SEn extends S {
   String get detailWriteNotesHint => 'Write your personal notes...';
 
   @override
-  String get detailNoNotesYet =>
-      'No notes yet. Tap Edit to add your personal notes.';
+  String get detailNoNotesYet => 'No notes yet. Tap Edit to add your personal notes.';
 
   @override
   String get detailNoNotesReadonly => 'No notes from the author.';
@@ -3280,8 +3173,7 @@ class SEn extends S {
   String get allItemsNoMatch => 'No items match filter';
 
   @override
-  String get allItemsAddViaCollections =>
-      'Go to Collections → create a collection → add items\nvia Search. They will appear here automatically.';
+  String get allItemsAddViaCollections => 'Go to Collections → create a collection → add items\nvia Search. They will appear here automatically.';
 
   @override
   String get allItemsFailedToLoad => 'Failed to load items';
@@ -3399,8 +3291,7 @@ class SEn extends S {
   String get settingsAnimeMangaTitleLanguage => 'Anime & manga title language';
 
   @override
-  String get settingsAnimeMangaTitleLanguageSubtitle =>
-      'Title shown for anime and manga';
+  String get settingsAnimeMangaTitleLanguageSubtitle => 'Title shown for anime and manga';
 
   @override
   String get settingsAnimeMangaTitleLanguageRomaji => 'Romaji';
@@ -3503,8 +3394,7 @@ class SEn extends S {
   String get steamGridDbSearchHint => 'Search game...';
 
   @override
-  String get steamGridDbNoApiKey =>
-      'SteamGridDB API key not set. Configure it in Settings.';
+  String get steamGridDbNoApiKey => 'SteamGridDB API key not set. Configure it in Settings.';
 
   @override
   String get steamGridDbBackToSearch => 'Back to search';
@@ -3568,51 +3458,49 @@ class SEn extends S {
   String get reviewsInEnglish => 'Reviews in English';
 
   @override
-  String get settingsShowRecommendationsSubtitle =>
-      'Similar movies and TV shows on detail pages';
+  String get settingsShowRecommendationsSubtitle => 'Similar movies and TV shows on detail pages';
 
   @override
-  String get settingsHideEmptyMediaTypeChevrons =>
-      'Hide empty media type filters';
+  String get settingsHideEmptyMediaTypeChevrons => 'Hide empty media type filters';
 
   @override
-  String get settingsHideEmptyMediaTypeChevronsSubtitle =>
-      'Hide media type chevrons (Games, Movies, etc.) when there are no items of that type';
+  String get settingsHideEmptyMediaTypeChevronsSubtitle => 'Hide media type chevrons (Games, Movies, etc.) when there are no items of that type';
 
   @override
   String get settingsAlwaysShowSubcategories => 'Always show subcategories';
 
   @override
-  String get settingsAlwaysShowSubcategoriesSubtitle =>
-      'Show subcategory filters (game platforms, anime/manga types) without selecting their media type first';
+  String get settingsAlwaysShowSubcategoriesSubtitle => 'Show subcategory filters (game platforms, anime/manga types) without selecting their media type first';
+
+  @override
+  String get settingsShowAllCardTags => 'Show all tags on cards';
+
+  @override
+  String get settingsShowAllCardTagsSubtitle => 'List every tag on the poster instead of the first one and a +N counter';
 
   @override
   String get settingsShowPlatformOverlay => 'Game platform covers';
 
   @override
-  String get settingsShowPlatformOverlaySubtitle =>
-      'Show platform overlay on game posters (PS5, Switch, etc.)';
+  String get settingsShowPlatformOverlaySubtitle => 'Show platform overlay on game posters (PS5, Switch, etc.)';
 
   @override
   String get settingsShowBlurayOverlay => 'Blu-ray covers';
 
   @override
-  String get settingsShowBlurayOverlaySubtitle =>
-      'Show Blu-ray overlay on movie and TV show posters';
+  String get settingsShowBlurayOverlaySubtitle => 'Show Blu-ray overlay on movie and TV show posters';
 
   @override
   String get settingsRichCollections => 'Rich collection view';
 
   @override
-  String get settingsRichCollectionsSubtitle =>
-      'Personalize collections with a cover image and description';
+  String get settingsRichCollectionsSubtitle => 'Personalize collections with a cover image and description';
 
   @override
   String get settingsRichHeroStyle => 'Collection banner style';
 
   @override
-  String get settingsRichHeroStyleSubtitle =>
-      'How the rich collection header looks';
+  String get settingsRichHeroStyleSubtitle => 'How the rich collection header looks';
 
   @override
   String get settingsRichHeroStyleClassic => 'Classic';
@@ -3639,8 +3527,7 @@ class SEn extends S {
   String get settingsTextScale => 'Text size';
 
   @override
-  String get settingsTextScaleSubtitle =>
-      'Interface text size, on top of the system setting';
+  String get settingsTextScaleSubtitle => 'Interface text size, on top of the system setting';
 
   @override
   String get settingsFont => 'Font';
@@ -3649,8 +3536,7 @@ class SEn extends S {
   String get settingsFontSubtitle => 'Use a font installed on this computer';
 
   @override
-  String get settingsFontHint =>
-      'Picks a font already installed on this PC. Only the desktop app can read system fonts.';
+  String get settingsFontHint => 'Picks a font already installed on this PC. Only the desktop app can read system fonts.';
 
   @override
   String get settingsFontDefault => 'Default (Inter)';
@@ -3664,8 +3550,7 @@ class SEn extends S {
   }
 
   @override
-  String get settingsFontUnavailable =>
-      'System fonts are available in the desktop app only.';
+  String get settingsFontUnavailable => 'System fonts are available in the desktop app only.';
 
   @override
   String get settingsFontLoading => 'Reading installed fonts…';
@@ -3677,8 +3562,7 @@ class SEn extends S {
   String get collectionEditHeroImage => 'Cover image';
 
   @override
-  String get collectionEditHeroImageHint =>
-      'Recommended 2560×1080 (21:9). Main subject on the right — the left side is covered by the title, the bottom fades into the background';
+  String get collectionEditHeroImageHint => 'Recommended 2560×1080 (21:9). Main subject on the right — the left side is covered by the title, the bottom fades into the background';
 
   @override
   String get collectionEditHeroPick => 'Choose image';
@@ -3690,8 +3574,7 @@ class SEn extends S {
   String get collectionEditHeroRemove => 'Remove image';
 
   @override
-  String get collectionEditDescriptionHint =>
-      'Short tagline shown over the cover';
+  String get collectionEditDescriptionHint => 'Short tagline shown over the cover';
 
   @override
   String get collectionEditDialogTitle => 'Collection settings';
@@ -3700,23 +3583,19 @@ class SEn extends S {
   String get settingsDiscordRpc => 'Discord Rich Presence';
 
   @override
-  String get settingsDiscordRpcSubtitle =>
-      'Show currently viewed item in your Discord status';
+  String get settingsDiscordRpcSubtitle => 'Show currently viewed item in your Discord status';
 
   @override
   String get settingsDiscordRaSync => 'Sync RetroAchievements';
 
   @override
-  String get settingsDiscordRaSyncSubtitle =>
-      'Show your RetroAchievements activity in Discord instead';
+  String get settingsDiscordRaSyncSubtitle => 'Show your RetroAchievements activity in Discord instead';
 
   @override
-  String get uncategorizedBanner =>
-      'Add to a collection to unlock Board and episode tracking';
+  String get uncategorizedBanner => 'Add to a collection to unlock Board and episode tracking';
 
   @override
-  String get uncategorizedDeprecationNotice =>
-      'This system collection will be removed soon. Create your own collection and move all items here into it.';
+  String get uncategorizedDeprecationNotice => 'This system collection will be removed soon. Create your own collection and move all items here into it.';
 
   @override
   String get uncategorizedDeprecationBadge => 'Will be removed';
@@ -3788,8 +3667,7 @@ class SEn extends S {
   String get studioPickerEmpty => 'No studios found';
 
   @override
-  String get studioFilterExclusiveHint =>
-      'While a studio is selected, other filters and the search text are ignored';
+  String get studioFilterExclusiveHint => 'While a studio is selected, other filters and the search text are ignored';
 
   @override
   String filterBlockedBy(String filter) {
@@ -4004,8 +3882,7 @@ class SEn extends S {
   String get appBarSearchHint => 'Start typing to search';
 
   @override
-  String get appBarMetaSearchHint =>
-      'Genre, author, studio… comma = and, / = or';
+  String get appBarMetaSearchHint => 'Genre, author, studio… comma = and, / = or';
 
   @override
   String get searchModeTooltip => 'Search mode';
@@ -4099,8 +3976,7 @@ class SEn extends S {
   String get tierListAddTier => 'Add tier';
 
   @override
-  String get tierListClearConfirm =>
-      'Remove all items from tiers? They will return to Unranked.';
+  String get tierListClearConfirm => 'Remove all items from tiers? They will return to Unranked.';
 
   @override
   String get tierListDeleteConfirm => 'Delete this tier list?';
@@ -4109,8 +3985,7 @@ class SEn extends S {
   String get tierListEmpty => 'No Tier Lists Yet';
 
   @override
-  String get tierListEmptyHint =>
-      'Tap + to create a tier list and rank items\nfrom your collections.';
+  String get tierListEmptyHint => 'Tap + to create a tier list and rank items\nfrom your collections.';
 
   @override
   String get tierListAllRanked => 'All items ranked!';
@@ -4148,15 +4023,13 @@ class SEn extends S {
   String get settingsIgdbImport => 'IGDB List';
 
   @override
-  String get settingsIgdbImportSubtitle =>
-      'Import a game list exported from IGDB (CSV)';
+  String get settingsIgdbImportSubtitle => 'Import a game list exported from IGDB (CSV)';
 
   @override
   String get igdbImportTitle => 'Import IGDB List';
 
   @override
-  String get igdbImportDescription =>
-      'Pick a CSV list exported from IGDB. Games are matched by their IGDB id; anything IGDB no longer has goes to the wishlist.';
+  String get igdbImportDescription => 'Pick a CSV list exported from IGDB. Games are matched by their IGDB id; anything IGDB no longer has goes to the wishlist.';
 
   @override
   String get igdbImportSelectCsvFile => 'Select CSV file';
@@ -4171,8 +4044,7 @@ class SEn extends S {
   String get igdbImportPlatformSelect => 'Select platform';
 
   @override
-  String get importIgdbRequired =>
-      'IGDB connection required. Set up API keys in Settings → Credentials first.';
+  String get importIgdbRequired => 'IGDB connection required. Set up API keys in Settings → Credentials first.';
 
   @override
   String get importing => 'Importing...';
@@ -4190,8 +4062,7 @@ class SEn extends S {
   String get steamImportApiKey => 'Steam API Key';
 
   @override
-  String get steamImportApiKeyHint =>
-      'Get free key at steamcommunity.com/dev/apikey';
+  String get steamImportApiKeyHint => 'Get free key at steamcommunity.com/dev/apikey';
 
   @override
   String get steamImportSteamId => 'Steam ID (64-bit)';
@@ -4250,8 +4121,7 @@ class SEn extends S {
   }
 
   @override
-  String get steamImportPlayedStatus =>
-      'Played games marked as \"In Progress\"';
+  String get steamImportPlayedStatus => 'Played games marked as \"In Progress\"';
 
   @override
   String get steamImportPlaytimeComment => 'Playtime saved in comments';
@@ -4285,6 +4155,30 @@ class SEn extends S {
 
   @override
   String get collectionCopyToCollection => 'Copy to collection';
+
+  @override
+  String get duplicateAsCustom => 'Duplicate as custom item';
+
+  @override
+  String get coverOverrideChange => 'Change cover';
+
+  @override
+  String get coverOverrideReset => 'Restore original cover';
+
+  @override
+  String get coverOverrideSaveFailed => 'Couldn\'t save the cover';
+
+  @override
+  String get coverOverrideSetFromGallery => 'Make it the cover';
+
+  @override
+  String get coverPickerLoadFailed => 'Couldn\'t load covers';
+
+  @override
+  String get coverPickerEmpty => 'No covers found';
+
+  @override
+  String get coverSourceIgdb => 'IGDB';
 
   @override
   String collectionItemCopiedTo(Object collection, Object name) {
@@ -4338,8 +4232,7 @@ class SEn extends S {
   String get importResultOpenCollection => 'Open Collection';
 
   @override
-  String get importResultWishlistHint =>
-      'Items not found in the database were saved to your Wishlist for later.';
+  String get importResultWishlistHint => 'Items not found in the database were saved to your Wishlist for later.';
 
   @override
   String get importResultSourceCollectionFile => 'Collection File';
@@ -4348,8 +4241,7 @@ class SEn extends S {
   String get settingsBrowseCollections => 'Browse Collections';
 
   @override
-  String get settingsBrowseCollectionsSubtitle =>
-      'Download ready-made collections';
+  String get settingsBrowseCollectionsSubtitle => 'Download ready-made collections';
 
   @override
   String browseCollectionsSummary(int count, int items) {
@@ -4409,8 +4301,7 @@ class SEn extends S {
   String get raImportTitle => 'RetroAchievements Import';
 
   @override
-  String get raGetApiKey =>
-      'Get your API key at retroachievements.org/controlpanel.php';
+  String get raGetApiKey => 'Get your API key at retroachievements.org/controlpanel.php';
 
   @override
   String get raImportOptionWishlist => 'Add unmatched games to Wishlist';
@@ -4673,8 +4564,7 @@ class SEn extends S {
   String get kodiConnectionTitle => 'Connection';
 
   @override
-  String get kodiConnectionSubtitle =>
-      'Kodi HTTP JSON-RPC (Settings → Services → Control)';
+  String get kodiConnectionSubtitle => 'Kodi HTTP JSON-RPC (Settings → Services → Control)';
 
   @override
   String get kodiHost => 'Host';
@@ -4723,19 +4613,16 @@ class SEn extends S {
   String get kodiEnableSyncActiveSubtitle => 'Active while Tonkatsu is running';
 
   @override
-  String get kodiEnableSyncDisabledSubtitle =>
-      'Select a target collection first';
+  String get kodiEnableSyncDisabledSubtitle => 'Select a target collection first';
 
   @override
   String get kodiSyncInterval => 'Sync interval';
 
   @override
-  String get kodiCreateSubCollections =>
-      'Create sub-collections from Kodi sets';
+  String get kodiCreateSubCollections => 'Create sub-collections from Kodi sets';
 
   @override
-  String get kodiCreateSubCollectionsSubtitle =>
-      'E.g. \"Harry Potter Collection (kodi)\"';
+  String get kodiCreateSubCollectionsSubtitle => 'E.g. \"Harry Potter Collection (kodi)\"';
 
   @override
   String get kodiImportRatings => 'Import ratings from Kodi';
@@ -4752,8 +4639,7 @@ class SEn extends S {
   }
 
   @override
-  String get kodiTargetDeletedSnack =>
-      'Target collection deleted — sync stopped';
+  String get kodiTargetDeletedSnack => 'Target collection deleted — sync stopped';
 
   @override
   String get kodiSyncStatus => 'Sync status';
@@ -4771,8 +4657,7 @@ class SEn extends S {
   String get kodiClearLastSync => 'Clear last sync timestamp';
 
   @override
-  String get kodiClearLastSyncSubtitle =>
-      'Next sync will fetch all watched items';
+  String get kodiClearLastSyncSubtitle => 'Next sync will fetch all watched items';
 
   @override
   String get kodiLastSyncCleared => 'Last sync timestamp cleared';
@@ -4829,8 +4714,7 @@ class SEn extends S {
   String get settingsMalImport => 'MyAnimeList';
 
   @override
-  String get settingsMalImportSubtitle =>
-      'Import anime/manga lists from XML export';
+  String get settingsMalImportSubtitle => 'Import anime/manga lists from XML export';
 
   @override
   String get malImportTitle => 'MyAnimeList Import';
@@ -4842,8 +4726,7 @@ class SEn extends S {
   String get malImportPickFiles => 'Add XML file';
 
   @override
-  String get malImportFilesHint =>
-      'Export XML from myanimelist.net/panel.php?go=export';
+  String get malImportFilesHint => 'Export XML from myanimelist.net/panel.php?go=export';
 
   @override
   String get importAnimeList => 'Anime list';
@@ -4880,8 +4763,7 @@ class SEn extends S {
   String get malImportOverwriteExisting => 'Overwrite existing entries';
 
   @override
-  String get malImportOverwriteExistingHint =>
-      'When off, items already in the collection keep your local status, rating, progress, dates and notes. New items are still imported.';
+  String get malImportOverwriteExistingHint => 'When off, items already in the collection keep your local status, rating, progress, dates and notes. New items are still imported.';
 
   @override
   String malImportFailedLookup(int count) {
@@ -4913,30 +4795,25 @@ class SEn extends S {
   String get settingsAniListImport => 'AniList';
 
   @override
-  String get settingsAniListImportSubtitle =>
-      'Import anime/manga lists by public username';
+  String get settingsAniListImportSubtitle => 'Import anime/manga lists by public username';
 
   @override
-  String get settingsHardcoverImportSubtitle =>
-      'Import a book library from hardcover.app by username';
+  String get settingsHardcoverImportSubtitle => 'Import a book library from hardcover.app by username';
 
   @override
   String get hardcoverImportTitle => 'Hardcover Import';
 
   @override
-  String get hardcoverImportSubtitle =>
-      'Fetches a user\'s library from hardcover.app — public part for other users, everything for your own account';
+  String get hardcoverImportSubtitle => 'Fetches a user\'s library from hardcover.app — public part for other users, everything for your own account';
 
   @override
-  String get hardcoverImportTokenMissing =>
-      'Hardcover API token is not set. Add it in Settings → API Credentials.';
+  String get hardcoverImportTokenMissing => 'Hardcover API token is not set. Add it in Settings → API Credentials.';
 
   @override
   String get aniListImportTitle => 'AniList Import';
 
   @override
-  String get aniListImportSubtitle =>
-      'Fetches public lists from anilist.co — no login required';
+  String get aniListImportSubtitle => 'Fetches public lists from anilist.co — no login required';
 
   @override
   String get aniListImportUsername => 'AniList username';
@@ -4945,8 +4822,7 @@ class SEn extends S {
   String get aniListImportInclude => 'What to import';
 
   @override
-  String get aniListImportModeOverwriteSubtitle =>
-      'Update progress, status and dates from AniList';
+  String get aniListImportModeOverwriteSubtitle => 'Update progress, status and dates from AniList';
 
   @override
   String aniListImportNewCollectionDefault(String username) {
@@ -4979,15 +4855,13 @@ class SEn extends S {
   String get settingsCustomCardsImport => 'Custom cards';
 
   @override
-  String get settingsCustomCardsImportSubtitle =>
-      'Import cards from a JSON or CSV file';
+  String get settingsCustomCardsImportSubtitle => 'Import cards from a JSON or CSV file';
 
   @override
   String get customImportTitle => 'Import custom cards';
 
   @override
-  String get customImportDescription =>
-      'Load a JSON or CSV file produced by your own script or parser — every row becomes a custom card. Download a template to see all supported fields and values.';
+  String get customImportDescription => 'Load a JSON or CSV file produced by your own script or parser. Each row becomes a custom card, or a real one when the source lookup is on. Download a template to see all supported fields and values.';
 
   @override
   String get customImportSelectFile => 'Select JSON/CSV file';
@@ -5038,12 +4912,10 @@ class SEn extends S {
   String get customImportErrorEmptyFile => 'The file is empty';
 
   @override
-  String get customImportErrorInvalidJson =>
-      'Broken JSON — the file could not be parsed';
+  String get customImportErrorInvalidJson => 'Broken JSON — the file could not be parsed';
 
   @override
-  String get customImportErrorMissingColumns =>
-      'CSV must have \"title\" and \"type\" columns';
+  String get customImportErrorMissingColumns => 'CSV must have \"title\" and \"type\" columns';
 
   @override
   String get customImportIssueNotAnObject => 'Not a JSON object';
@@ -5075,12 +4947,10 @@ class SEn extends S {
   }
 
   @override
-  String get customImportIssueFormatNotApplicable =>
-      '\"format\" is only for manga and anime';
+  String get customImportIssueFormatNotApplicable => '\"format\" is only for manga and anime';
 
   @override
-  String get customImportIssueInvalidCover =>
-      '\"cover\" must be an http(s) URL';
+  String get customImportIssueInvalidCover => '\"cover\" must be an http(s) URL';
 
   @override
   String customImportIssueInvalidDate(String field, String value) {
@@ -5102,15 +4972,13 @@ class SEn extends S {
   String get moodGridPresetAboutMe => 'About Me: Tonkatsu Box';
 
   @override
-  String get moodGridPresetAboutMeSubtitle =>
-      '1×5 — favorite game, movie, TV show, anime, manga';
+  String get moodGridPresetAboutMeSubtitle => '1×5 — favorite game, movie, TV show, anime, manga';
 
   @override
   String get moodGridPresetBlank => 'Blank';
 
   @override
-  String get moodGridPresetBlankSubtitle =>
-      'Empty grid with the size you choose';
+  String get moodGridPresetBlankSubtitle => 'Empty grid with the size you choose';
 
   @override
   String get moodGridRows => 'Rows';
@@ -5122,8 +4990,7 @@ class SEn extends S {
   String get moodGridDeleteTitle => 'Delete this grid?';
 
   @override
-  String get moodGridDeleteMessage =>
-      'The grid will be removed. This cannot be undone.';
+  String get moodGridDeleteMessage => 'The grid will be removed. This cannot be undone.';
 
   @override
   String get moodGridAddRow => 'Add row';
@@ -5141,8 +5008,7 @@ class SEn extends S {
   String get moodGridShrinkTitle => 'Shrink grid?';
 
   @override
-  String get moodGridShrinkMessage =>
-      'Cells outside the new bounds will be deleted.';
+  String get moodGridShrinkMessage => 'Cells outside the new bounds will be deleted.';
 
   @override
   String get moodGridShrinkConfirm => 'Shrink';
@@ -5166,8 +5032,7 @@ class SEn extends S {
   String get moodGridCaptionTemplate => 'Row captions';
 
   @override
-  String get moodGridCaptionTemplateHint =>
-      'Template applied per cell. Available tokens: name, year, genre, rating.';
+  String get moodGridCaptionTemplateHint => 'Template applied per cell. Available tokens: name, year, genre, rating.';
 
   @override
   String get moodGridCellLabelTemplate => 'Cell labels';
@@ -5191,12 +5056,10 @@ class SEn extends S {
   String get screenScraperSection => 'ScreenScraper API';
 
   @override
-  String get screenScraperSourceDesc =>
-      'Game metadata + media (covers, screenshots, art)';
+  String get screenScraperSourceDesc => 'Game metadata + media (covers, screenshots, art)';
 
   @override
-  String get screenScraperDevCredsHint =>
-      'Developer credentials (devid / devpassword). The server signs every request with them; without them ScreenScraper refuses.';
+  String get screenScraperDevCredsHint => 'Developer credentials (devid / devpassword). The server signs every request with them; without them ScreenScraper refuses.';
 
   @override
   String get screenScraperDevIdLabel => 'devid';
@@ -5208,12 +5071,10 @@ class SEn extends S {
   String get screenScraperDevPasswordLabel => 'devpassword';
 
   @override
-  String get screenScraperDevPasswordPlaceholder =>
-      'ScreenScraper developer password';
+  String get screenScraperDevPasswordPlaceholder => 'ScreenScraper developer password';
 
   @override
-  String get screenScraperUserCredsHint =>
-      'User credentials (ssid / sspassword). Quota is per user.';
+  String get screenScraperUserCredsHint => 'User credentials (ssid / sspassword). Quota is per user.';
 
   @override
   String get screenScraperSsidLabel => 'ssid';
@@ -5225,8 +5086,7 @@ class SEn extends S {
   String get screenScraperSspasswordLabel => 'sspassword';
 
   @override
-  String get screenScraperSspasswordPlaceholder =>
-      'Your ScreenScraper password';
+  String get screenScraperSspasswordPlaceholder => 'Your ScreenScraper password';
 
   @override
   String get screenScraperCheckQuota => 'Check quota';
@@ -5353,8 +5213,7 @@ class SEn extends S {
   }
 
   @override
-  String get showcaseAllRowsHidden =>
-      'All rows are hidden. Turn some on in the showcase settings.';
+  String get showcaseAllRowsHidden => 'All rows are hidden. Turn some on in the showcase settings.';
 
   @override
   String showcaseEpisodeShort(int number) {
@@ -5432,22 +5291,19 @@ class SEn extends S {
   String get personalizationStatsHint => 'Your library in numbers';
 
   @override
-  String get personalizationRecommendationsHint =>
-      'Based on what you finished and rated';
+  String get personalizationRecommendationsHint => 'Based on what you finished and rated';
 
   @override
   String get likesTitle => 'Likes, notes & replays';
 
   @override
-  String get personalizationLikesHint =>
-      'Episodes and chapters you marked, titles you replayed';
+  String get personalizationLikesHint => 'Episodes and chapters you marked, titles you replayed';
 
   @override
   String get likesEmptyTitle => 'Nothing marked yet';
 
   @override
-  String get likesEmptyBody =>
-      'Like an episode or leave a note in a title\'s tracker and it will show up here.';
+  String get likesEmptyBody => 'Like an episode or leave a note in a title\'s tracker and it will show up here.';
 
   @override
   String get likesNoMatches => 'Nothing matches the filter';
@@ -5524,22 +5380,19 @@ class SEn extends S {
   String get recommendationsEmpty => 'No recommendations yet';
 
   @override
-  String get recommendationsEmptyHint =>
-      'Complete and rate some movies or shows to get personalized picks';
+  String get recommendationsEmptyHint => 'Complete and rate some movies or shows to get personalized picks';
 
   @override
   String get recommendationsNoCandidates => 'Nothing new to suggest';
 
   @override
-  String get recommendationsNoCandidatesHint =>
-      'We couldn\'t find anything new to suggest right now. Try again later';
+  String get recommendationsNoCandidatesHint => 'We couldn\'t find anything new to suggest right now. Try again later';
 
   @override
   String get recommendationsNoApiKey => 'TMDB API key required';
 
   @override
-  String get recommendationsNoApiKeyHint =>
-      'Add your TMDB API key in Settings to get recommendations';
+  String get recommendationsNoApiKeyHint => 'Add your TMDB API key in Settings to get recommendations';
 
   @override
   String get recommendationsBecauseLabel => 'Because you liked';
@@ -5781,13 +5634,8 @@ class SEn extends S {
   String get statsMetricLikedUnits => 'liked episodes';
 
   @override
-  String statsHoursShort(String hours) {
-    return '${hours}h';
-  }
-
-  @override
-  String statsHoursBreakdown(int manual, int tracker, int estimated) {
-    return 'hours: manual ${manual}h · trackers ${tracker}h · estimated ${estimated}h';
+  String statsHoursBreakdown(String manual, String tracker, String estimated) {
+    return 'hours: manual $manual · trackers $tracker · estimated $estimated';
   }
 
   @override
@@ -5821,7 +5669,7 @@ class SEn extends S {
 
   @override
   String statsPlatformsSummary(String hours, int games) {
-    return '${hours}h · $games games';
+    return '$hours · $games games';
   }
 
   @override
@@ -5891,8 +5739,7 @@ class SEn extends S {
   String get statsEmptyTitle => 'No statistics yet';
 
   @override
-  String get statsEmptyBody =>
-      'Add items to your library and they will show up here in numbers.';
+  String get statsEmptyBody => 'Add items to your library and they will show up here in numbers.';
 
   @override
   String get statsExportTitle => 'Export share card';
@@ -5922,12 +5769,10 @@ class SEn extends S {
   String get simklImportTitle => 'Simkl Import';
 
   @override
-  String get settingsSimklImportSubtitle =>
-      'Movies, TV shows and anime from your Simkl account';
+  String get settingsSimklImportSubtitle => 'Movies, TV shows and anime from your Simkl account';
 
   @override
-  String get simklImportSubtitle =>
-      'Connect your Simkl account with a short code — movies, TV shows and anime arrive in one import, together with the episode watch history';
+  String get simklImportSubtitle => 'Connect your Simkl account with a short code — movies, TV shows and anime arrive in one import, together with the episode watch history';
 
   @override
   String get simklClientIdLabel => 'Simkl app key (client_id)';
@@ -5971,8 +5816,7 @@ class SEn extends S {
   String get simklRememberToken => 'Stay connected on this device';
 
   @override
-  String get simklRememberTokenSubtitle =>
-      'The access token is stored in settings; uncheck to be asked for a code next time';
+  String get simklRememberTokenSubtitle => 'The access token is stored in settings; uncheck to be asked for a code next time';
 
   @override
   String get simklDisconnect => 'Disconnect';
@@ -5992,12 +5836,10 @@ class SEn extends S {
   }
 
   @override
-  String get simklImportModeOverwriteSubtitle =>
-      'Update status, rating and note on existing items';
+  String get simklImportModeOverwriteSubtitle => 'Update status, rating and note on existing items';
 
   @override
-  String get simklClientIdRequired =>
-      'The import needs a Simkl app key — enter your client_id';
+  String get simklClientIdRequired => 'The import needs a Simkl app key — enter your client_id';
 
   @override
   String simklImportRateLimitWait(int seconds, int attempt, int max) {
@@ -6025,43 +5867,34 @@ class SEn extends S {
   String get credentialsPodcastIndexSection => 'Podcast Index API';
 
   @override
-  String get credentialsEnterPodcastIndexKey =>
-      'Enter your Podcast Index API key';
+  String get credentialsEnterPodcastIndexKey => 'Enter your Podcast Index API key';
 
   @override
-  String get credentialsEnterPodcastIndexSecret =>
-      'Enter your Podcast Index API secret';
+  String get credentialsEnterPodcastIndexSecret => 'Enter your Podcast Index API secret';
 
   @override
   String get credentialsPodcastIndexKeyValid => 'Podcast Index keys are valid';
 
   @override
-  String get credentialsPodcastIndexKeyInvalid =>
-      'Podcast Index rejected the keys. Check the pair and the system clock';
+  String get credentialsPodcastIndexKeyInvalid => 'Podcast Index rejected the keys. Check the pair and the system clock';
 
   @override
-  String get welcomeApiPodcastIndexDesc =>
-      'Podcast search and episode tracking. Uses a free key/secret pair from api.podcastindex.org.';
+  String get welcomeApiPodcastIndexDesc => 'Podcast search and episode tracking. Uses a free key/secret pair from api.podcastindex.org.';
 
   @override
-  String get welcomeSourceDescMusicBrainz =>
-      'Open music encyclopedia: albums, artists and editions. No key needed.';
+  String get welcomeSourceDescMusicBrainz => 'Open music encyclopedia: albums, artists and editions. No key needed.';
 
   @override
-  String get welcomeSourceDescPodcastIndex =>
-      'Open podcast catalog with episode-level tracking. Free key/secret pair.';
+  String get welcomeSourceDescPodcastIndex => 'Open podcast catalog with episode-level tracking. Free key/secret pair.';
 
   @override
-  String get welcomeSourceDescTapTap =>
-      'Mainland-China games store and community: Chinese titles, tags and descriptions. No key needed.';
+  String get welcomeSourceDescTapTap => 'Mainland-China games store and community: Chinese titles, tags and descriptions. No key needed.';
 
   @override
-  String get welcomeSourceDescXimalaya =>
-      'Mainland-China audio platform: podcasts and audio dramas in Chinese. No key needed.';
+  String get welcomeSourceDescXimalaya => 'Mainland-China audio platform: podcasts and audio dramas in Chinese. No key needed.';
 
   @override
-  String get creditsPodcastIndexAttribution =>
-      'Podcast data from Podcast Index.';
+  String get creditsPodcastIndexAttribution => 'Podcast data from Podcast Index.';
 
   @override
   String get credentialsApiSecret => 'API Secret';
@@ -6076,12 +5909,10 @@ class SEn extends S {
   String get settingsProxy => 'Proxy';
 
   @override
-  String get settingsProxySubtitle =>
-      'Route app traffic through a local proxy to reach blocked sources';
+  String get settingsProxySubtitle => 'Route app traffic through a local proxy to reach blocked sources';
 
   @override
-  String get settingsProxyHint =>
-      'Point this at the local port your VPN app exposes (Clash\'s mixed port is usually 7890 for HTTP, 7891 for SOCKS5). Off means a direct connection, same as before.';
+  String get settingsProxyHint => 'Point this at the local port your VPN app exposes (Clash\'s mixed port is usually 7890 for HTTP, 7891 for SOCKS5). Off means a direct connection, same as before.';
 
   @override
   String get settingsProxyEnabled => 'Enable proxy';
@@ -6096,16 +5927,13 @@ class SEn extends S {
   String get settingsProxyPort => 'Port';
 
   @override
-  String get settingsReachabilitySubtitle =>
-      'See which sources your network can reach';
+  String get settingsReachabilitySubtitle => 'See which sources your network can reach';
 
   @override
-  String get reachabilityIntro =>
-      'Sends one lightweight probe to each source and reports whether the network reached it.';
+  String get reachabilityIntro => 'Sends one lightweight probe to each source and reports whether the network reached it.';
 
   @override
-  String get reachabilityNote =>
-      'A 4xx or 5xx answer still counts as reached; this page does not test whether an API works.';
+  String get reachabilityNote => 'A 4xx or 5xx answer still counts as reached; this page does not test whether an API works.';
 
   @override
   String get reachabilityRun => 'Run Check';
@@ -6131,8 +5959,7 @@ class SEn extends S {
   String get reachabilityOutcomeFailed => 'Unreachable';
 
   @override
-  String get reachabilityWebNote =>
-      'The web build routes every request through the server, so this check does not apply.';
+  String get reachabilityWebNote => 'The web build routes every request through the server, so this check does not apply.';
 
   @override
   String get sourceNeedsIntlNetwork => 'Needs international access';
@@ -6141,26 +5968,22 @@ class SEn extends S {
   String get settingsGameListImport => 'Import from a game list';
 
   @override
-  String get settingsGameListImportSubtitle =>
-      'Paste a library list and match entries automatically';
+  String get settingsGameListImportSubtitle => 'Paste a library list and match entries automatically';
 
   @override
   String get settingsPsnImport => 'PlayStation sign-in';
 
   @override
-  String get settingsPsnImportSubtitle =>
-      'Sign in to PSN and read your purchased games';
+  String get settingsPsnImportSubtitle => 'Sign in to PSN and read your purchased games';
 
   @override
   String get psnImportTitle => 'PlayStation Network';
 
   @override
-  String get psnImportDescription =>
-      'Sign in at playstation.com in any browser, then open the NPSSO page below in that same browser. Paste the value it shows and the app will read the games your account owns.';
+  String get psnImportDescription => 'Sign in at playstation.com in any browser, then open the NPSSO page below in that same browser. Paste the value it shows and the app will read the games your account owns.';
 
   @override
-  String get psnImportHowTo =>
-      'An NPSSO is a session cookie rather than a password, but treat it like one. It is used once and never stored; only the refresh token (about two months) is kept, and only if you ask.';
+  String get psnImportHowTo => 'An NPSSO is a session cookie rather than a password, but treat it like one. It is used once and never stored; only the refresh token (about two months) is kept, and only if you ask.';
 
   @override
   String get psnImportNpssoLabel => 'NPSSO';
@@ -6194,8 +6017,7 @@ class SEn extends S {
   }
 
   @override
-  String get credentialsIgdbAuthHint =>
-      'The Twitch auth server (id.twitch.tv) is unreachable from mainland networks — that is expected. Authorize once on any network that can reach it: the token lasts about 60 days, and searches afterwards go straight to api.igdb.com with no proxy.';
+  String get credentialsIgdbAuthHint => 'The Twitch auth server (id.twitch.tv) is unreachable from mainland networks — that is expected. Authorize once on any network that can reach it: the token lasts about 60 days, and searches afterwards go straight to api.igdb.com with no proxy.';
 
   @override
   String get psnImportEmpty => 'The account returned no purchased games';
@@ -6204,8 +6026,7 @@ class SEn extends S {
   String get psnImportRemember => 'Stay signed in';
 
   @override
-  String get psnImportSecurityNote =>
-      'Keeps a refresh token (about 2 months) on this device. The NPSSO itself is never saved.';
+  String get psnImportSecurityNote => 'Keeps a refresh token (about 2 months) on this device. The NPSSO itself is never saved.';
 
   @override
   String get psnImportSavedSession => 'Saved session';
@@ -6220,8 +6041,7 @@ class SEn extends S {
   String get gameListImportTitle => 'Game name list';
 
   @override
-  String get gameListImportDescription =>
-      'Paste your game library, one title per line. Copy it straight from the PS App, a trophy site or a note — leading numbers, bullets and trailing platform tags are cleaned up automatically.';
+  String get gameListImportDescription => 'Paste your game library, one title per line. Copy it straight from the PS App, a trophy site or a note — leading numbers, bullets and trailing platform tags are cleaned up automatically.';
 
   @override
   String get gameListImportFieldHint => 'One game name per line…';
@@ -6272,8 +6092,7 @@ class SEn extends S {
   }
 
   @override
-  String get gameListImportReasonNotFound =>
-      'No match found in the game catalogues';
+  String get gameListImportReasonNotFound => 'No match found in the game catalogues';
 
   @override
   String get gameListImportQualityExact => 'Identical';
@@ -6291,12 +6110,10 @@ class SEn extends S {
   String get gameListImportQualityNone => 'Unmatched';
 
   @override
-  String get gameListImportIgdbMissing =>
-      'IGDB is not connected: Chinese titles still match through TapTap, but Latin titles cannot be matched.';
+  String get gameListImportIgdbMissing => 'IGDB is not connected: Chinese titles still match through TapTap, but Latin titles cannot be matched.';
 
   @override
-  String get gameListImportPlatformHint =>
-      'Only affects the platform shown on each item';
+  String get gameListImportPlatformHint => 'Only affects the platform shown on each item';
 
   @override
   String gameListImportUnmatchedNote(int count) {
@@ -6308,4 +6125,74 @@ class SEn extends S {
 
   @override
   String get gameListImportStatusLabel => 'Status after import';
+
+  @override
+  String get importStageReading => 'Reading file...';
+
+  @override
+  String get importStageFetchingGames => 'Fetching game data...';
+
+  @override
+  String get importStageFetchingMovies => 'Fetching movie data...';
+
+  @override
+  String get importStageFetchingTvShows => 'Fetching TV show data...';
+
+  @override
+  String get importStageFetchingVisualNovels => 'Fetching visual novel data...';
+
+  @override
+  String get importStageFetchingManga => 'Fetching manga data...';
+
+  @override
+  String get importStageFetchingAnime => 'Fetching anime data...';
+
+  @override
+  String get importStageFetchingBooks => 'Fetching book data...';
+
+  @override
+  String get importStageCachingMedia => 'Caching media...';
+
+  @override
+  String get importStageCreatingCollection => 'Creating collection...';
+
+  @override
+  String get importStageResolvingTitles => 'Looking up sources...';
+
+  @override
+  String get importStageAddingItems => 'Adding items...';
+
+  @override
+  String get importStageImportingCanvas => 'Importing board...';
+
+  @override
+  String get importStageRestoringMedia => 'Restoring media data...';
+
+  @override
+  String get importStageImportingImages => 'Restoring images...';
+
+  @override
+  String get importStageCompleted => 'Import completed';
+
+  @override
+  String importBreadcrumb(String title, String source) {
+    return '$title → $source';
+  }
+
+  @override
+  String importTallies(int found, int custom, int ambiguous) {
+    return 'Found $found · Custom cards $custom · Ambiguous $ambiguous';
+  }
+
+  @override
+  String get customImportResolveTitle => 'Look up cards in sources';
+
+  @override
+  String get customImportResolveHint => 'Searches each row by title in the sources of its type (TMDB, IGDB, Kitsu and others). Exactly one match becomes a real card, otherwise a custom card is created. Custom and audio rows are never looked up.';
+
+  @override
+  String get importResultUnresolved => 'Several records matched, kept as custom cards';
+
+  @override
+  String get importResultUnresolvedCopied => 'Titles copied';
 }

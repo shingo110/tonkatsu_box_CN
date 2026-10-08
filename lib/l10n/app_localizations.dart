@@ -66,8 +66,7 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the S.supportedLocales
 /// property.
 abstract class S {
-  S(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  S(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -87,13 +86,12 @@ abstract class S {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
@@ -102,7 +100,7 @@ abstract class S {
     Locale('fr'),
     Locale('pt'),
     Locale('ru'),
-    Locale('zh'),
+    Locale('zh')
   ];
 
   /// No description provided for @appName.
@@ -578,6 +576,18 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Finished'**
   String get sortCompletionDateShort;
+
+  /// No description provided for @sortReleaseDateDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Release Date'**
+  String get sortReleaseDateDisplay;
+
+  /// No description provided for @sortReleaseDateShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Released'**
+  String get sortReleaseDateShort;
 
   /// No description provided for @sortDateOldest.
   ///
@@ -2251,12 +2261,7 @@ abstract class S {
   ///
   /// In en, this message translates to:
   /// **'Data from {device}, {date}: {collections} collections, {items} items.\n\nCurrent data will be REPLACED. A backup copy stays next to the database.'**
-  String lanSyncReceiveMessage(
-    String device,
-    String date,
-    int collections,
-    int items,
-  );
+  String lanSyncReceiveMessage(String device, String date, int collections, int items);
 
   /// No description provided for @lanSyncReplace.
   ///
@@ -4003,6 +4008,42 @@ abstract class S {
   /// In en, this message translates to:
   /// **'No episodes found'**
   String get noEpisodesFound;
+
+  /// No description provided for @undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get undo;
+
+  /// No description provided for @episodeUnmarkedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode unmarked'**
+  String get episodeUnmarkedSnack;
+
+  /// No description provided for @seasonUnmarkedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Season unmarked'**
+  String get seasonUnmarkedSnack;
+
+  /// No description provided for @episodesClearedSnack.
+  ///
+  /// In en, this message translates to:
+  /// **'Episode marks cleared'**
+  String get episodesClearedSnack;
+
+  /// No description provided for @episodeWatchedDateEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched date'**
+  String get episodeWatchedDateEdit;
+
+  /// No description provided for @episodeWatchedDateSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'When did you watch it?'**
+  String get episodeWatchedDateSelect;
 
   /// No description provided for @episodeWatchedDate.
   ///
@@ -6338,6 +6379,18 @@ abstract class S {
   /// **'Show subcategory filters (game platforms, anime/manga types) without selecting their media type first'**
   String get settingsAlwaysShowSubcategoriesSubtitle;
 
+  /// No description provided for @settingsShowAllCardTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all tags on cards'**
+  String get settingsShowAllCardTags;
+
+  /// No description provided for @settingsShowAllCardTagsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'List every tag on the poster instead of the first one and a +N counter'**
+  String get settingsShowAllCardTagsSubtitle;
+
   /// No description provided for @settingsShowPlatformOverlay.
   ///
   /// In en, this message translates to:
@@ -7634,6 +7687,54 @@ abstract class S {
   /// **'Copy to collection'**
   String get collectionCopyToCollection;
 
+  /// No description provided for @duplicateAsCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate as custom item'**
+  String get duplicateAsCustom;
+
+  /// No description provided for @coverOverrideChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change cover'**
+  String get coverOverrideChange;
+
+  /// No description provided for @coverOverrideReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore original cover'**
+  String get coverOverrideReset;
+
+  /// No description provided for @coverOverrideSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the cover'**
+  String get coverOverrideSaveFailed;
+
+  /// No description provided for @coverOverrideSetFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Make it the cover'**
+  String get coverOverrideSetFromGallery;
+
+  /// No description provided for @coverPickerLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load covers'**
+  String get coverPickerLoadFailed;
+
+  /// No description provided for @coverPickerEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No covers found'**
+  String get coverPickerEmpty;
+
+  /// No description provided for @coverSourceIgdb.
+  ///
+  /// In en, this message translates to:
+  /// **'IGDB'**
+  String get coverSourceIgdb;
+
   /// No description provided for @collectionItemCopiedTo.
   ///
   /// In en, this message translates to:
@@ -8825,7 +8926,7 @@ abstract class S {
   /// No description provided for @customImportDescription.
   ///
   /// In en, this message translates to:
-  /// **'Load a JSON or CSV file produced by your own script or parser — every row becomes a custom card. Download a template to see all supported fields and values.'**
+  /// **'Load a JSON or CSV file produced by your own script or parser. Each row becomes a custom card, or a real one when the source lookup is on. Download a template to see all supported fields and values.'**
   String get customImportDescription;
 
   /// No description provided for @customImportSelectFile.
@@ -10208,17 +10309,11 @@ abstract class S {
   /// **'liked episodes'**
   String get statsMetricLikedUnits;
 
-  /// No description provided for @statsHoursShort.
-  ///
-  /// In en, this message translates to:
-  /// **'{hours}h'**
-  String statsHoursShort(String hours);
-
   /// No description provided for @statsHoursBreakdown.
   ///
   /// In en, this message translates to:
-  /// **'hours: manual {manual}h · trackers {tracker}h · estimated {estimated}h'**
-  String statsHoursBreakdown(int manual, int tracker, int estimated);
+  /// **'hours: manual {manual} · trackers {tracker} · estimated {estimated}'**
+  String statsHoursBreakdown(String manual, String tracker, String estimated);
 
   /// No description provided for @statsMonthsTitle.
   ///
@@ -10277,7 +10372,7 @@ abstract class S {
   /// No description provided for @statsPlatformsSummary.
   ///
   /// In en, this message translates to:
-  /// **'{hours}h · {games} games'**
+  /// **'{hours} · {games} games'**
   String statsPlatformsSummary(String hours, int games);
 
   /// No description provided for @statsPlatformNone.
@@ -11119,6 +11214,138 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Status after import'**
   String get gameListImportStatusLabel;
+
+  /// No description provided for @importStageReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading file...'**
+  String get importStageReading;
+
+  /// No description provided for @importStageFetchingGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching game data...'**
+  String get importStageFetchingGames;
+
+  /// No description provided for @importStageFetchingMovies.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching movie data...'**
+  String get importStageFetchingMovies;
+
+  /// No description provided for @importStageFetchingTvShows.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching TV show data...'**
+  String get importStageFetchingTvShows;
+
+  /// No description provided for @importStageFetchingVisualNovels.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching visual novel data...'**
+  String get importStageFetchingVisualNovels;
+
+  /// No description provided for @importStageFetchingManga.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching manga data...'**
+  String get importStageFetchingManga;
+
+  /// No description provided for @importStageFetchingAnime.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching anime data...'**
+  String get importStageFetchingAnime;
+
+  /// No description provided for @importStageFetchingBooks.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching book data...'**
+  String get importStageFetchingBooks;
+
+  /// No description provided for @importStageCachingMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Caching media...'**
+  String get importStageCachingMedia;
+
+  /// No description provided for @importStageCreatingCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Creating collection...'**
+  String get importStageCreatingCollection;
+
+  /// No description provided for @importStageResolvingTitles.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking up sources...'**
+  String get importStageResolvingTitles;
+
+  /// No description provided for @importStageAddingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding items...'**
+  String get importStageAddingItems;
+
+  /// No description provided for @importStageImportingCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing board...'**
+  String get importStageImportingCanvas;
+
+  /// No description provided for @importStageRestoringMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring media data...'**
+  String get importStageRestoringMedia;
+
+  /// No description provided for @importStageImportingImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring images...'**
+  String get importStageImportingImages;
+
+  /// No description provided for @importStageCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Import completed'**
+  String get importStageCompleted;
+
+  /// No description provided for @importBreadcrumb.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} → {source}'**
+  String importBreadcrumb(String title, String source);
+
+  /// No description provided for @importTallies.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {found} · Custom cards {custom} · Ambiguous {ambiguous}'**
+  String importTallies(int found, int custom, int ambiguous);
+
+  /// No description provided for @customImportResolveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up cards in sources'**
+  String get customImportResolveTitle;
+
+  /// No description provided for @customImportResolveHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Searches each row by title in the sources of its type (TMDB, IGDB, Kitsu and others). Exactly one match becomes a real card, otherwise a custom card is created. Custom and audio rows are never looked up.'**
+  String get customImportResolveHint;
+
+  /// No description provided for @importResultUnresolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Several records matched, kept as custom cards'**
+  String get importResultUnresolved;
+
+  /// No description provided for @importResultUnresolvedCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Titles copied'**
+  String get importResultUnresolvedCopied;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {
@@ -11130,40 +11357,29 @@ class _SDelegate extends LocalizationsDelegate<S> {
   }
 
   @override
-  bool isSupported(Locale locale) => <String>[
-    'en',
-    'es',
-    'fr',
-    'pt',
-    'ru',
-    'zh',
-  ].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'es', 'fr', 'pt', 'ru', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_SDelegate old) => false;
 }
 
 S lookupS(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return SEn();
-    case 'es':
-      return SEs();
-    case 'fr':
-      return SFr();
-    case 'pt':
-      return SPt();
-    case 'ru':
-      return SRu();
-    case 'zh':
-      return SZh();
+    case 'en': return SEn();
+    case 'es': return SEs();
+    case 'fr': return SFr();
+    case 'pt': return SPt();
+    case 'ru': return SRu();
+    case 'zh': return SZh();
   }
 
   throw FlutterError(
     'S.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

@@ -20,7 +20,7 @@
 ---
 
 > [!IMPORTANT]
-> **本仓库是 [`hacan359/tonkatsu_box`](https://github.com/hacan359/tonkatsu_box) 的国内化分支**（上游 0.44.0，MIT 许可）。
+> **本仓库是 [`hacan359/tonkatsu_box`](https://github.com/hacan359/tonkatsu_box) 的国内化分支**（上游 0.45.0，MIT 许可）。
 >
 > 上游的数据源以海外服务为主（TMDB、IGDB、AniList、Google Books…），在国内网络下要么不可达，要么只提供英文元数据。本分支的目标是**接入国内可直连、带中文元数据的数据源**，让搜索与入库真正可用。
 >
@@ -336,6 +336,8 @@ CI**：要外网、会碰上游限流。
 | [`docs/RCOLL_FORMAT.md`](docs/RCOLL_FORMAT.md) | `.xcoll` / `.xcollx` 导出格式规范 |
 | [`server/README.md`](server/README.md) | 自托管服务端 |
 | [`server/PROTOCOL.md`](server/PROTOCOL.md) | `/rpc` 与 `/proxy` 线上契约 |
+| [`docs/CUSTOM_CARDS_IMPORT.md`](docs/CUSTOM_CARDS_IMPORT.md) | 自定义卡片导入的 JSON/CSV 格式与来源匹配规则（v0.45.0 新增，上游提供） |
+| [上游 Wiki](https://github.com/hacan359/tonkatsu_box/wiki) | 上游的用户指南与 FAQ（本 fork 未收录其中文等价物时参考） |
 
 ## 上游致谢
 

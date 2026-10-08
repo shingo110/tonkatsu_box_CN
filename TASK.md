@@ -4,7 +4,7 @@
 
 ## 状态
 
-- **已完成**：D1–D32 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试；**`cn-v0.44.5` 三端发版**）；**D33 审查报告 P0/P1 全修与 `cn-v0.44.6` 四轮发版**（自托管鉴权闸门**补上前导斜杠归一才真正生效** + `/img` 封面宿主白名单补齐已装源 + 解析器 id 契约回归 + WeRead 偏移上限；**四轮才出包，逐轮都是真缺陷**）
+- **已完成**：D1–D32 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试；**`cn-v0.44.5` 三端发版**）；**D33 审查报告 P0/P1 全修与 `cn-v0.44.6` 四轮发版**（自托管鉴权闸门**补上前导斜杠归一才真正生效** + `/img` 封面宿主白名单补齐已装源 + 解析器 id 契约回归 + WeRead 偏移上限；**四轮才出包，逐轮都是真缺陷**）；**D34 同步上游 v0.45.0**（合并 184 文件，20 个冲突逐条定性；迁移链接到 v66；发现并修复 `buildRpcHandler` 的 `log` 未接导致 RPC 失败日志绕过容器日志通道）
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面**本地**构建（缺 VS C++ 工作负载）—— 但发布走 CI 的 `windows-2022` 运行器，不阻塞出包
 
@@ -1023,6 +1023,49 @@ apk `100132914` / web `23066332` / win `25487773` 字节。
 **文档与技能同步**：`RULES.md` §三 增列「封面宿主登记」为第四个静默降级连带点、§四 补 P23/P24；
 技能 `tonkatsu-three-platform-release` 新增 §4.5（重推 tag 全流程 + 四轮定性表）、
 `tonkatsu-box-add-source` 补封面宿主连带点。
+
+### D34 · 同步上游 v0.45.0（2026-10-08）
+
+分支 `sync/upstream-v0.45.0`，`git merge upstream/main`（`00a4fac6`）。**这是本 fork 第一次真正同步上游**。
+
+**分叉状况**：共同祖先 `f2ed6e08`（上游 v0.44.0）；本 fork 领先 77 提交、上游领先 8 提交。上游 v0.45.0 改动 184 文件 / +12071 −1331，内容为自定义卡片按标题匹配目录、统一导入进度对话框、卡片显示全部标签、替换任意条目封面、播出日期排序与撤销、备份带 Kitsu 季集。
+
+**冲突面：`git merge-tree` 干跑预判 20 个，实际 merge 也是 20 个，逐字相符**。分三类：
+
+1. **13 个 l10n**：6 个 `.arb` 各 1 块，**键集合零重叠**（fork 85 键 / 上游 22 键），直接两侧拼接 + 补上交界处缺失的尾逗号（拼接缝落在 `gameListImportStatusLabel` 上，fork 侧原本是文件末项故无逗号）。**拼接后 6 语言各 1874 键，JSON 合法且集合完全齐平**。7 个 `app_localizations*.dart` 由 `flutter gen-l10n` 重新生成（该命令崩在 `cmd.exe /c ver` 的 231，但**产物已正确写出** —— 判据是产物不是退出码）。
+2. **7 个判断文件**：
+   - `pubspec.yaml` 取上游 `0.45.0+42`（发版时再 bump）
+   - `host_rate_limiter.dart` 两侧都留：上游给 IGDB 260ms / AniList 700ms 间隔，本 fork 给国内源加间隔**并新增整套熔断器**（`kHostBackoffPolicy`）—— 是同一张 Map 的**并集**，不是二选一
+   - `config_service.dart` 2 块两侧都留（`showAllCardTags` 落在字符串键与布尔键两处，与上游一致）
+   - `collections_provider.dart` 上游新方法 `setCoverOverride` / `_releaseOverrideCover` 全留 + 本 fork 的 clamp 说明注释保留；解完后**相对上游仍恰好 `+13 −13`**，与同步前的预期数字完全吻合
+   - `settings_provider.dart` 双方方法各自闭合（末尾共用一个 `}`，易漏）
+   - `README.md` **选了方案 A**：保留 fork 的中文 README（守 ADR-4「用户文档用中文」），只补入 `docs/CUSTOM_CARDS_IMPORT.md` 与上游 Wiki 两条链接 ⇒ 相对同步前**恰好只加 2 行**
+   - `CHANGELOG.md` 两侧纯追加块均保留
+3. **README 冲突的真实形态**（评估误判处）：文件级 `numstat` 显示上游 `+3 −1`，实际是**上游把 README 整个重写成英文目录式**（401 行、中文只剩 1 行），三处冲突中块 2 **横跨 227 行**。⇒ **文档类冲突不能只看 numstat，要看冲突块的行跨度**。
+
+**迁移链（唯一的真实技术风险，已核）**：上游新增 `migration_v65` / `v66`，本 fork 原止于 `v64`。
+- `migration_registry` 顺序正确（v61…v66），`latestVersion => all.last.version` 无硬编码。
+- `v66` 用 `Migration.addColumnIfAbsent` ⇒ 天然重跑安全。
+- `v65` 只有一条 `DELETE FROM custom_items … WHERE NOT EXISTS` ⇒ 可重复执行，安全。
+- 本 fork 的 11 处重跑安全加固**全部留存**；`migration_idempotency_test` / `migration_stale_version_test` 与上游新增的 v65/v66 测试**共 23 个迁移测试文件全绿**。
+
+**语义叠加复核**：发现一处真缺口 —— 上游给 `buildRpcHandler` 新增了 `log` 参数（错误信息脱敏、失败行仍记日志），而本 fork `app_handler.dart` 调用时**未传 `log`** ⇒ RPC 失败行走默认 `print`，**绕过了本 fork 的容器日志通道**。已修：`buildAppHandler` 新增可选 `rpcFailureLogger`，默认 `_printRpcFailure`（仍是 `print`，与请求日志同流），不改变上游签名、不影响既有调用方。
+
+**验证**：`dart format` 解析通过（"Changed" 是旧版风格，不算错）；server **14 文件 134 项全绿**；packages/core **154 文件 0 失败**；迁移链 23 文件全绿。
+
+**CI 第一轮就红在 `Analyze`（P27 的第一个实例）**：上游给 `AppPalette` 加了**必填**的
+`brandContainer` / `onBrandContainer`（M3 的 hover / chip / badge 容器色），上游的 dark 与
+sakura 都填了，**本 fork 自建的 PS1 复古灰与 Eva 蔚蓝没跟上** ⇒ 4 条
+`missing_required_argument`。**这两处没产生任何合并冲突** —— 纯新增必填字段、两侧各自独立，
+git 全程绿、merge 全成功，**只有 `flutter analyze` 才红**。
+色值按各palette 自身背景的 WCAG 亮度定方向（PS1 背景亮度 0.418、Eva 0.770，均为浅底
+⇒ 取 brand 的浅档作容器、暗档作文字），不凭记忆；结果
+PS1 `0xFFD9E5F2`/`0xFF0D1F32`、Eva `0xFFDAE3FF`/`0xFF0E1D47`，
+四套主题实测对比度 dark 9.05 / sakura 12.87 / ps1 13.06 / eva 12.77。
+护栏同步补强`theme_palette_guard_test`（新增「`onBrandContainer` on `brandContainer` ≥ 4.5」
+与「`brandContainer` ≠ `brand`」两条），并用「故意让 Eva 文字与容器同色」验证护栏有牙。
+
+**未做**：bump 到 `0.45.0+48`、发版。`main` 与 `cn-v0.44.6` 均未动。
 
 ## 📋 候选（下一步从这里挑）
 
