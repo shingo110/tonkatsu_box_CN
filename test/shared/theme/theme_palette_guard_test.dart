@@ -100,6 +100,22 @@ void main() {
         check(theme, 'onBrand on brand', p.onBrand, p.brand, 3.0);
         check(theme, 'onBadge on badge', p.onBadge, p.badge, 3.0);
         check(theme, 'onOverlay on scrim', p.onOverlay, p.scrim, 4.5);
+        // v0.45.0 added the container pair for M3 hover / chip / badge fills.
+        check(
+          theme,
+          'onBrandContainer on brandContainer',
+          p.onBrandContainer,
+          p.brandContainer,
+          4.5,
+        );
+        // Must stay distinct from [brand]: an equal color merges the hover
+        // thumb into its own track (see AppPalette's doc comment).
+        if (p.brandContainer == p.brand) {
+          failures.add(
+            '$theme: brandContainer equals brand — the hovered switch thumb '
+            'would vanish into its track',
+          );
+        }
       }
 
       expect(failures, isEmpty, reason: failures.join('\n'));
