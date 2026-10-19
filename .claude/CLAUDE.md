@@ -17,6 +17,99 @@ not answer in Russian; the upstream author's rule does not apply here.
 - Tests: `flutter_test` + `mocktail`
 - Localization: ARB files in `lib/l10n/` — `en`, `ru`, `es`, `fr`, `pt`, `zh`
 
+## Current baseline (2026-10-19)
+
+> **If you are starting a new session on this repo, read this section first.**
+> It pins the live state of the fork. Numbers drift with every release — treat
+> them as "as of now", not as constants.
+
+**Facts of the fork:**
+
+- Fork of `hacan359/tonkatsu_box` (MIT, upstream at `v0.45.0`); this is the
+  Chinese-localized branch `shingo110/tonkatsu_box_CN`.
+- **Local checkout:** `D:\Projects\TonkatsuBoxCN\tonkatsu_box_CN`
+- **Upstream remote:** `upstream` — **push URL is `DISABLED`**
+  (`git remote set-url --push upstream DISABLED`). Running `git push upstream`
+  fails with `fatal: 'DISABLED' does not appear to be a git repository`.
+  The guard script `probe/check_upstream_guard.py` (in the **workspace**,
+  not in this repo) exits non-zero if the guard is lifted. Always run it
+  before opening an upstream PR / issue.
+- **All `gh` commands** must pass `--repo shingo110/tonkatsu_box_CN` (or
+  `-R …`). `gh`'s default resolution falls through to the upstream because
+  this repo has an `upstream` remote. The upstream author has been notified
+  of this rule; PR **#450** (2026-09-23) was accidentally opened against
+  upstream and closed the same day.
+
+**Live numbers (as of `cn-v0.45.0`, 2026-10-08):**
+
+- `pubspec.yaml` version `0.45.0+48` (build 48 — the release bump chain is
+  45 → 46 → 47 → 48, strictly increasing; never reuse a previous number).
+- Migration chain: `v66` (upstream added `v65` / `v66` in 0.45.0; this fork
+  added 11 re-run-safe hardenings on its own `v57` / `v60` / `v62`).
+- ARB: 6 locales × **1874** keys, all identical sets (`test/l10n/arb_parity_test.dart` enforces).
+- `DataSource` enum: **25** values (upstream 22 + 11 Chinese-localized
+  entries; the enum is exhaustive-switched in this fork, so adding a value
+  without a switch arm is a compile error by design).
+- Search sources: **34** instances in `lib/features/search/sources/search_sources.dart`.
+- Catalogue services: **22** in `lib/shared/constants/source_catalog.dart`.
+- Media types with Chinese-capable sources: **8 of 8** (books / films /
+  series / anime / manga / music / games / podcasts) — only **manga** and
+  **visual novels** have no mainland-only source.
+- Themes: 4 palettes (dark, sakura, **PS1 grey**, **Eva azure**). All four
+  define `brandContainer` / `onBrandContainer` (upstream added these as
+  required fields in 0.45.0; the two fork themes had to be updated to
+  match — see D34 in TASK.md).
+- Three-platform releases: `cn-v0.44.0` through `cn-v0.44.6` (seven) plus
+  **`cn-v0.45.0`** (first upstream sync). Trigger is **`cn-v*`** on
+  `.github/workflows/release-cn.yml` — upstream's `release.yml` uses `v*`,
+  so the two pipelines never fire together.
+
+**Hard constraints:**
+
+- `lib/` (Flutter) → `packages/core` (pure Dart, no Flutter imports) →
+  `server/` (pure Dart, shelf). Three targets must all be green:
+  Windows / Android / Web.
+- Migration chain is **append-only** (never edit a `migration_vN.dart` that
+  already exists). New migrations must be re-run-safe: `CREATE TABLE IF NOT
+  EXISTS` / `Migration.addColumnIfAbsent` / `Migration.tableExists` guard /
+  `DELETE … WHERE NOT EXISTS`. A crash mid-migration can leave "schema
+  current, user_version stale" — re-running the whole chain must be a no-op.
+- Changing a model or DAO: `cd packages/core && dart run tool/generate_rpc.dart`
+  and commit the generated artifacts.
+- HTTP egress is only through `createApiDio` (never `Dio(BaseOptions(...))`).
+- UI copy goes into `lib/l10n/app_*.arb` — 6 files, and they must stay
+  key-set-identical.
+- Strict typing: no `dynamic`, no `var` in public APIs, no `!`.
+
+**Where the memory lives:**
+
+- **Repo docs** (committed, follow the git tree): `RULES.md` (the P1–P27
+  Windows / toolchain / environment traps table), `TASK.md` (D1–D34 task log,
+  living status), `PROJECT.md` (milestones M0–M8 + ADR-1–ADR-15),
+  `CHANGELOG.md` (upstream + `[cn]` entries, kept append-only),
+  `README.md` (user-facing), `.claude/CLAUDE.md` (this file).
+- **Workspace memory** (NOT in this git repo — migrate it if you move the
+  project): `D:\Projects\TonkatsuBoxCN\.workbuddy\memory\`. Contains
+  `MEMORY.md` (the "skeleton" — long-term facts, P1–P27, source table, release
+  state) and dated daily logs `YYYY-MM-DD.md` (what actually happened that
+  day, with full evidence). **The workspace-root entry-point document is
+  `D:\Projects\TonkatsuBoxCN\README-DOCS.md`** — read that first if you
+  land here cold.
+- **Skills** (in `D:\Projects\.workbuddy\skills\`, NOT in this repo):
+  `tonkatsu-box-add-source`, `tonkatsu-box-add-import-source`,
+  `tonkatsu-selfhost-proxy-verify`, `tonkatsu-three-platform-release`,
+  `tonkatsu-sync-upstream`, `tonkatsu-add-color-theme`,
+  `tonkatsu-box-db-migration-debug`.
+
+**Next pending work (as of 2026-10-19):**
+
+- Awaiting the upstream author's reply on which shared parts he wants to
+  pull in (in-app proxy, selfhost auth, server hardening, custom themes).
+  The split is already drafted and sitting in
+  `D:\Projects\TonkatsuBoxCN\共用部分拆分方案.md`. **Not pushing the PR yet.**
+- Windows local build is still blocked (no VS C++ workload); release goes
+  through the `windows-2022` CI runner.
+
 ## Toolchain
 
 **The Flutter SDK lives on Windows.** This fork is checked out on Windows
