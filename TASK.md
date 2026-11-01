@@ -4,9 +4,10 @@
 
 ## 状态
 
-- **已完成**：D1–D32 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试；**`cn-v0.44.5` 三端发版**）；**D33 审查报告 P0/P1 全修与 `cn-v0.44.6` 四轮发版**（自托管鉴权闸门**补上前导斜杠归一才真正生效** + `/img` 封面宿主白名单补齐已装源 + 解析器 id 契约回归 + WeRead 偏移上限；**四轮才出包，逐轮都是真缺陷**）；**D34 同步上游 v0.45.0**（合并 184 文件，20 个冲突逐条定性；迁移链接到 v66；发现并修复 `buildRpcHandler` 的 `log` 未接导致 RPC 失败日志绕过容器日志通道；**`cn-v0.45.0` 八版发版，build 号沿革 45→46→47→48**）
+- **已完成**：D1–D32 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试；**`cn-v0.44.5` 三端发版**）；**D33 审查报告 P0/P1 全修与 `cn-v0.44.6` 四轮发版**（自托管鉴权闸门**补上前导斜杠归一才真正生效** + `/img` 封面宿主白名单补齐已装源 + 解析器 id 契约回归 + WeRead 偏移上限；**四轮才出包，逐轮都是真缺陷**）；**D34 同步上游 v0.45.0**（合并 184 文件，20 个冲突逐条定性；迁移链接到 v66；发现并修复 `buildRpcHandler` 的 `log` 未接导致 RPC 失败日志绕过容器日志通道；**`cn-v0.45.0` 八版发版，build 号沿革 45→46→47→48**）；**D35 迁移到 macOS + 鉴权分支 PR #459**（工作区 Windows→macOS；鉴权分支 rebase 到 `upstream/release/0.46` 并修掉 `/img` 403 语义断裂；**向上游开出 PR #459**；gh CLI + keyring OAuth 打通；全库中文注释审计；**5 条 commit 改英文并 force push**；目录结构澄清 + 轻量清理；**上游连夜收尾：#459 关闭、`#460` 接替并署名 credit，三条设计问题落成 ADR-17**）
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面**本地**构建（缺 VS C++ 工作负载）—— 但发布走 CI 的 `windows-2022` 运行器，不阻塞出包
+- **等待上游**：**PR #459**（自托管鉴权，base `release/0.46`）已开，等 hacan359 review；已按其要求把 5 条 commit 改为英文
 
 ---
 
@@ -1068,6 +1069,167 @@ PS1 `0xFFD9E5F2`/`0xFF0D1F32`、Eva `0xFFDAE3FF`/`0xFF0E1D47`，
 **发版**：`cn-v0.44.6` 全程未动。`cn-v0.45.0` 已发（pubspec `0.45.0+48`，tag `6c3b7f8b`，CI `37734850038` 五 job 全 success，验收四项全过：exe 内嵌 `0.45.0+48`、无脏构建、`background_tile_eva/ps1.png` sha256 与仓库一致、APK 签名 `f6d98b09…39cb` 与历版一致⇒ 可覆盖安装）。
 
 **共用部分拆分（备料，未推 PR）**：少爷接受上游作者（hcan359）10-03 回信的邀请（"Would you be interested in bringing them upstream as PRs?"），但先把 A（应用内代理，4 文件 0 耦合）/ B（自托管鉴权，5 文件 1 处）/ C（服务端加固，3 文件 4 处）/ D（自定义主题，6 文件 0 耦合）拆出来备好，**不直接 PR**；已回复作者说明需要哪些再定形态。方案在仓库外 `D:\Projects\TonkatsuBoxCN\共用部分拆分方案.md`。
+
+### D35 · 迁移到 macOS + 鉴权分支 PR #459（2026-10-21 ~ 10-22）
+
+> 这是 **D34 之后的第一轮大动作**：工作区从 Windows 迁到 macOS，并把「共用部分拆分」里的 **B 块（自托管鉴权）** 真正开成了上游 PR。
+
+#### 一、本地 vs 远程逐项比对（10-21）
+
+- **本地工作区 vs 本地 HEAD：零真实内容差异**。`git status` 报 1707 文件全 M 是 **CRLF 行尾**假阳性（工作树仍是 Windows 时期的 CRLF，仓库 blob 是 LF）。判据：`git diff --ignore-cr-at-eol --name-only` → **0 文件**。
+- 本地 `main` `5090b09e` **== origin/main**；`git merge-base HEAD upstream/main` = `00a4fac6`（= 上游本体）⇒ **上游 0 提交领先**，fork 领先上游 **83 提交**。
+- 硬计数核对：pubspec `0.45.0+48`（上游 +42）· `DataSource` 25（上游 19）· 搜索源 34（上游 21）· `SourceInfo` **23**（上游 17）· ARB 1874（上游 1779）· 迁移链 v66（一致）· 主题 4（上游 2）。
+- **文档偏差两处**：README 写「22 目录服务」而 `SourceInfo(` 实测 **23**；README 表格列 9 行却标 8/8。
+
+#### 二、鉴权分支换基线（10-21）
+
+- `upstream/selfhost-auth`（原基于 v0.45.0 + 4 提交）→ **rebase 到 `upstream/release/0.46`（`ad0d61f7`）**，**零冲突**。
+- 备份分支 `backup/selfhost-auth-v045` = `f7795dd1`。
+- rebase 后 SHA：`a92486ab` / `e4fd328c` / `60cf386c` / `d743d85b`。
+- **rebase 暴露一处真实语义断裂**：`test/image_handler_test.dart` 7 例断言 `200`/`502` 实得 **403**。
+  根因：`buildAppHandler` 新增 `AuthToken? authToken` 参数后该测试 `build()` 未传；且 `_isDataPath` 的**实现与自己的注释自相矛盾**——注释称「`/img` is deliberately public」，实现却只放行 `/rpc` + `/proxy/`，`/img` 被闸门拦成 403。
+  ⇒ 分支在 v0.45.0 上时该测试能过，是因为**当时根本没接 auth 中间件**；rebase 到 0.46 只是让它显形。
+- 修法取②：按注释本意让 `_isDataPath` 显式放行 `/img`，并**补齐已装源的封面宿主白名单**（`00a16ea3`）⇒ server **116/116 全绿**。
+
+#### 三、push 到 fork + 开 PR #459（10-21）
+
+- 远端 `upstream/selfhost-auth` = `00a16ea3` = 本地 HEAD。
+- **PR**：https://github.com/hacan359/tonkatsu_box/pull/459 · base `release/0.46` · head `shingo110:upstream/selfhost-auth` · 5 commits · `+745 −17`（少爷手工提交）。
+- **跨 fork PR 的正确拼法**（本轮踩坑）：base 必须是**上游仓库里真实存在的分支**，head 用**三段式** `owner:repo:branch`；**永远从上游仓库那侧发起**。错的写法（少了仓库段）会报 "There isn't anything to compare"。
+
+#### 四、「开不了 PR」根因排查（10-21）
+
+**结论：不是沙盒限制，是「凭据确实没配 + gh 没装」。** 逐项实测：
+
+| 探测 | 结果 | 判定 |
+|---|---|---|
+| `nc github.com 443 / 22 / 9418` | 全 succeeded | 网络无端口封锁 |
+| `ssh -T git@github.com` | `Hi shingo110!` | SSH 认证有效（只覆盖 git 传输） |
+| `curl api.github.com/rate_limit` | HTTP 200 | API 匿名可达 |
+| 无凭据 `POST /issues` | **HTTP 401** | **沙盒放行出站 POST，拒绝来自 GitHub 侧** |
+| 写 `/opt/homebrew/bin` / `/tmp` | 全部可写 | 沙盒不限制写 |
+| `which gh` / `GH_TOKEN` / 钥匙串 / `~/.netrc` | **四项全缺** | ← **唯一真因** |
+
+- DNS 把 `github.com` 解析到 `198.18.0.x`（RFC2544 保留段）⇒ 经本地透明代理，但代理**不阻断**。
+
+#### 五、gh / PAT 环境补全（10-22）
+
+- 少爷 `brew install gh` → `/opt/homebrew/bin/gh` **v2.102.1**。
+- 报 `zsh: command not found: gh` 的根因：**`~/.zshrc` 没有 Homebrew PATH**（Apple Silicon 的 brew 在 `/opt/homebrew`，非 Intel 的 `/usr/local`）。修法：`eval "$(/opt/homebrew/bin/brew shellenv)"`。
+- 中途 `GH_TOKEN` 环境变量抢占（gh 优先用它、拒绝走 OAuth）→ `unset GH_TOKEN` 后重走交互登录。
+- **认证结果**：`Logged in to github.com account shingo110 (keyring)`，token `gho_*`，scopes `gist, read:org, repo, workflow`。⇒ **keyring（OAuth `gho_`）比 PAT 明文落盘安全**，为本项目推荐形态。
+
+#### 六、全库中文注释审计（10-22，结论：无需改动）
+
+- 范围：`git ls-files` 全部 **1662** 个 `.dart`/`.md`/`.yaml`（排除 `lib/l10n/*` 与 `*.arb`）。
+- 结果：含中文 **16 文件 / 70 字符**，逐条核对后**没有一条是应翻译的注释**：
+  - **UI 显示串**（`'zh': '中文'`、`'日本語'`）→ 正当，改英文反而是 bug
+  - **CJK 测试样本**（`'葬送のフリーレン'`、`'進撃の巨人'`、`'汉字'`）→ 刻意为之
+  - **模板数据**（`"alt_title": "鋼の錬金術師"`）、**CHANGELOG/README 里的语言名** → 正当
+- **关键：PR #459 涉及的 33 个文件，中文注释数 = 0**。
+
+#### 七、5 条 commit 改英文 + force push（10-22）
+
+- **触发**：上游作者 hacan359 在 PR #459 评论 —— "Let's always use English for future PR commits and code descriptions; it's more universal."
+- 英文来源：`~/Downloads/pr459-english-messages.md`（逐字使用，禁翻译改写）；第 4 条只有标题无正文。
+- 方法：`git rebase -i ad0d61f7` + 两个脚本驱动（`GIT_SEQUENCE_EDITOR` 把 `pick`→`reword`；`GIT_EDITOR` 按原中文 subject 匹配 → 覆盖为对应英文消息文件）。
+- **改写前后 tree hash 5 个逐一相同 ⇒ 内容零改动**（`git diff backup HEAD` 空输出）。
+
+| 原 SHA | 新 SHA | tree |
+|---|---|---|
+| `a92486ab` | `7f640a72` | `68478eba` |
+| `e4fd328c` | `89f18a95` | `7ac1881d` |
+| `60cf386c` | `6f361f97` | `cabe749f` |
+| `d743d85b` | `2f858945` | `288ac3a4` |
+| `00a16ea3` | **`c1be05cf`**(HEAD) | `2990ff92` |
+
+- 备份分支 `backup/selfhost-auth-cnmsg` = `00a16ea3`。
+- 远端 fork `upstream/selfhost-auth` 已更新为 **`c1be05cf`**；`main` 仍 `5090b09e`（未动）。
+
+#### 八、目录结构澄清 + 轻量清理（10-22）
+
+- **两者是父子关系，不是二选一**：
+  - `/Users/alvindrake/projects/TonkatsuBoxCN/` = **工作区（Workspace）**，**无 `.git`**（含 `README-DOCS.md` / `.workbuddy/memory/` / `probe/` / `_ref/` / 评估 md / tag 素材）
+  - `/Users/alvindrake/projects/TonkatsuBoxCN/tonkatsu_box_CN/` = **唯一 git 仓库**（`git rev-parse --show-toplevel` 指向此）
+  - 全盘深度 3 内只有 **1 个 `.git`**，无嵌套仓库
+- 清理：删内层空 `.workbuddy/`（trash，可恢复）；外层 `.DS_Store` 被 Finder 立刻重建（macOS 正常行为，外层非 git 仓故无害）；`.tmp/`（PSN 素材，使命已完成）**保留**。
+- 内层 `.gitignore` 补 `.workbuddy/`（第 17 行 Miscellaneous 段），正反两面验证通过（`check-ignore` 命中 + `wb_control/` 未误伤）。**未提交**（按项目惯例累积到下次操作）。
+
+#### 九、新增项目规范（响应作者要求）
+
+| 项 | 规则 |
+|---|---|
+| commit message | **英文** |
+| 新增代码注释 | **英文** |
+| PR title / body | **英文** |
+| 例外（保持中文） | UI 文案 · l10n 的 `zh` 翻译 · CJK 测试样本 |
+
+#### 十、本轮沉淀的环境坑（已并入 RULES.md §四）
+
+- **P28**：macOS 侧工作树仍是 CRLF ⇒ `git status` 恒报 1707 文件全 M；判真实改动必须 `--ignore-cr-at-eol`。
+- **P29**：显式 URL + `--force-with-lease` 会误判 `stale info`（git 无法关联 remote-tracking ref）⇒ 必须用 `--force-with-lease=<branch>:<sha>` 显式给期望值。
+- **P30**：`GIT_SEQUENCE_EDITOR="sed -i '' -e '…'"` 内联字符串会被 git 拆参数而失败 ⇒ 必须写成**脚本文件**再传路径。
+- **P31**：`git show -s --format=%B` 输出末尾自带一个 LF ⇒ 与消息文件比对须先 `rstrip('\n')`，否则恒差 1 字符（假阳性）。
+- **P32**：带尾斜杠的目录忽略规则**对不存在的路径 `check-ignore` 不命中** ⇒ 必须建真实目录验证。
+- **`gh` 纪律**：本机默认仓库解析会落到上游；**一律显式 `-R <owner>/<repo>`**。
+
+#### 十一、上游收尾：#459 关闭 → #460 接替（10-22 01:21 上游侧）
+
+> 上游作者连夜把这一轮收尾了。**#459 是「关闭」不是「合并」**，接替它的是他自己开的 **#460**。
+
+**时间线（UTC → 北京）**
+
+| 时刻（UTC） | 时刻（+8） | 事件 |
+|---|---|---|
+| 10-21 16:32 | 10-22 00:32 | 我方回复 English-only 要求，说明 5 条 commit 已改英文 |
+| 10-21 16:39 | 10-22 00:39 | 作者："I'm already looking into your branch. I'll make a few changes" |
+| 10-21 17:15 | 10-22 01:15 | `de9b570b`（他的重塑提交） |
+| 10-21 17:21 | 10-22 01:21 | **关闭 #459** + 开 **#460** |
+| — | 当前 | **#460 Open · base `release/0.46` · head `feat/selfhost-auth-token` · MERGEABLE** |
+
+**#460 的两个提交**
+
+| SHA | 内容 |
+|---|---|
+| `f8c055a1` | **#459 全部内容的 squash**，`Co-authored-by: shingo110 <alvin1985811@gmail.com>` —— **署名 credit 明确给了本 fork** |
+| `de9b570b` | 他的重塑（可选鉴权 + 封面宿主白名单改为配置） |
+
+**他改的三条实打实的设计问题（必须记住）**
+
+1. **「离开回环就强制令牌」这条规则在 Docker 下是错的。** 容器**永远监听 `0.0.0.0`**，所以按 bind 地址推导鉴权的做法会让**每一个 Docker 安装都被强制鉴权、且没有关闭开关**。改成 `TONKATSU_AUTH=token` **显式开启、默认关闭** ⇒ 老用户零感知、默认行为不变。
+2. **无令牌时存在死锁。** 浏览器首个 RPC 就 401 → 直接撞上**致命错误页**；而填令牌的**设置页恰恰到不了**。他补了「首次 401 弹粘贴令牌页」（`ServerTokenScreen`），并在启动时打印登录链接 `http://localhost:<port>/?token=…`。
+3. **`/img` 的 `POST`/`DELETE` 写操作在 #459 里没设闸** —— 他只放行了 `GET /img`，写方法漏了，已补。
+
+**另有两条超出「三问题」的修正**
+
+- **封面宿主白名单从硬编码改成配置**（`TONKATSU_IMAGE_HOSTS`）。原硬编码版**漏了 TVMaze、播客封面、自定义卡片 URL**，且**只检查跳转第一跳** ⇒ 列表内宿主若有开放重定向即可越界。新版由 `ImageCache` 逐跳校验（最多 5 跳）。
+- `TONKATSU_BIND` 控制宿主侧发布端口；代理与图片体积上限 20 MB；请求日志脱敏 `npsso` / `x_access_token`。
+
+**「For the #459 author」——他把本 fork 的用法映射成了三行 `.env`**（等于手把手交接「你的配置在新版照样成立」）
+
+```
+TONKATSU_AUTH=token
+TONKATSU_IMAGE_HOSTS=doubanio.com,bgm.tv,tapimg.com,xmcdn.com,weread.qq.com,myqcloud.com,neodb.social
+TONKATSU_BIND=127.0.0.1
+```
+
+> 这 7 个宿主根即本 fork `_allowedImageHosts` 的域级归并结果（`doubanio.com` 覆盖 `img3.doubanio.com` 等子域）。
+
+**他的设计哲学（已落为 ADR-17，后续所有上游 PR 的指导原则）**
+
+> **默认行为不动，新功能配置开启。**
+> 凡是要进上游的东西，默认值必须与合并前**逐字节等价**；新能力一律通过配置 / 开关引入，且能关。
+
+**验证数据对照**（他换了一种实现，测试数因此变化）
+
+| 套件 | 我方 #459 | 他的 #460 |
+|---|---|---|
+| `flutter analyze` | 零输出 | clean |
+| `flutter test` | 5753 / 3 skip | **5773** / 3 skip |
+| `server` | 116 | **133** |
+| `packages/core` | 2345 | 2345 |
+
+**下一步**：等 **#460 合并**后再删两个本地备份分支 `backup/selfhost-auth-v045`（`f7795dd1`）与 `backup/selfhost-auth-cnmsg`（`00a16ea3`）。**未合并前不删**。
 
 ## 📋 候选（下一步从这里挑）
 

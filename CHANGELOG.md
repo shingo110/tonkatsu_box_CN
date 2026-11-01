@@ -12,6 +12,53 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+> **Status of the `[cn]` self-host auth entries below (2026-10-22):** they
+> describe the fork's original design, which upstream **did not take as-is**.
+> PR #459 was **closed**; the maintainer squashed it into
+> [#460](https://github.com/hacan359/tonkatsu_box/pull/460)
+> (`f8c055a1`, with `Co-authored-by: shingo110` credit) and reshaped it in
+> `de9b570b`. Three things changed on the way in: the token is now
+> **`TONKATSU_AUTH=token`, explicit opt-in and off by default** — the
+> "beyond loopback" rule forced auth on every Docker install, because a
+> container always listens on `0.0.0.0`; a browser without a token now gets a
+> paste-the-token screen instead of the fatal error view that made the
+> settings field unreachable; and `POST`/`DELETE` on `/img` are gated. The
+> cover-host allowlist became `TONKATSU_IMAGE_HOSTS` (config, not source) and
+> is checked per redirect hop. Read the entries below as **the fork's
+> contribution**, not as the shipped behaviour of upstream. The governing rule
+> is now ADR-17: **keep the default behaviour untouched, put new features
+> behind config.**
+
+## [cn] Fixed — `/img` was 403 for the cover hosts of every installed source
+
+The bearer-token gate added below left `/img` inside the gated set: its
+`_isDataPath` doc comment said "`/img` is deliberately public", but the
+implementation only allowed `/rpc` and `/proxy/*`, so every cover request was
+rejected with 403. The comment was right and the code was wrong — a browser's
+native `Image` request cannot carry an `Authorization` header, so covers must
+stay anonymous.
+
+The gate now admits `/img` as well, and the cover-host allowlist was completed
+to cover every installed source. Surfaced by `server/test/image_handler_test.dart`
+(7 assertions expecting 200/502 got 403) once the auth middleware landed; the
+suite is green again at 116/116.
+
+- `server/lib/src/app_handler.dart`: `_isDataPath` admits `/img`.
+- `server/lib/src/image_handler.dart`: `_allowedImageHosts` completed.
+
+## [cn] Changed — commit messages and comments headed upstream are English
+
+Upstream maintainer hacan359 asked for English in PR #459: *"Let's always use
+English for future PR commits and code descriptions; it's more universal."* The
+five commits on `upstream/selfhost-auth` were rewritten accordingly and
+force-pushed; the tree hashes are byte-identical before and after, so no file
+content changed. UI copy, the `zh` ARB translations and CJK test fixtures stay
+Chinese by design.
+
+- `upstream/selfhost-auth`: five commit messages rewritten (`00a16ea3` →
+  `c1be05cf`), trees unchanged.
+- `.claude/CLAUDE.md`: the English rule recorded in "Current baseline".
+
 ## [cn] Security — the selfhost server asks for a token once it leaves loopback
 
 `/rpc` and `GET/POST /proxy/keys` answered anyone who could open a socket to the

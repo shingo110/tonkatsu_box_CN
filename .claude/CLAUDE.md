@@ -17,7 +17,7 @@ not answer in Russian; the upstream author's rule does not apply here.
 - Tests: `flutter_test` + `mocktail`
 - Localization: ARB files in `lib/l10n/` — `en`, `ru`, `es`, `fr`, `pt`, `zh`
 
-## Current baseline (2026-10-19)
+## Current baseline (2026-10-22)
 
 > **If you are starting a new session on this repo, read this section first.**
 > It pins the live state of the fork. Numbers drift with every release — treat
@@ -25,20 +25,35 @@ not answer in Russian; the upstream author's rule does not apply here.
 
 **Facts of the fork:**
 
-- Fork of `hacan359/tonkatsu_box` (MIT, upstream at `v0.45.0`); this is the
+- Fork of `hacan359/tonkatsu_box` (MIT, upstream at `v0.45.0`; upstream
+  `release/0.46` branch is open at `ad0d61f7`); this is the
   Chinese-localized branch `shingo110/tonkatsu_box_CN`.
-- **Local checkout:** `D:\Projects\TonkatsuBoxCN\tonkatsu_box_CN`
+- **Local checkout (macOS since 2026-10-21):**
+  `/Users/alvindrake/projects/TonkatsuBoxCN/tonkatsu_box_CN`.
+  The outer `/Users/alvindrake/projects/TonkatsuBoxCN/` is the **workspace**
+  and has **no `.git`** — it holds `README-DOCS.md`, `.workbuddy/memory/`,
+  `probe/`, `_ref/` and the evaluation docs. **Any `D:\Projects\...` path
+  still present in the repo docs is a Windows-era leftover.**
 - **Upstream remote:** `upstream` — **push URL is `DISABLED`**
   (`git remote set-url --push upstream DISABLED`). Running `git push upstream`
   fails with `fatal: 'DISABLED' does not appear to be a git repository`.
   The guard script `probe/check_upstream_guard.py` (in the **workspace**,
   not in this repo) exits non-zero if the guard is lifted. Always run it
   before opening an upstream PR / issue.
-- **All `gh` commands** must pass `--repo shingo110/tonkatsu_box_CN` (or
-  `-R …`). `gh`'s default resolution falls through to the upstream because
-  this repo has an `upstream` remote. The upstream author has been notified
-  of this rule; PR **#450** (2026-09-23) was accidentally opened against
-  upstream and closed the same day.
+- **All `gh` commands** must pass `--repo <owner>/<repo>` (or `-R …`). `gh`'s
+  default resolution falls through to the upstream because this repo has an
+  `upstream` remote. The upstream author has been notified of this rule; PR
+  **#450** (2026-09-23) was accidentally opened against upstream and closed
+  the same day. **As of 2026-10-22 `gh` is installed and authenticated**
+  (`/opt/homebrew/bin/gh` v2.102.1, keyring OAuth as `shingo110`, scopes
+  `gist, read:org, repo, workflow`) — so the REST API *is* reachable from this
+  machine now; the `-R` discipline still applies.
+- **Upstream-facing English rule (2026-10-22):** commit messages, new code
+  comments, and PR titles/bodies for anything headed upstream must be
+  **English**. Upstream author hacan359 asked for this in PR #459: *"Let's
+  always use English for future PR commits and code descriptions; it's more
+  universal."* **Exceptions that stay Chinese:** UI copy, the `zh` ARB
+  translations, CJK test fixtures. Fork-internal Chinese docs are unaffected.
 
 **Live numbers (as of `cn-v0.45.0`, 2026-10-08):**
 
@@ -51,7 +66,8 @@ not answer in Russian; the upstream author's rule does not apply here.
   entries; the enum is exhaustive-switched in this fork, so adding a value
   without a switch arm is a compile error by design).
 - Search sources: **34** instances in `lib/features/search/sources/search_sources.dart`.
-- Catalogue services: **22** in `lib/shared/constants/source_catalog.dart`.
+- Catalogue services: **23** in `lib/shared/constants/source_catalog.dart`
+  (the README's "22" is stale — measured 23 on 2026-10-21).
 - Media types with Chinese-capable sources: **8 of 8** (books / films /
   series / anime / manga / music / games / podcasts) — only **manga** and
   **visual novels** have no mainland-only source.
@@ -83,38 +99,93 @@ not answer in Russian; the upstream author's rule does not apply here.
 
 **Where the memory lives:**
 
-- **Repo docs** (committed, follow the git tree): `RULES.md` (the P1–P27
-  Windows / toolchain / environment traps table), `TASK.md` (D1–D34 task log,
-  living status), `PROJECT.md` (milestones M0–M8 + ADR-1–ADR-15),
+- **Repo docs** (committed, follow the git tree): `RULES.md` (the P1–P32
+  Windows / macOS / toolchain / environment traps table), `TASK.md` (D1–D35
+  task log, living status), `PROJECT.md` (milestones M0–M8 + ADR-1–ADR-15),
   `CHANGELOG.md` (upstream + `[cn]` entries, kept append-only),
   `README.md` (user-facing), `.claude/CLAUDE.md` (this file).
 - **Workspace memory** (NOT in this git repo — migrate it if you move the
-  project): `D:\Projects\TonkatsuBoxCN\.workbuddy\memory\`. Contains
-  `MEMORY.md` (the "skeleton" — long-term facts, P1–P27, source table, release
-  state) and dated daily logs `YYYY-MM-DD.md` (what actually happened that
-  day, with full evidence). **The workspace-root entry-point document is
-  `D:\Projects\TonkatsuBoxCN\README-DOCS.md`** — read that first if you
-  land here cold.
-- **Skills** (in `D:\Projects\.workbuddy\skills\`, NOT in this repo):
+  project): `/Users/alvindrake/projects/TonkatsuBoxCN/.workbuddy/memory/`.
+  Contains `MEMORY.md` (the "skeleton" — long-term facts, P1–P32, source
+  table, release state) and dated daily logs `YYYY-MM-DD.md` (what actually
+  happened that day, with full evidence). **The workspace-root entry-point
+  document is `/Users/alvindrake/projects/TonkatsuBoxCN/README-DOCS.md`** —
+  read that first if you land here cold.
+- **Skills** (in `.workbuddy/skills/`, NOT in this repo):
   `tonkatsu-box-add-source`, `tonkatsu-box-add-import-source`,
   `tonkatsu-selfhost-proxy-verify`, `tonkatsu-three-platform-release`,
   `tonkatsu-sync-upstream`, `tonkatsu-add-color-theme`,
   `tonkatsu-box-db-migration-debug`.
+  **⚠️ 2026-10-22: these nine skills were NOT found on the current macOS
+  machine** (`~/.workbuddy/skills/` is empty, no `tonkatsu-*` anywhere on
+  disk). Confirm they exist before relying on them; they may still be on the
+  Windows box or may have been lost in the migration.
 
-**Next pending work (as of 2026-10-19):**
+**Next pending work (as of 2026-10-22):**
 
-- Awaiting the upstream author's reply on which shared parts he wants to
-  pull in (in-app proxy, selfhost auth, server hardening, custom themes).
-  The split is already drafted and sitting in
-  `D:\Projects\TonkatsuBoxCN\共用部分拆分方案.md`. **Not pushing the PR yet.**
+- **PR #459 is CLOSED (not merged).** The author squashed it into his own
+  **PR #460** — <https://github.com/hacan359/tonkatsu_box/pull/460>, base
+  `release/0.46`, head `feat/selfhost-auth-token`, **Open / MERGEABLE**,
+  2 commits. `f8c055a1` is the squash of #459 with
+  `Co-authored-by: shingo110` credit intact; `de9b570b` is his reshape.
+  **No action needed from us — he is driving it.**
+- **Wait for #460 to merge, then delete** the two local backup branches
+  `backup/selfhost-auth-v045` (`f7795dd1`, pre-rebase) and
+  `backup/selfhost-auth-cnmsg` (`00a16ea3`, pre-English-rewrite).
+  **Do not delete either before the merge.**
+- **Why he reshaped it** (three real design problems; read ADR-17 in
+  `PROJECT.md` before preparing any further upstream PR):
+  1. "Require a token once the server leaves loopback" is wrong under Docker —
+     **a container always listens on `0.0.0.0`**, so that rule forced auth on
+     every Docker install with no way to turn it off. He made it
+     `TONKATSU_AUTH=token`, **explicit opt-in, off by default**.
+  2. Deadlock with no token: the first RPC answered 401 on the splash and hit
+     the fatal error view, while the settings page that holds the token was
+     unreachable. He added `ServerTokenScreen` on the first 401 plus a
+     `http://localhost:<port>/?token=…` sign-in link printed at startup.
+  3. `POST` / `DELETE` on `/img` were left ungated; he gated them.
+  He also turned the hardcoded cover-host allowlist into a setting
+  (`TONKATSU_IMAGE_HOSTS`) because the hardcoded one dropped TVMaze, podcast
+  artwork and custom-card URLs, and only checked the first hop of a redirect —
+  now `ImageCache` walks up to 5 hops.
+- **The rule to remember:** *keep the default behaviour untouched, put new
+  features behind config.* Concretely: after merging, the default output must
+  be byte-identical to before; every new capability is opt-in, switchable off,
+  and invisible to existing users. **Block "A" (in-app proxy) must be prepared
+  this way** — the proxy may not "take over egress when it detects one"; it
+  has to be off until the user configures it.
+- Blocks "A" (in-app proxy), "C" (server hardening) and "D" (custom themes)
+  from the same split are still drafted and un-pushed; the draft lives in
+  `/Users/alvindrake/projects/TonkatsuBoxCN/共用部分拆分方案.md`. Note #460
+  already absorbed part of "C" (20 MB body caps, `npsso` /
+  `x_access_token` log redaction, bad option prints a message instead of a
+  stack trace) and reworked the `/img` allowlist — re-scope "C" before drafting.
+- The `.gitignore` change (adding `.workbuddy/`) is **uncommitted** on `main`
+  — decide whether it stays on `upstream/selfhost-auth` or lives on `main`.
+  #459 being closed removes the "it would enter the PR" pressure.
 - Windows local build is still blocked (no VS C++ workload); release goes
   through the `windows-2022` CI runner.
 
 ## Toolchain
 
-**The Flutter SDK lives on Windows.** This fork is checked out on Windows
-itself, so the commands below run as-is from the repo root. There is no WSL
-hop, no `wslpath`, and no `powershell.exe -Command` wrapper.
+> **Environment changed on 2026-10-21: the working copy now lives on macOS**
+> (`/Users/alvindrake/projects/TonkatsuBoxCN/tonkatsu_box_CN`), and the Flutter
+> SDK is `/Users/alvindrake/development/flutter/bin` (3.47.7 stable / Dart
+> 3.13.5, **not on `PATH`**). The four commands below run natively on macOS with
+> no WSL hop. **Everything in this section about Windows / `flutter.bat` /
+> PowerShell is kept for the CI `windows-2022` runner and for history** — do not
+> apply it on the macOS machine. macOS-side traps are `RULES.md` P28–P32.
+>
+> Also note on macOS: the **worktree is still CRLF** (carried over from Windows)
+> while the blobs are LF, so plain `git status` reports all 1707 files as
+> modified. Use `git diff --ignore-cr-at-eol --name-only` to see real changes.
+> And `gh` is at `/opt/homebrew/bin/gh` — if the shell reports
+> `command not found: gh`, `eval "$(/opt/homebrew/bin/brew shellenv)"` is missing
+> from `~/.zshrc`.
+
+**The Flutter SDK lived on Windows** when this fork was first checked out.
+The historical Windows setup ran the commands as-is from the repo root with no
+WSL hop, no `wslpath`, and no `powershell.exe -Command` wrapper.
 
 ```bash
 flutter analyze --fatal-infos --fatal-warnings

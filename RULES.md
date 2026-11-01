@@ -94,6 +94,9 @@
 
 ## 四、Windows 环境坑（全部伪装成"项目坏了"）
 
+> **2026-10-21 起本机已迁到 macOS**，本节标题保留历史，但 **P28–P32 是 macOS 侧的新坑**，同样适用。
+> **P33–P34 不是环境坑而是部署/安全设计坑**（Docker 监听语义、白名单逐跳校验），来自上游 #460 的重塑，与 ADR-17 配套读。
+
 | # | 现象 | 真凶 | 规避 |
 |:-:|------|------|------|
 | P1 | 全部测试 `+0 -413`，报 `WebSocketException: Invalid WebSocket upgrade request` | `HTTP_PROXY` 指向沙箱代理，`NO_PROXY` 未设，flutter_tester 连 loopback 被拦 —— 极易误判为编译错误 | 带清代理跑：`env -u HTTP_PROXY -u HTTPS_PROXY -u http_proxy -u https_proxy -u ALL_PROXY -u all_proxy NO_PROXY="127.0.0.1,localhost,::1" flutter test --no-pub` |
@@ -119,6 +122,13 @@
 | P25 | 同步上游时想先看看会撞几处 | —— | **`git merge-tree --write-tree main upstream/main`**：只写对象库，**不碰工作区与索引**，可反复跑。⚠️ 它的输出**混着** `Auto-merging X` 行与纯路径行，**只取 `Merge conflict in ` 那一段**才是冲突清单（误取会报出接近三倍的数字）。⚠️ 若本地从未 `fetch upstream`，`git log upstream/main` 会报 `unknown revision` —— 那是空引用不是真实状态，先 `git fetch upstream`。D34 用它预判 20 个冲突，实际 merge 也是 20 个，逐字相符 |
 | P26 | 以为文档冲突看 `numstat` 就够了 | —— | **文件级 `numstat` 会掩盖「整篇重写」**。D34 评估时 `README` 显示上游 `+3 −1`，实际是上游把README 从中文直写式**整个重写成英文目录式**（401 行、中文只剩 1 行），三处冲突中一块**横跨 227 行**。⇒ **判文档冲突强度要看「冲突块的行跨度」，不是净变化量**；重写型必须单独决策（本仓取「保留中文、只取实质链接」） |
 | P27 | 合并后以为「自动合并 = 没风险」 | —— | 自动合并成功**不代表语义正确**，凡「双方都改过同一文件」即便无冲突也要复核。D34 逮到**两类**：① 上游给 `buildRpcHandler` 新增 `log` 参数（错误信息脱敏），而本 fork 调用时**未传 `log`** ⇒ RPC 失败行走默认 `print`，**绕过了本 fork 的容器日志通道**；② 上游给 `AppPalette` 新增**必填**的 `brandContainer` / `onBrandContainer`，上游两个内置调色板都填了，**本 fork 自建的 PS1 与 Eva 两套主题没填** ⇒ `flutter analyze` 报 4 条 `missing_required_argument`。**第②类最隐蔽：纯新增必填字段、两侧各自独立 ⇒ git 零冲突、merge 全成功，只有 analyze 才红。** 修法：给 `buildAppHandler` 加**可选** `rpcFailureLogger`（默认仍 `print`，不改上游签名）；调色板按各自身背景的 WCAG 亮度定深/浅方向取色，**不凭记忆**，且必须 `≠ brand`（否则 hover thumb 并进轨道）。**同步上游前先查上游给基类加了哪些 `required this.x`** |
+| P28 | 迁移到 macOS 后 `git status` 恒报 **1707 文件全 M**（`git diff --stat` 显示 `+421558/-421558` 对称数），看着像「工作树被大改过」 | 工作树仍是 **Windows 时期的 CRLF**，而仓库 blob 是 LF。本机无 `core.autocrlf`/`core.eol` 配置，`.gitattributes` 只对 3 类路径强制 LF | **判「有无真实改动」必须加 `--ignore-cr-at-eol`**：`git diff --ignore-cr-at-eol --name-only`（实测 = 0）。⚠️ `git status` **不接受** `--ignore-cr-at-eol`（会报 `unknown option`），只有 `git diff` 系列支持 |
+| P29 | `git push --force-with-lease <显式URL> <branch>` 报 `! [rejected] … (stale info)`，明明远端就是自己的期望值 | **用显式 URL 而非 remote 名时，git 无法关联本地 remote-tracking ref** ⇒ lease 拿不到可信期望值，直接判 stale。这是为绕 HTTPS 凭据问题改用显式 URL（本机只有 SSH 可用）的副作用 | **显式给出期望 SHA**，不依赖追踪 ref：`git push --force-with-lease=<branch>:<expected-sha> git@github.com:… <branch>`。期望值**必须由自己独立核实**（`git ls-remote`），不能照抄 git 的提示 |
+| P30 | `GIT_SEQUENCE_EDITOR="sed -i '' -e 's/^pick/reword/'" git rebase -i …` 报 `sed: : No such file or directory` | 内联字符串**会被 git 拆参数**再交给 shell | 把编辑器命令写成**脚本文件**（`chmod +x`），`GIT_SEQUENCE_EDITOR=/path/to/script.sh` 传**路径**。`GIT_EDITOR` 同理 |
+| P31 | 比对 commit message 时，`git show -s --format=%B` 的输出与消息文件**恒差 1 字符**，看着像改写没成功 | **`%B` 输出末尾自带一个 LF**，而消息文件通常以单换行结尾 | 两侧都 `rstrip('\n')` 再比。这是**对账工具行为**，不是内容差异（同 P22 的 `%(contents)` 多带换行） |
+| P32 | `.gitignore` 里加了带尾斜杠的目录规则（如 `.workbuddy/`），`git check-ignore -v .workbuddy/x` **不命中**，以为规则写错了 | 带尾斜杠的目录规则**对不存在的路径 `check-ignore` 不命中**（git 需要路径真实存在才能判定目录） | 建一个**真实目录**再验证：`mkdir -p .workbuddy/t && git check-ignore -v .workbuddy/t/f` ⇒ 命中。**并做反面测试**（如 `wb_control/x.txt` 不被忽略）证明规则精确、非全局误伤 |
+| P33 | 「离开回环就强制令牌」在 Docker 安装上**变成全员强制、且关不掉**（上游 #460 逮到，见 ADR-17） | **Docker 容器永远监听 `0.0.0.0`** —— 容器内 bind 地址**不携带「是否对外」的任何信息**，宿主侧映射才是。用 bind 地址反推部署形态 / 安全策略，在容器里必然错 | **不要把部署形态编码进安全策略**；安全开关一律**显式配置、默认关闭**（`TONKATSU_AUTH=token`），宿主侧暴露面用独立变量控制（`TONKATSU_BIND`）。同理：任何「强制项」都必须保证**关闭它的路径在它生效前可达**（#459 的无令牌死锁：首个 RPC 401 → 致命错误页 → 设置页到不了） |
+| P34 | 白名单「只在第一跳校验」= 假白名单 | 列表内宿主若有**开放重定向**，一跳即可越界；`TONKATSU_IMAGE_HOSTS` 因此改成关闭 HTTP 客户端的自动跟随，由 `ImageCache` **逐跳校验（最多 5 跳）** | 凡「按 URL 放行」的策略，**必须覆盖整条跳转链**而不是入参一次。另：硬编码白名单极易**漏站**（上游原版漏了 TVMaze / 播客封面 / 自定义卡片 URL）⇒ 优先做成**配置**而非源码常量 |
 
 ## 五、测试设施坑（mocktail，都是血泪）
 
