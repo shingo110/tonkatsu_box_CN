@@ -94,8 +94,9 @@
 
 ## 四、Windows 环境坑（全部伪装成"项目坏了"）
 
-> **2026-10-21 起本机已迁到 macOS**，本节标题保留历史，但 **P28–P32 是 macOS 侧的新坑**，同样适用。
+> **2026-10-21 起本机已迁到 macOS**，本节标题保留历史，但 **P28–P38 是 macOS 侧的新坑**，同样适用。
 > **P33–P34 不是环境坑而是部署/安全设计坑**（Docker 监听语义、白名单逐跳校验），来自上游 #460 的重塑，与 ADR-17 配套读。
+> **P35–P38 是本机工具链坑**（pub 镜像源、package_config 割裂、多模式 BRE 假阴性、GNU stat），D36 期间连续踩到。
 
 | # | 现象 | 真凶 | 规避 |
 |:-:|------|------|------|
@@ -129,6 +130,10 @@
 | P32 | `.gitignore` 里加了带尾斜杠的目录规则（如 `.workbuddy/`），`git check-ignore -v .workbuddy/x` **不命中**，以为规则写错了 | 带尾斜杠的目录规则**对不存在的路径 `check-ignore` 不命中**（git 需要路径真实存在才能判定目录） | 建一个**真实目录**再验证：`mkdir -p .workbuddy/t && git check-ignore -v .workbuddy/t/f` ⇒ 命中。**并做反面测试**（如 `wb_control/x.txt` 不被忽略）证明规则精确、非全局误伤 |
 | P33 | 「离开回环就强制令牌」在 Docker 安装上**变成全员强制、且关不掉**（上游 #460 逮到，见 ADR-17） | **Docker 容器永远监听 `0.0.0.0`** —— 容器内 bind 地址**不携带「是否对外」的任何信息**，宿主侧映射才是。用 bind 地址反推部署形态 / 安全策略，在容器里必然错 | **不要把部署形态编码进安全策略**；安全开关一律**显式配置、默认关闭**（`TONKATSU_AUTH=token`），宿主侧暴露面用独立变量控制（`TONKATSU_BIND`）。同理：任何「强制项」都必须保证**关闭它的路径在它生效前可达**（#459 的无令牌死锁：首个 RPC 401 → 致命错误页 → 设置页到不了） |
 | P34 | 白名单「只在第一跳校验」= 假白名单 | 列表内宿主若有**开放重定向**，一跳即可越界；`TONKATSU_IMAGE_HOSTS` 因此改成关闭 HTTP 客户端的自动跟随，由 `ImageCache` **逐跳校验（最多 5 跳）** | 凡「按 URL 放行」的策略，**必须覆盖整条跳转链**而不是入参一次。另：硬编码白名单极易**漏站**（上游原版漏了 TVMaze / 播客封面 / 自定义卡片 URL）⇒ 优先做成**配置**而非源码常量 |
+| P35 | `flutter test` 一片「loading … failed」，报 `The method 'decodeLazy' isn't defined for the type 'ZLibDecoder'`（在 `package:image` 里），代码一行没改 | 提交版 `pubspec.lock` 记录的 hosted url 是 `https://pub.dev`，本机走 `https://pub.flutter-io.cn` 镜像 ⇒ **pub 视为不同源、整表重新解析**（lock 动 291 行），把 `image` 从 4.8.0 升到 4.11.0；而镜像只提供 `archive 4.0.9`，其 `ZLibDecoder` 没有 `decodeLazy` | 对齐源再解析：`PUB_HOSTED_URL=https://pub.dev flutter pub get` ⇒ 回到 lock 的 `image 4.8.0` + `archive 4.0.9`，编译恢复。**别去改 pubspec 或删 lock**——问题在解析源不在代码 |
+| P36 | `flutter analyze` 通过，但 `flutter test` 编译失败 —— 看着像「analyze 骗人」 | `git checkout -- pubspec.lock` 只还原了 lock，`.dart_tool/package_config.json` **仍指向升级后的版本**；analyze 的类型解析是惰性的，碰不到 `package:image` 的实体化编译 | 还原 lock 后**必须让 package_config 与之一致**（重跑 pub get）；判据看 `.dart_tool/package_config.json` 里的实际包目录名，不要看 `pubspec.lock` |
+| P37 | `grep '<<<<<<<\|=======\|>>>>>>>' file` 报 0 命中，可文件里明明有冲突标记 | 本机 zsh + BSD grep 下这种**多模式 BRE 静默失配**（`\|` 交替 + `^=======$` 组合尤其容易） | 拆成多次单模式：`grep -n -e '<<<<<<<' -e '>>>>>>>'`，或 `grep -c '^<<<<<<<'`。**冲突标记检查绝不能用多模式 BRE 下结论** |
+| P38 | `stat -f%z file` 报 `Unknown option '%z'` | 本机 `stat` 是 **GNU coreutils**（随 brew 装的），不是 macOS 自带的 BSD 版；`-f` 在 GNU 下是 `--file-system` | 统计字节改用 `python3 -c "os.path.getsize(...)"`，或 `wc -c < file`。**`du -sh` 报的是块分配**，116 个小文件会比实际字节虚高约 17% |
 
 ## 五、测试设施坑（mocktail，都是血泪）
 

@@ -12,6 +12,48 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Added — in-app HTTP/SOCKS proxy, contributed upstream as PR #464
+
+`Dart`'s `HttpClient` never reads the OS proxy, so on a restricted network the
+only way out was a VPN in TUN mode — and on some Android setups that capture
+path breaks every request. The app can now be pointed at the local port a proxy
+app exposes (`Settings → Data Sources → Proxy`), and it goes out through that
+port explicitly. **Off by default:** nothing changes until the switch is turned
+on, and the host/port fields are hidden while it is off. Loopback always goes
+`DIRECT`; when enabled the routing string is `PROXY host:port; DIRECT` (or
+`SOCKS5 host:port; DIRECT`), so a proxy that is not running degrades to a
+direct connection instead of hanging. There is no system-proxy detection and no
+automatic takeover.
+
+Originally `ee575658` on this fork; rebased onto `c9ea4213` (the `release/0.46`
+tip) for upstream and opened as
+[#464](https://github.com/hacan359/tonkatsu_box/pull/464) against `main`.
+
+- `lib/core/services/app_proxy_config.dart` (new): `AppProxyConfig`
+  (`enabled` / `type` / `host` / `port`, `current`, `findProxyForUri`),
+  `AppProxyType` (`http` / `socks5`).
+- `lib/core/services/app_http_overrides.dart`: `createHttpClient` installs
+  `findProxy` alongside the existing `userAgent`.
+- `lib/features/settings/screens/proxy_settings_screen.dart` (new):
+  `ProxySettingsScreen`.
+- `lib/features/settings/screens/settings_screen.dart`: proxy tile behind
+  `!kIsWebBuild`, new `_kProxyColor`.
+- `lib/features/settings/providers/settings_provider.dart`: `proxyEnabled` /
+  `proxyType` / `proxyHost` / `proxyPort` in `SettingsState`, four setters,
+  seeding of `AppProxyConfig.current` on load.
+- `lib/core/services/config_service.dart`: the four keys join the export /
+  restore key lists.
+- l10n: 8 `settingsProxy*` keys across en / es / fr / pt / ru / zh.
+
+## [cn] Changed — the proxy availability note is no longer hardcoded Chinese
+
+`ProxySettingsScreen` rendered `'此设置仅在桌面端与移动端可用。'` verbatim, so
+every non-Chinese locale showed Chinese. Moved into l10n as
+`settingsProxyDesktopMobileOnly`; the `zh` value stays the original sentence.
+
+- `lib/l10n/app_*.arb` + regenerated `app_localizations*.dart`.
+
+
 > **Status of the `[cn]` self-host auth entries below (2026-10-22):** they
 > describe the fork's original design, which upstream **did not take as-is**.
 > PR #459 was **closed**; the maintainer squashed it into

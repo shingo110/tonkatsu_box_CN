@@ -4,10 +4,10 @@
 
 ## 状态
 
-- **已完成**：D1–D32 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试；**`cn-v0.44.5` 三端发版**）；**D33 审查报告 P0/P1 全修与 `cn-v0.44.6` 四轮发版**（自托管鉴权闸门**补上前导斜杠归一才真正生效** + `/img` 封面宿主白名单补齐已装源 + 解析器 id 契约回归 + WeRead 偏移上限；**四轮才出包，逐轮都是真缺陷**）；**D34 同步上游 v0.45.0**（合并 184 文件，20 个冲突逐条定性；迁移链接到 v66；发现并修复 `buildRpcHandler` 的 `log` 未接导致 RPC 失败日志绕过容器日志通道；**`cn-v0.45.0` 八版发版，build 号沿革 45→46→47→48**）；**D35 迁移到 macOS + 鉴权分支 PR #459**（工作区 Windows→macOS；鉴权分支 rebase 到 `upstream/release/0.46` 并修掉 `/img` 403 语义断裂；**向上游开出 PR #459**；gh CLI + keyring OAuth 打通；全库中文注释审计；**5 条 commit 改英文并 force push**；目录结构澄清 + 轻量清理；**上游连夜收尾：#459 关闭、`#460` 接替并署名 credit，三条设计问题落成 ADR-17**）
+- **已完成**：D1–D36 全部收口 —— M0 开工就绪度核验；**十一个国内源**（Bangumi 动画 / NeoDB 图书 / NeoDB 影视 / 微信读书 / 豆瓣图书 / 豆瓣影视 / Bangumi 漫画 / 豆瓣动画 / 豆瓣音乐 / TapTap 游戏 / 喜马拉雅播客）；自托管 `/proxy` 全链路验证（B2 闭环）；源区域维度与连通性自检（D15）；**M7 三端打包与发布流水线（D20）**；明文凭据审计（D21）；**游戏库两条导入路径**（D22 粘贴名单 / **D23 PSN 登录导入**）；**D24 PSN 导入真机修正**（CSRF 闸门 · 「查看」弹窗误关页面 · 库补齐「玩过」一半）；**D25 代理环境误判与授权超时**（应用内代理设置 + 授权单独 30s）；**D26 界面字体**（桌面端选本机已安装字体）；**D27 连接检查的失败分流**（缺凭据 vs 传输失败，文案回归本地化）；**D28 六个国内源的品牌图标**（TapTap / Bangumi / NeoDB / WeRead / 豆瓣 / 喜马拉雅，取自厂商自有 512px 素材）；**D29 自托管 /proxy 活体扩容**（补上 WeRead 与豆瓣两条从未实证的链路，**13/13** 通过）；**D30 IGDB 密钥就位与 cn-v0.44.3 三端发版**（少爷在 Twitch 后台完成授权，B5 最后一环闭环）；**D31 第三套配色主题 PS1 复古灰**（设置内可选第三套配色 —— PS1 初代灰机身 + 四色标志，含可重跑纹理工具与全主题护栏测试）；**D32 第四套配色主题 Eva 蔚蓝**（色值由脚本从色阶卡逐块采样而非凭记忆，卡面被裁部分不外推；新增静态校验脚本与有牙测试；**`cn-v0.44.5` 三端发版**）；**D33 审查报告 P0/P1 全修与 `cn-v0.44.6` 四轮发版**（自托管鉴权闸门**补上前导斜杠归一才真正生效** + `/img` 封面宿主白名单补齐已装源 + 解析器 id 契约回归 + WeRead 偏移上限；**四轮才出包，逐轮都是真缺陷**）；**D34 同步上游 v0.45.0**（合并 184 文件，20 个冲突逐条定性；迁移链接到 v66；发现并修复 `buildRpcHandler` 的 `log` 未接导致 RPC 失败日志绕过容器日志通道；**`cn-v0.45.0` 八版发版，build 号沿革 45→46→47→48**）；**D35 迁移到 macOS + 鉴权分支 PR #459**（工作区 Windows→macOS；鉴权分支 rebase 到 `upstream/release/0.46` 并修掉 `/img` 403 语义断裂；**向上游开出 PR #459**；gh CLI + keyring OAuth 打通；全库中文注释审计；**5 条 commit 改英文并 force push**；目录结构澄清 + 轻量清理；**上游连夜收尾：#459 关闭、`#460` 接替并署名 credit，三条设计问题落成 ADR-17**）；**D36 A 块应用内代理回流上游 + PR #464**（基线换到 `c9ea4213`；cherry-pick 16 冲突逐块解，`.arb` 拒绝字面合集、只搬 7 个 key；提交信息英文化而 tree hash 不改变；硬编码中文移入 l10n；ADR-17 五项自检全过；**PR #464 开向 `main`，CI 6/6 全绿，作者已回复将 review**）
 - **进行中**：无
 - **进行中（阻塞）**：Windows 桌面**本地**构建（缺 VS C++ 工作负载）—— 但发布走 CI 的 `windows-2022` 运行器，不阻塞出包
-- **等待上游**：**PR #459**（自托管鉴权，base `release/0.46`）已开，等 hacan359 review；已按其要求把 5 条 commit 改为英文
+- **等待上游**：**PR #464**（A 块应用内代理，base **`main`**）已开，CI 6/6 通过；hacan359 于 11-02 04:11 回复 *"Thx I will review this!!"* ⇒ **等他 review，我方无动作**。B 块（鉴权）已由 #460 于 10-26 合入上游并随 v0.46.0 发布（#459 关闭）
 
 ---
 
@@ -1230,6 +1230,106 @@ TONKATSU_BIND=127.0.0.1
 | `packages/core` | 2345 | 2345 |
 
 **下一步**：等 **#460 合并**后再删两个本地备份分支 `backup/selfhost-auth-v045`（`f7795dd1`）与 `backup/selfhost-auth-cnmsg`（`00a16ea3`）。**未合并前不删**。
+
+---
+
+### D36 · A 块（应用内代理）回流上游 + PR #464（2026-11-01 ~ 11-02）
+
+> 「共用部分拆分方案」里的 **A 块**（应用内代理）走完本地准备 → 自检 → 开 PR 全流程。B 块（鉴权）由 #460 完成，A 块是本轮。
+
+#### 一、基线变更：不能再拿 10 月的 SHA 当标准
+
+- `upstream/release/0.46`：`ad0d61f7` → **`c9ea4213`**（#460 以 `6863c0d2` 合入、#461 合入后续推进）
+- `upstream/main`：**`198a19e4`** = `release: v0.46.0`
+- **`v0.46.0` 是附注标签**（tag 对象 `aa3f24d4` → commit `198a19e4`），**只落在 `main`，不在 `release/0.46`**
+- 拓扑：`merge-base(main, release/0.46) = c9ea4213`（即 release/0.46 自身）⇒ **release/0.46 已整体并入 main**（`247e3a51` Merge PR #455），main 领先 4 提交、release/0.46 领先 0
+
+#### 二、分支与 cherry-pick
+
+| 项 | 值 |
+|---|---|
+| 备份分支 | `backup/app-proxy-prep-20261101` = `4d83bf06` |
+| 工作分支 | `upstream/app-proxy`，base = `c9ea4213` |
+| 源提交 | `ee575658`（19 文件，`feat(cn-net): 应用内 HTTP/SOCKS 代理设置`） |
+| 结果 | 两个提交：`92d2edfa`（feat）+ `4653e55b`（fix），对基线 **19 文件 628+/1-** |
+
+#### 三、16 个冲突与解法（**本轮最关键的技术判断**）
+
+干跑（`git merge-tree --write-tree --merge-base=ee575658^`）预判与实际完全一致：3 个代码文件各 2 块 + 6 个 `.arb` 各 1 块 + 7 个生成 `app_localizations*.dart` 各 1 块。
+
+**`.arb` 绝不能照字面「取双方 key 合集」** —— 冲突块「对方一侧」夹带的不只是 7 个代理 key，而是整段 fork 独有文案：
+
+| 文件 | HEAD 侧 key | 对方侧 key | 代理 key | 夹带 fork 独有 |
+|---|:-:|:-:|:-:|:-:|
+| `app_en.arb` | 32 | 15 | 7 | **8** |
+| `app_zh/es/fr/pt/ru.arb` | 36 | 69 | 7 | **各 62** |
+
+夹带内容：`settingsReachability`+`reachability*` 11、`psnImport*` 20、`gameListImport*` 30、`settingsGameListImport*`/`settingsPsnImport*` 各 2、`sourceNeedsIntlNetwork`、`credentialsIgdbAuthHint` —— **上游全部为 0**。字面执行等于把无对应代码的悬空文案塞进上游。
+
+⇒ **定法**：以上游侧为底原样保留，只插本提交的 7 个 key，值逐字取 `ee575658` 对应语言；落法是脚本化的（锚点取上游每份 arb 的 `"markAllListened"` 行，插入后 JSON 断言「新增 == 7 / 删除 == 0 / 值与源一致」）。
+
+**代码冲突另有三处判断**（`settings_screen.dart`）：
+1. 丢掉 `import 'reachability_screen.dart'` —— 该文件**上游整树不存在**，保留即编译失败
+2. 丢掉 Reachability 的 `SettingsTile` —— `l.settingsReachability` 上游计数 0
+3. 新增 `const Color _kProxyColor = Color(0xFF26A69A);` —— 代理 tile 原复用 fork 独有的 `_kReachabilityColor`，色值沿用
+
+⇒ 最终 diff 只有 1 行 import + 1 行颜色常量 + 1 个代理 tile；其中新增的 `_kProxyColor` 是**第一个提交 593 insertions vs 原提交 592 的唯一来源**。
+
+`config_service.dart` / `settings_provider.dart` 四块均为纯并集（保留 `showAllCardTags` / `uiScale` 等上游新增项 + 代理 key/setter）。
+
+#### 四、提交信息英文化（amend，内容零改动）
+
+| 项 | amend 前 | amend 后 |
+|---|---|---|
+| HEAD | `8ba990b2` | `92d2edfa` |
+| **tree** | `2e22fb95…` | **`2e22fb95…`（逐字相同）** |
+| 作者 | `shingo110 <alvin1985811@gmail.com> Tue Sep 22 10:28:11 2026 +0000` | 不变 |
+
+⚠️ 单 `-m` 会**丢掉原中文正文**（原本有一段解释「为什么做代理」）。当前 message 只有标题。
+
+#### 五、硬编码中文移入 l10n（第二个提交 `4653e55b`）
+
+代理页那句 `'此设置仅在桌面端与移动端可用。'` → 新 key `settingsProxyDesktopMobileOnly`，6 语言齐平（en 为原文 "This setting is only available on desktop and mobile."，zh 逐字保留原句），本次 14 文件（1 屏 + 6 arb + 7 生成），**各 arb 代理 key 总数 = 8**。
+
+#### 六、ADR-17 五项自检（全部通过）
+
+| 项 | 结论 | 关键证据 |
+|---|---|---|
+| 默认关闭 | ✅ enabled 默认 `false` | `app_proxy_config.dart:28` 静态初值 `.disabled()`；`settings_provider.dart:238` 构造默认；`:731` 读 prefs `?? false` |
+| 显式启用链 | ✅ 6 环贯通 | tile(`settings_screen.dart:606`) → 开关(`proxy_settings_screen.dart:76`) → setter(`settings_provider.dart:1181`) → 持久化(`config_service.dart:111,123,140`) → 出口(`app_http_overrides.dart:19`)；冷启动播种 `settings_provider.dart:827` |
+| 关闭时零影响 | ✅ | `findProxyForUri` 对 loopback 与 `!enabled` 均返回 `'DIRECT'`（`app_proxy_config.dart:44-49`）；基线原文 `return super.createHttpClient(context)..userAgent = userAgent;` 本无 `findProxy` |
+| 无自动接管 | ✅ | `systemProxy`/`Platform.environment`/`autoDetect`/`ProxySelector` 全 0 命中；`findProxy` 4 处 = 2 文档注释 + 1 方法定义 + **1 处位于开关条件内的赋值** |
+| 无附带改动 | ✅ | 19 文件清单无 AndroidManifest / Info.plist / entitlements / pubspec.yaml |
+
+**一点如实说明**：关闭时 client 上仍挂着一个返回 `DIRECT` 的回调（而非完全不设）。路由结果与基线等价，但不是逐字节意义上「完全没碰过」。
+
+#### 七、push + PR #464
+
+| 项 | 值 |
+|---|---|
+| PR | **https://github.com/hacan359/tonkatsu_box/pull/464** |
+| base / head | **`main`** / `shingo110:upstream/app-proxy` |
+| 规模 | 2 commits · 19 files · MERGEABLE |
+| push | **仅 SSH**：`git push git@github.com:shingo110/tonkatsu_box_CN.git upstream/app-proxy:upstream/app-proxy`（origin 的 HTTPS 无凭据，必失败） |
+| 上游校验 | fork `refs/heads/upstream/app-proxy` = `4653e55b…`；fork `main` 仍 `5090b09e`（本地 main `4d83bf06` **未推**） |
+
+**base 选 `main` 的事实依据**：`release/0.46` 已整体并入 main（见第一节）；上游唯一 open PR #462 与近 15 条 merged PR 全部投 main；往 `release/0.46` 只发生过 2 条（#460/#461，均在版本收尾期）。
+
+**CI**：workflow `Tests` run `41328288793`，**6/6 全部 pass** —— Analyze 1m34s · Test core and server 1m34s · Test app shard 0/1/2/3 分别 7m48s / 6m51s / 7m42s / 8m32s（四路分片来自 #463）。
+
+**上游回复**：`2026-11-01T20:11:02Z`（北京 **11-02 04:11**）hacan359：*"Thx I will review this!!"* ⇒ **球在他手里，等我方无动作**。
+
+#### 八、probe/ 瘦身（顺带）
+
+- 盘点 → 116 个「建议删」移入 `~/.Trash/probe-cleanup-2026-11-02`（**mv，禁止 rm**，保留 `__pycache__` 子目录结构）
+- 结果：废纸篓 116 个 / 1,525,412 bytes（1.45 MB）；`probe/` 剩 **139 个 / 494,574 bytes（483 KB）**
+- 保留：`check_upstream_guard.py`、`selfhost_proxy_live.py`、`animation_golden/`、PSN 探针、`verify_release_v04xx.py` 全系列、G4 的 42 个探测脚本
+
+#### 九、本轮沉淀的环境坑（已并入 RULES §四 P35–P37）
+
+- **P35**：`pubspec.lock` 记录的 hosted url 与本机镜像不同源 ⇒ pub **整表重解析**，把 `image` 从 4.8.0 升到 4.11.0，而镜像只提供 `archive 4.0.9`（无 `ZLibDecoder.decodeLazy`）⇒ 测试编译全红。修法：`PUB_HOSTED_URL=https://pub.dev flutter pub get`
+- **P36**：`git checkout -- pubspec.lock` 后 `.dart_tool/package_config.json` 仍指升级版 ⇒ **analyze 通过但 test 编译失败**的割裂态（analyze 的类型解析是惰性的）
+- **P37**：本机 `grep '<<<<<<<\|=======\|>>>>>>>'` 这类多模式 BRE 会**静默 0 命中**（假阴性）⇒ 必须拆成 `-e` 多次
 
 ## 📋 候选（下一步从这里挑）
 

@@ -17,7 +17,7 @@ not answer in Russian; the upstream author's rule does not apply here.
 - Tests: `flutter_test` + `mocktail`
 - Localization: ARB files in `lib/l10n/` — `en`, `ru`, `es`, `fr`, `pt`, `zh`
 
-## Current baseline (2026-10-22)
+## Current baseline (2026-11-02)
 
 > **If you are starting a new session on this repo, read this section first.**
 > It pins the live state of the fork. Numbers drift with every release — treat
@@ -25,8 +25,10 @@ not answer in Russian; the upstream author's rule does not apply here.
 
 **Facts of the fork:**
 
-- Fork of `hacan359/tonkatsu_box` (MIT, upstream at `v0.45.0`; upstream
-  `release/0.46` branch is open at `ad0d61f7`); this is the
+- Fork of `hacan359/tonkatsu_box` (MIT). **Upstream is at `v0.46.0`**
+  (`198a19e4`, tagged on `main`; the tag object is `aa3f24d4`). The
+  `release/0.46` branch tip is `c9ea4213` and is **already merged into
+  `main`** via #455 — it carries no work of its own. This repo is the
   Chinese-localized branch `shingo110/tonkatsu_box_CN`.
 - **Local checkout (macOS since 2026-10-21):**
   `/Users/alvindrake/projects/TonkatsuBoxCN/tonkatsu_box_CN`.
@@ -121,50 +123,50 @@ not answer in Russian; the upstream author's rule does not apply here.
   disk). Confirm they exist before relying on them; they may still be on the
   Windows box or may have been lost in the migration.
 
-**Next pending work (as of 2026-10-22):**
+**Next pending work (as of 2026-11-02):**
 
-- **PR #459 is CLOSED (not merged).** The author squashed it into his own
-  **PR #460** — <https://github.com/hacan359/tonkatsu_box/pull/460>, base
-  `release/0.46`, head `feat/selfhost-auth-token`, **Open / MERGEABLE**,
-  2 commits. `f8c055a1` is the squash of #459 with
-  `Co-authored-by: shingo110` credit intact; `de9b570b` is his reshape.
-  **No action needed from us — he is driving it.**
-- **Wait for #460 to merge, then delete** the two local backup branches
-  `backup/selfhost-auth-v045` (`f7795dd1`, pre-rebase) and
-  `backup/selfhost-auth-cnmsg` (`00a16ea3`, pre-English-rewrite).
-  **Do not delete either before the merge.**
-- **Why he reshaped it** (three real design problems; read ADR-17 in
-  `PROJECT.md` before preparing any further upstream PR):
-  1. "Require a token once the server leaves loopback" is wrong under Docker —
-     **a container always listens on `0.0.0.0`**, so that rule forced auth on
-     every Docker install with no way to turn it off. He made it
-     `TONKATSU_AUTH=token`, **explicit opt-in, off by default**.
-  2. Deadlock with no token: the first RPC answered 401 on the splash and hit
-     the fatal error view, while the settings page that holds the token was
-     unreachable. He added `ServerTokenScreen` on the first 401 plus a
-     `http://localhost:<port>/?token=…` sign-in link printed at startup.
-  3. `POST` / `DELETE` on `/img` were left ungated; he gated them.
-  He also turned the hardcoded cover-host allowlist into a setting
-  (`TONKATSU_IMAGE_HOSTS`) because the hardcoded one dropped TVMaze, podcast
-  artwork and custom-card URLs, and only checked the first hop of a redirect —
-  now `ImageCache` walks up to 5 hops.
-- **The rule to remember:** *keep the default behaviour untouched, put new
-  features behind config.* Concretely: after merging, the default output must
-  be byte-identical to before; every new capability is opt-in, switchable off,
-  and invisible to existing users. **Block "A" (in-app proxy) must be prepared
-  this way** — the proxy may not "take over egress when it detects one"; it
-  has to be off until the user configures it.
-- Blocks "A" (in-app proxy), "C" (server hardening) and "D" (custom themes)
-  from the same split are still drafted and un-pushed; the draft lives in
+- **PR #464 is open and under review** — the in-app proxy (block "A" of the
+  shared-parts split): <https://github.com/hacan359/tonkatsu_box/pull/464>,
+  base **`main`**, head `shingo110:upstream/app-proxy`, 2 commits, 19 files,
+  MERGEABLE. **CI is 6/6 green** (Analyze, Test core and server, Test app
+  shards 0-3). The maintainer replied on 2026-11-01T20:11Z: *"Thx I will
+  review this!!"* — **the ball is in his court, we take no action.**
+- **PR #459 is CLOSED (not merged).** That selfhost-auth work was squashed into
+  his **#460** (`f8c055a1` carries `Co-authored-by: shingo110`; `de9b570b` is
+  his reshape), merged 2026-10-26 and shipped in `v0.46.0`.
+- **Delete the two selfhost backup branches only after their wave settles:**
+  `backup/selfhost-auth-v045` (`f7795dd1`) and `backup/selfhost-auth-cnmsg`
+  (`00a16ea3`). They are now safe to remove — #460 landed and `v0.46.0` is out
+  — but the owner has not asked for the cleanup yet, so they stay.
+- Blocks "C" (server hardening) and "D" (custom themes) from the same split are
+  still drafted and un-pushed; the draft lives in
   `/Users/alvindrake/projects/TonkatsuBoxCN/共用部分拆分方案.md`. Note #460
   already absorbed part of "C" (20 MB body caps, `npsso` /
   `x_access_token` log redaction, bad option prints a message instead of a
   stack trace) and reworked the `/img` allowlist — re-scope "C" before drafting.
-- The `.gitignore` change (adding `.workbuddy/`) is **uncommitted** on `main`
-  — decide whether it stays on `upstream/selfhost-auth` or lives on `main`.
-  #459 being closed removes the "it would enter the PR" pressure.
+- The `.gitignore` change (adding `.workbuddy/`) is committed on `main`
+  (`4d83bf06`) but **not pushed**; `origin/main` is still `5090b09e`.
 - Windows local build is still blocked (no VS C++ workload); release goes
   through the `windows-2022` CI runner.
+
+**Upstream PR logistics (learned the hard way, 2026-11-02):**
+
+- **Pick the PR base by topology, not by memory.** `upstream/app-proxy` was cut
+  from `release/0.46` (`c9ea4213`), but by the time the PR opened,
+  `release/0.46` had been merged wholesale into `main` via #455 —
+  `merge-base(main, release/0.46) == release/0.46` and `release/0.46..main`
+  is empty. `v0.46.0` is an **annotated tag that lands on `main` only**, and
+  every recent merged PR plus the only open one target `main`. So the base is
+  **`main`** (see ADR-18 in `PROJECT.md`).
+- **Push over SSH only:** `git push git@github.com:shingo110/tonkatsu_box_CN.git
+  <branch>:<branch>`. The `origin` remote is HTTPS and there are no credentials
+  in the keychain on this machine.
+- **Run `probe/check_upstream_guard.py` (and `--open-pr`) before creating a
+  PR.** It takes no branch argument; its `-R` guidance is conditional — the
+  `-R hacan359/tonkatsu_box` form applies only when the intent really is an
+  upstream PR.
+- **`gh pr create` is cross-repo here:** `-R hacan359/tonkatsu_box --base main
+  --head shingo110:<branch>`.
 
 ## Toolchain
 
