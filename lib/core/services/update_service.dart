@@ -42,8 +42,11 @@ class UpdateService {
   final Dio _dio;
   final String? _currentVersionOverride;
 
-  static const String _repoOwner = 'hacan359';
-  static const String _repoName = 'tonkatsu_box';
+  // The CN fork publishes its own builds under its own tags (`cn-v0.45.0`), so
+  // the check must read the fork's releases, not upstream's: an upstream build
+  // has none of the Chinese sources and installing it would replace this one.
+  static const String _repoOwner = 'shingo110';
+  static const String _repoName = 'tonkatsu_box_CN';
   static const String _apiUrl =
       'https://api.github.com/repos/$_repoOwner/$_repoName/releases/latest';
 
@@ -85,7 +88,7 @@ class UpdateService {
 
       final Map<String, dynamic> data = response.data!;
       final String tagName = data['tag_name'] as String;
-      final String latestVersion = tagName.replaceFirst('v', '');
+      final String latestVersion = _stripVersionPrefix(tagName);
       final String releaseUrl = data['html_url'] as String;
       final String? body = data['body'] as String?;
 
@@ -123,6 +126,14 @@ class UpdateService {
     }
     return null;
   }
+
+  /// Normalises a release tag to a bare version.
+  ///
+  /// This fork tags `cn-v0.45.0`; upstream tags `v0.46.0`. A hand-made tag may
+  /// carry no prefix at all. All three must compare like-for-like, so strip
+  /// the optional `cn-` and the optional `v` — nothing else.
+  static String _stripVersionPrefix(String tag) =>
+      tag.replaceFirst(RegExp('^(cn-)?v'), '');
 
   /// Compares semver: `true` if [latest] > [current].
   bool isNewer(String latest, String current) {

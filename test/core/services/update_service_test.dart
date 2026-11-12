@@ -184,9 +184,49 @@ void main() {
         await sut.checkForUpdate();
 
         verify(() => mockDio.get<Map<String, dynamic>>(
-              'https://api.github.com/repos/hacan359/tonkatsu_box/releases/latest',
+              'https://api.github.com/repos/shingo110/tonkatsu_box_CN/releases/latest',
               options: any(named: 'options'),
             )).called(1);
+      });
+    });
+
+    group('tag parsing', () {
+      Future<bool> hasUpdateForTag(String tag) async {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        final UpdateService service = UpdateService(
+          prefs: prefs,
+          dio: mockDio,
+          currentVersionOverride: '0.45.0',
+        );
+
+        when(() => mockDio.get<Map<String, dynamic>>(
+              any(),
+              options: any(named: 'options'),
+            )).thenAnswer((_) async => Response<Map<String, dynamic>>(
+              data: <String, dynamic>{
+                'tag_name': tag,
+                'html_url': 'https://example.test/releases/tag/$tag',
+                'body': null,
+              },
+              statusCode: 200,
+              requestOptions: RequestOptions(path: ''),
+            ));
+
+        final UpdateInfo? info = await service.checkForUpdate();
+        expect(info, isNotNull);
+        return info!.hasUpdate;
+      }
+
+      test('cn-v0.46.0 vs 0.45.0 → update available', () async {
+        expect(await hasUpdateForTag('cn-v0.46.0'), isTrue);
+      });
+
+      test('cn-v0.45.0 vs 0.45.0 → no update', () async {
+        expect(await hasUpdateForTag('cn-v0.45.0'), isFalse);
+      });
+
+      test('v0.46.0 vs 0.45.0 → update available (upstream tag form)', () async {
+        expect(await hasUpdateForTag('v0.46.0'), isTrue);
       });
     });
 
