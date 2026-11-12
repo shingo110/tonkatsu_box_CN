@@ -12,6 +12,23 @@ Entries follow the [GNU Change Log style](https://www.gnu.org/prep/standards/htm
 
 ## [Unreleased]
 
+## [cn] Fixed — the update check reads the upstream repository, not this fork
+
+`UpdateService` had `hacan359/tonkatsu_box` hardcoded as the release source, so a
+CN build compared its version against upstream's tag: every user was told an
+update was available, and following that prompt opened — and installed — an
+upstream build with none of this fork's Chinese sources or features. The check
+now reads `shingo110/tonkatsu_box_CN`, and the tag is normalised through
+`RegExp('^(cn-)?v')` so `cn-v0.45.0`, `v0.46.0` and a bare `0.45.0` all compare
+like-for-like instead of the previous `replaceFirst('v', '')`. The release URL
+still comes from the API's `html_url`, so the link follows the source
+automatically.
+
+- `lib/core/services/update_service.dart`: `_repoOwner` / `_repoName`,
+  `_stripVersionPrefix` (`UpdateService`).
+- `test/core/services/update_service_test.dart`: expected URL, plus a
+  `tag parsing` group covering the three tag forms.
+
 ## [cn] Added — in-app HTTP/SOCKS proxy, contributed upstream as PR #464
 
 `Dart`'s `HttpClient` never reads the OS proxy, so on a restricted network the
